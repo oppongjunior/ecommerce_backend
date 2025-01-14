@@ -1,0 +1,121 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateUserInput {
+  """Email address"""
+  email: String!
+
+  """Facebook account ID"""
+  facebookId: String
+
+  """Google account ID"""
+  googleId: String
+
+  """Whether the account is active"""
+  isActive: Boolean! = true
+
+  """User’s name"""
+  name: String!
+
+  """Password (required for manual signup)"""
+  password: String
+
+  """Phone number"""
+  phoneNumber: String
+
+  """Profile picture URL"""
+  profilePicture: String
+
+  """Role name"""
+  role: Role! = USER
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createUser(createUserInput: CreateUserInput!): User!
+  removeUser(id: String!): User!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Query {
+  user(id: String!): User!
+  users: [User!]!
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+input UpdateUserInput {
+  """Email address"""
+  email: String
+
+  """Facebook account ID"""
+  facebookId: String
+
+  """Google account ID"""
+  googleId: String
+  id: String!
+
+  """Whether the account is active"""
+  isActive: Boolean = true
+
+  """User’s name"""
+  name: String
+
+  """Password (required for manual signup)"""
+  password: String
+
+  """Phone number"""
+  phoneNumber: String
+
+  """Profile picture URL"""
+  profilePicture: String
+
+  """Role name"""
+  role: Role = USER
+}
+
+type User {
+  """Date of account creation"""
+  createdAt: DateTime!
+
+  """Email address"""
+  email: String!
+
+  """Facebook ID for social login"""
+  facebookId: String
+
+  """Google ID for social login"""
+  googleId: String
+
+  """Unique identifier for the user"""
+  id: String!
+
+  """Account activation status"""
+  isActive: Boolean!
+
+  """Date of last login"""
+  lastLoginAt: DateTime
+
+  """User’s full name"""
+  name: String!
+
+  """Phone number"""
+  phoneNumber: String
+
+  """Profile picture URL"""
+  profilePicture: String
+
+  """Role of the user"""
+  role: String!
+
+  """Date of last update"""
+  updatedAt: DateTime!
+}
