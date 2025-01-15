@@ -2,7 +2,8 @@ import { BadRequestException, ForbiddenException, Injectable, NotFoundException 
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from '../prisma/prisma.service';
-import { PasswordService } from '../auth/password.service';
+import { PasswordService } from '../commons/password.service';
+import { CreateUserBySocialInput } from './dto/create-user-by-social.input';
 
 @Injectable()
 export class UsersService {
@@ -11,13 +12,9 @@ export class UsersService {
     private readonly passwordService: PasswordService,
   ) {}
 
-  async create(createUserInput: CreateUserInput) {
+  async createUserByCredentials(createUserInput: CreateUserInput) {
     const { password } = createUserInput;
-    if (createUserInput) {
-      createUserInput.password = await this.passwordService.encryptPassword(password);
-      createUserInput.facebookId = null;
-      createUserInput.googleId = null;
-    }
+    createUserInput.password = await this.passwordService.encryptPassword(password);
     return this.prismaService.user.create({ data: createUserInput });
   }
 
@@ -27,6 +24,10 @@ export class UsersService {
 
   findOne(id: string) {
     return this.prismaService.user.findUnique({ where: { id } });
+  }
+
+  findUserByEmail(email: string) {
+    return this.prismaService.user.findUnique({ where: { email } });
   }
 
   async update(id: string, updateUserInput: UpdateUserInput) {

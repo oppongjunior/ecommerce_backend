@@ -8,6 +8,7 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
+import { CommonsModule } from './commons/commons.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { AuthModule } from './auth/auth.module';
       sortSchema: true,
     }),
     AuthModule,
+    CommonsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

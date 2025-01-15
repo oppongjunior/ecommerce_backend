@@ -6,12 +6,6 @@ input CreateUserInput {
   """Email address"""
   email: String!
 
-  """Facebook account ID"""
-  facebookId: String
-
-  """Google account ID"""
-  googleId: String
-
   """Whether the account is active"""
   isActive: Boolean! = true
 
@@ -19,7 +13,7 @@ input CreateUserInput {
   name: String!
 
   """Password (required for manual signup)"""
-  password: String
+  password: String!
 
   """Phone number"""
   phoneNumber: String
@@ -55,12 +49,6 @@ enum Role {
 input UpdateUserInput {
   """Email address"""
   email: String
-
-  """Facebook account ID"""
-  facebookId: String
-
-  """Google account ID"""
-  googleId: String
   id: String!
 
   """Whether the account is active"""
