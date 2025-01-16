@@ -9,6 +9,7 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { CommonsModule } from './commons/commons.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { CommonsModule } from './commons/commons.module';
     }),
     AuthModule,
     CommonsModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
