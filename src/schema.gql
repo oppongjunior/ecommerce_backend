@@ -2,6 +2,24 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Category {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input CreateCategoryInput {
+  """Description of the category"""
+  description: String
+
+  """Name of the category"""
+  name: String!
+}
+
+input CreateProductInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateUserInput {
   """Email address"""
   email: String!
@@ -31,12 +49,27 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createProduct(createProductInput: CreateProductInput!): Product!
   createUser(createUserInput: CreateUserInput!): User!
+  removeCategory(id: Int!): Category!
+  removeProduct(id: Int!): Product!
   removeUser(id: String!): User!
+  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
+  updateProduct(updateProductInput: UpdateProductInput!): Product!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
+type Product {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 type Query {
+  categories: [Category!]!
+  category(id: Int!): Category!
+  product(id: Int!): Product!
+  products: [Product!]!
   user(id: String!): User!
   users: [User!]!
 }
@@ -44,6 +77,21 @@ type Query {
 enum Role {
   ADMIN
   USER
+}
+
+input UpdateCategoryInput {
+  """Description of the category"""
+  description: String
+  id: Int!
+
+  """Name of the category"""
+  name: String
+}
+
+input UpdateProductInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateUserInput {

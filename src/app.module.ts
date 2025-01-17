@@ -10,6 +10,7 @@ import { join } from 'path';
 import { AuthModule } from './auth/auth.module';
 import { CommonsModule } from './commons/commons.module';
 import { ProductsModule } from './products/products.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { ProductsModule } from './products/products.module';
     AuthModule,
     CommonsModule,
     ProductsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

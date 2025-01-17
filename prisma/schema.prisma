@@ -47,3 +47,64 @@ model Address {
 
   @@index([userId])
 }
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String        @unique @db.VarChar(100)
+  description   String?       @db.Text
+  products      Product[]
+  subcategories Subcategory[]
+}
+
+model Subcategory {
+  id          String    @id @default(cuid())
+  name        String    @unique @db.VarChar(100)
+  description String?   @db.Text
+  categoryId  String
+  category    Category  @relation(fields: [categoryId], references: [id])
+  products    Product[]
+}
+
+model Tag {
+  id       String    @id @default(cuid())
+  name     String    @unique @db.VarChar(256)
+  products Product[]
+}
+
+model Variant {
+  id        String  @id @default(cuid())
+  size      String?
+  color     String?
+  price     Decimal @db.Decimal(10, 2)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id            String       @id @default(cuid())
+  name          String       @db.VarChar(255)
+  description   String?      @db.Text
+  price         Decimal      @db.Decimal(10, 2)
+  sku           String?      @unique
+  quantity      Int          @default(0)
+  images        String[]
+  isActive      Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  categoryId    String
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subcategoryId String?
+  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+  brand         String?      @db.VarChar(100)
+  tags          Tag[]
+  ratings       Rating[]
+  variants      Variant[]
+}
+
+model Rating {
+  id        String  @id @default(cuid())
+  score     Int
+  comment   String?
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+}
