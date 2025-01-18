@@ -11,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
 import { CommonsModule } from './commons/commons.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CategoriesModule } from './categories/categories.module';
     CommonsModule,
     ProductsModule,
     CategoriesModule,
+    SubCategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

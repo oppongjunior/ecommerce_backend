@@ -3,8 +3,16 @@
 # ------------------------------------------------------
 
 type Category {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """Description of the category"""
+  description: String
+
+  """Id of category"""
+  id: ID!
+
+  """Name of the category"""
+  name: String!
+  products: [Product!]!
+  subcategories: [SubCategory!]!
 }
 
 input CreateCategoryInput {
@@ -18,6 +26,17 @@ input CreateCategoryInput {
 input CreateProductInput {
   """Example field (placeholder)"""
   exampleField: Int!
+}
+
+input CreateSubCategoryInput {
+  """Id of parent category"""
+  categoryId: ID!
+
+  """Description of the category"""
+  description: String
+
+  """Name of the category"""
+  name: String!
 }
 
 input CreateUserInput {
@@ -51,12 +70,15 @@ scalar DateTime
 type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createProduct(createProductInput: CreateProductInput!): Product!
+  createSubCategory(createSubCategoryInput: CreateSubCategoryInput!): SubCategory!
   createUser(createUserInput: CreateUserInput!): User!
-  removeCategory(id: Int!): Category!
+  removeCategory(id: String!): Category!
   removeProduct(id: Int!): Product!
+  removeSubCategory(id: String!): SubCategory!
   removeUser(id: String!): User!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateSubCategory(updateSubCategoryInput: UpdateSubCategoryInput!): SubCategory!
   updateUser(updateUserInput: UpdateUserInput!): User!
 }
 
@@ -67,9 +89,11 @@ type Product {
 
 type Query {
   categories: [Category!]!
-  category(id: Int!): Category!
+  category(id: String!): Category!
   product(id: Int!): Product!
   products: [Product!]!
+  subCategories: [SubCategory!]!
+  subCategory(id: String!): SubCategory!
   user(id: String!): User!
   users: [User!]!
 }
@@ -79,10 +103,27 @@ enum Role {
   USER
 }
 
+type SubCategory {
+  category: [SubCategory!]!
+
+  """Id of parent category"""
+  categoryId: ID!
+
+  """Description of the category"""
+  description: String!
+
+  """Id of category"""
+  id: ID!
+
+  """Name of the category"""
+  name: String!
+  products: [Product!]!
+}
+
 input UpdateCategoryInput {
   """Description of the category"""
   description: String
-  id: Int!
+  id: String!
 
   """Name of the category"""
   name: String
@@ -92,6 +133,18 @@ input UpdateProductInput {
   """Example field (placeholder)"""
   exampleField: Int
   id: Int!
+}
+
+input UpdateSubCategoryInput {
+  """Id of parent category"""
+  categoryId: ID
+
+  """Description of the category"""
+  description: String
+  id: ID!
+
+  """Name of the category"""
+  name: String
 }
 
 input UpdateUserInput {
