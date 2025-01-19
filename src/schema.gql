@@ -9,6 +9,9 @@ type Category {
   """Id of category"""
   id: ID!
 
+  """url of category"""
+  image: String!
+
   """Name of the category"""
   name: String!
   products: [Product!]!
@@ -19,6 +22,9 @@ input CreateCategoryInput {
   """Description of the category"""
   description: String
 
+  """url of category"""
+  image: String!
+
   """Name of the category"""
   name: String!
 }
@@ -28,12 +34,29 @@ input CreateProductInput {
   exampleField: Int!
 }
 
+input CreateRatingInput {
+  """comment about rating"""
+  comment: String
+
+  """Id of product"""
+  productId: ID!
+
+  """rating score"""
+  score: Int!
+
+  """Id of user"""
+  userId: ID!
+}
+
 input CreateSubCategoryInput {
   """Id of parent category"""
   categoryId: ID!
 
   """Description of the category"""
   description: String
+
+  """url of sub category"""
+  image: String!
 
   """Name of the category"""
   name: String!
@@ -70,16 +93,25 @@ scalar DateTime
 type Mutation {
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createProduct(createProductInput: CreateProductInput!): Product!
+  createRating(createRatingInput: CreateRatingInput!): Rating!
   createSubCategory(createSubCategoryInput: CreateSubCategoryInput!): SubCategory!
   createUser(createUserInput: CreateUserInput!): User!
   removeCategory(id: String!): Category!
   removeProduct(id: Int!): Product!
+  removeRating(id: ID!): Rating!
   removeSubCategory(id: String!): SubCategory!
   removeUser(id: String!): User!
   updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
   updateProduct(updateProductInput: UpdateProductInput!): Product!
+  updateRating(updateRatingInput: UpdateRatingInput!): Rating!
   updateSubCategory(updateSubCategoryInput: UpdateSubCategoryInput!): SubCategory!
   updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type PageInfo {
+  hasNext: Boolean!
+  hasPrevious: Boolean!
+  pageSize: Int!
 }
 
 type Product {
@@ -92,10 +124,30 @@ type Query {
   category(id: String!): Category!
   product(id: Int!): Product!
   products: [Product!]!
+  rating(id: ID!): Rating!
+  ratings: [Rating!]!
   subCategories: [SubCategory!]!
   subCategory(id: String!): SubCategory!
   user(id: String!): User!
   users: [User!]!
+  usersConnection(after: Int, first: Int, last: Int): UserConnection!
+}
+
+type Rating {
+  """comment about rating"""
+  comment: String!
+  id: ID!
+
+  """Id of product"""
+  product: Product!
+
+  """Id of product"""
+  productId: ID!
+
+  """rating score"""
+  score: Int!
+  user: User!
+  userId: ID!
 }
 
 enum Role {
@@ -115,6 +167,9 @@ type SubCategory {
   """Id of category"""
   id: ID!
 
+  """url of sub category"""
+  image: String!
+
   """Name of the category"""
   name: String!
   products: [Product!]!
@@ -124,6 +179,9 @@ input UpdateCategoryInput {
   """Description of the category"""
   description: String
   id: String!
+
+  """url of category"""
+  image: String
 
   """Name of the category"""
   name: String
@@ -135,6 +193,21 @@ input UpdateProductInput {
   id: Int!
 }
 
+input UpdateRatingInput {
+  """comment about rating"""
+  comment: String
+  id: ID!
+
+  """Id of product"""
+  productId: ID
+
+  """rating score"""
+  score: Int
+
+  """Id of user"""
+  userId: ID
+}
+
 input UpdateSubCategoryInput {
   """Id of parent category"""
   categoryId: ID
@@ -142,6 +215,9 @@ input UpdateSubCategoryInput {
   """Description of the category"""
   description: String
   id: ID!
+
+  """url of sub category"""
+  image: String
 
   """Name of the category"""
   name: String
@@ -207,4 +283,19 @@ type User {
 
   """Date of last update"""
   updatedAt: DateTime!
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+
+  """information about the page"""
+  pageInfo: PageInfo!
+}
+
+type UserEdge {
+  """cursor"""
+  cursor: String!
+
+  """cursor"""
+  node: User!
 }

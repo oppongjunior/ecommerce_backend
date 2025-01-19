@@ -3,6 +3,6 @@ import { Field, ID, InputType, PartialType } from '@nestjs/graphql';
 
 @InputType()
 export class UpdateSubCategoryInput extends PartialType(CreateSubCategoryInput) {
-  @Field(() => ID)
+  @Field(() => ID, { nullable: false })
   id: string;
 }

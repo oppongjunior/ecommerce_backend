@@ -16,6 +16,9 @@ export class Category {
   @Field(() => [Product])
   products: Product[];
 
+  @Field({ description: 'url of category' })
+  image?: string;
+
   @Field(() => [SubCategory])
   subcategories: SubCategory[];
 }

@@ -1,9 +1,10 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { PasswordService } from '../commons/password.service';
-import { CreateUserBySocialInput } from './dto/create-user-by-social.input';
+import { Args, Int, Query } from '@nestjs/graphql';
+import { UserConnection } from './entities/user-connection.entity';
 
 @Injectable()
 export class UsersService {
@@ -17,6 +18,13 @@ export class UsersService {
     createUserInput.password = await this.passwordService.encryptPassword(password);
     return this.prismaService.user.create({ data: createUserInput });
   }
+
+  @Query(() => UserConnection)
+  async usersConnection(
+    @Args('first', { type: () => Int, nullable: true }) first?: number,
+    @Args('last', { type: () => Int, nullable: true }) last?: number,
+    @Args('after', { type: () => Int, nullable: true }) after?: number,
+  ) {}
 
   findAll() {
     return this.prismaService.user.findMany();

@@ -12,6 +12,7 @@ import { CommonsModule } from './commons/commons.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
+import { RatingsModule } from './ratings/ratings.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { SubCategoriesModule } from './sub-categories/sub-categories.module';
     ProductsModule,
     CategoriesModule,
     SubCategoriesModule,
+    RatingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

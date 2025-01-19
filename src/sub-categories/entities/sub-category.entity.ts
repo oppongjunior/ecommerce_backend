@@ -16,6 +16,9 @@ export class SubCategory {
   @Field(() => ID, { description: 'Id of parent category', nullable: false })
   categoryId: string;
 
+  @Field({ description: 'url of sub category' })
+  image?: string;
+
   @Field(() => [Product])
   products: Product[];
 
