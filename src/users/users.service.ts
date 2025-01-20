@@ -3,8 +3,7 @@ import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from '../prisma/prisma.service';
 import { PasswordService } from '../commons/password.service';
-import { Args, Int, Query } from '@nestjs/graphql';
-import { UserConnection } from './entities/user-connection.entity';
+import { PaginateArgs } from '../commons/entities/paginate.args';
 
 @Injectable()
 export class UsersService {
@@ -19,15 +18,32 @@ export class UsersService {
     return this.prismaService.user.create({ data: createUserInput });
   }
 
-  @Query(() => UserConnection)
-  async usersConnection(
-    @Args('first', { type: () => Int, nullable: true }) first?: number,
-    @Args('last', { type: () => Int, nullable: true }) last?: number,
-    @Args('after', { type: () => Int, nullable: true }) after?: number,
-  ) {}
+  async findAll(filter: PaginateArgs) {
+    const take = filter.first;
+    const skip = filter?.after ? 1 : 0;
+    const cursor = filter?.after ? { id: filter.after } : undefined;
 
-  findAll() {
-    return this.prismaService.user.findMany();
+    const users = await this.prismaService.user.findMany({
+      take,
+      skip,
+      cursor,
+    });
+
+    const totalCount = await this.prismaService.user.count();
+    const lastUser = users[users.length - 1];
+    return {
+      edges: users.map((user) => {
+        return {
+          cursor: user.id,
+          node: user,
+        };
+      }),
+      pageInfo: {
+        pageSize: take,
+        hasPreviousPage: !!filter.after,
+        hasNextPage: lastUser ? totalCount > users.length : false,
+      },
+    };
   }
 
   findOne(id: string) {

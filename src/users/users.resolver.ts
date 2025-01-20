@@ -1,8 +1,10 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Int, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
+import { UserConnection } from './entities/user-connection.entity';
+import { PaginateArgs } from '../commons/entities/paginate.args';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -13,9 +15,9 @@ export class UsersResolver {
     return this.usersService.createUserByCredentials(createUserInput);
   }
 
-  @Query(() => [User], { name: 'users' })
-  findAll() {
-    return this.usersService.findAll();
+  @Query(() => UserConnection)
+  async usersConnection(@Args('paginateFilter', { type: () => PaginateArgs, nullable: true }) filter: PaginateArgs) {
+    return this.usersService.findAll(filter);
   }
 
   @Query(() => User, { name: 'user' })

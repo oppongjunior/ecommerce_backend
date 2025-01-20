@@ -30,8 +30,28 @@ input CreateCategoryInput {
 }
 
 input CreateProductInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  brand: String
+  categoryId: Int!
+
+  """description of the product"""
+  description: String
+
+  """price of the product"""
+  float: Float!
+
+  """links to url of product images"""
+  image: [String!]
+  isActive: Boolean! = true
+
+  """Name of the product"""
+  name: String!
+
+  """description of the product"""
+  quantity: Int!
+
+  """sku of product"""
+  sku: String
+  subcategoryId: Int
 }
 
 input CreateRatingInput {
@@ -109,9 +129,16 @@ type Mutation {
 }
 
 type PageInfo {
-  hasNext: Boolean!
-  hasPrevious: Boolean!
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
   pageSize: Int!
+}
+
+input PaginateArgs {
+  """the id of the cursor"""
+  after: String
+  first: Int!
+  last: Int
 }
 
 type Product {
@@ -129,8 +156,7 @@ type Query {
   subCategories: [SubCategory!]!
   subCategory(id: String!): SubCategory!
   user(id: String!): User!
-  users: [User!]!
-  usersConnection(after: Int, first: Int, last: Int): UserConnection!
+  usersConnection(paginateFilter: PaginateArgs): UserConnection!
 }
 
 type Rating {
@@ -188,9 +214,29 @@ input UpdateCategoryInput {
 }
 
 input UpdateProductInput {
-  """Example field (placeholder)"""
-  exampleField: Int
+  brand: String
+  categoryId: Int
+
+  """description of the product"""
+  description: String
+
+  """price of the product"""
+  float: Float
   id: Int!
+
+  """links to url of product images"""
+  image: [String!]
+  isActive: Boolean = true
+
+  """Name of the product"""
+  name: String
+
+  """description of the product"""
+  quantity: Int
+
+  """sku of product"""
+  sku: String
+  subcategoryId: Int
 }
 
 input UpdateRatingInput {
@@ -293,9 +339,9 @@ type UserConnection {
 }
 
 type UserEdge {
-  """cursor"""
+  """cursor to identity resource"""
   cursor: String!
 
-  """cursor"""
+  """user record"""
   node: User!
 }

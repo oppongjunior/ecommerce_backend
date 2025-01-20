@@ -1,6 +1,6 @@
 import { Field, ObjectType } from '@nestjs/graphql';
 import { User } from './user.entity';
-import { PageInfo } from '../../commons/entities/PageInfo.entity';
+import { PageInfo } from '../../commons/entities/pageInfo.entity';
 import { UserEdge } from './user-edge.entity';
 
 @ObjectType()

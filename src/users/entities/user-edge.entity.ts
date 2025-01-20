@@ -3,9 +3,9 @@ import { User } from './user.entity';
 
 @ObjectType()
 export class UserEdge {
-  @Field(() => String, { description: 'cursor', nullable: false })
+  @Field(() => String, { description: 'cursor to identity resource', nullable: false })
   cursor: string;
 
-  @Field(() => User, { description: 'cursor', nullable: false })
+  @Field(() => User, { description: 'user record', nullable: false })
   node: User;
 }
