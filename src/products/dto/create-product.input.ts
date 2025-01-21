@@ -32,14 +32,14 @@ export class CreateProductInput {
   quantity: number;
 
   @IsBoolean()
-  @Field(() => Boolean, { defaultValue: true })
+  @Field(() => Boolean, { defaultValue: false })
   isActive: boolean;
 
   @IsNotEmpty()
-  @Field(() => Int)
+  @Field(() => String)
   categoryId: string;
 
-  @Field(() => Int, { nullable: true })
+  @Field(() => String, { nullable: true })
   subcategoryId: string;
 
   @Field(() => String, { nullable: true })
