@@ -44,4 +44,7 @@ export class CreateProductInput {
 
   @Field(() => String, { nullable: true })
   brand?: string;
+
+  @Field(() => Float, { nullable: false })
+  price: number;
 }

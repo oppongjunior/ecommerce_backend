@@ -13,6 +13,7 @@ import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { RatingsModule } from './ratings/ratings.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
@@ -31,6 +32,9 @@ import { RatingsModule } from './ratings/ratings.module';
     CategoriesModule,
     SubCategoriesModule,
     RatingsModule,
+    MulterModule.register({
+      dest: './upload',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -31,7 +31,7 @@ input CreateCategoryInput {
 
 input CreateProductInput {
   brand: String
-  categoryId: Int!
+  categoryId: String!
 
   """description of the product"""
   description: String
@@ -41,17 +41,18 @@ input CreateProductInput {
 
   """links to url of product images"""
   image: [String!]
-  isActive: Boolean! = true
+  isActive: Boolean! = false
 
   """Name of the product"""
   name: String!
+  price: Float!
 
   """description of the product"""
   quantity: Int!
 
   """sku of product"""
   sku: String
-  subcategoryId: Int
+  subcategoryId: String
 }
 
 input CreateRatingInput {
@@ -117,7 +118,7 @@ type Mutation {
   createSubCategory(createSubCategoryInput: CreateSubCategoryInput!): SubCategory!
   createUser(createUserInput: CreateUserInput!): User!
   removeCategory(id: String!): Category!
-  removeProduct(id: Int!): Product!
+  removeProduct(id: String!): Product!
   removeRating(id: ID!): Rating!
   removeSubCategory(id: String!): SubCategory!
   removeUser(id: String!): User!
@@ -149,8 +150,8 @@ type Product {
 type Query {
   categories: [Category!]!
   category(id: String!): Category!
-  product(id: Int!): Product!
-  products: [Product!]!
+  product(id: String!): Product!
+  products(paginateFilter: PaginateArgs): [Product!]!
   rating(id: ID!): Rating!
   ratings: [Rating!]!
   subCategories: [SubCategory!]!
@@ -215,7 +216,7 @@ input UpdateCategoryInput {
 
 input UpdateProductInput {
   brand: String
-  categoryId: Int
+  categoryId: String
 
   """description of the product"""
   description: String
@@ -226,17 +227,18 @@ input UpdateProductInput {
 
   """links to url of product images"""
   image: [String!]
-  isActive: Boolean = true
+  isActive: Boolean = false
 
   """Name of the product"""
   name: String
+  price: Float
 
   """description of the product"""
   quantity: Int
 
   """sku of product"""
   sku: String
-  subcategoryId: Int
+  subcategoryId: String
 }
 
 input UpdateRatingInput {
