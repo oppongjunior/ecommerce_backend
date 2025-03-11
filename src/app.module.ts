@@ -7,13 +7,14 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import { join } from 'path';
-import { AuthModule } from './auth/auth.module';
 import { CommonsModule } from './commons/commons.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { RatingsModule } from './ratings/ratings.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { IamModule } from './iam/iam.module';
+import { BcryptService } from './iam/hashing/bcrypt.service';
 
 @Module({
   imports: [
@@ -26,7 +27,6 @@ import { MulterModule } from '@nestjs/platform-express';
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       sortSchema: true,
     }),
-    AuthModule,
     CommonsModule,
     ProductsModule,
     CategoriesModule,
@@ -35,8 +35,9 @@ import { MulterModule } from '@nestjs/platform-express';
     MulterModule.register({
       dest: './upload',
     }),
+    IamModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, BcryptService],
 })
 export class AppModule {}

@@ -10,18 +10,18 @@ export class SubCategory {
   @Field(() => String, { description: 'Name of the category' })
   name: string;
 
-  @Field(() => String, { description: 'Description of the category' })
+  @Field(() => String, { description: 'Description of the category', nullable: true })
   description?: string;
 
   @Field(() => ID, { description: 'Id of parent category', nullable: false })
   categoryId: string;
 
-  @Field({ description: 'url of sub category' })
+  @Field({ description: 'url of sub category', nullable: true })
   image?: string;
 
-  @Field(() => [Product])
+  @Field(() => [Product], { nullable: true })
   products: Product[];
 
-  @Field(() => [SubCategory])
+  @Field(() => SubCategory, { nullable: true })
   category: Category;
 }

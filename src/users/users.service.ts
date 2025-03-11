@@ -2,20 +2,24 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from '../prisma/prisma.service';
-import { PasswordService } from '../commons/password.service';
 import { PaginateArgs } from '../commons/entities/paginate.args';
+import { HashingService } from '../iam/hashing/hashing.service';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly prismaService: PrismaService,
-    private readonly passwordService: PasswordService,
+    private readonly passwordService: HashingService,
   ) {}
 
   async createUserByCredentials(createUserInput: CreateUserInput) {
     const { password } = createUserInput;
-    createUserInput.password = await this.passwordService.encryptPassword(password);
+    createUserInput.password = await this.passwordService.hash(password);
     return this.prismaService.user.create({ data: createUserInput });
+  }
+
+  async createUserByGoogle(googleId: string, email: string) {
+    return this.prismaService.user.create({ data: { email, googleId } });
   }
 
   async findAll(filter: PaginateArgs) {
@@ -54,18 +58,22 @@ export class UsersService {
     return this.prismaService.user.findUnique({ where: { email } });
   }
 
+  findUserByGoogleId(googleId: string) {
+    return this.prismaService.user.findUnique({ where: { googleId } });
+  }
+
   async update(id: string, updateUserInput: UpdateUserInput) {
     const existUserRecord = await this.findUserByIdOrThrow(id);
     const { password } = updateUserInput;
     if (updateUserInput) {
       await this.compareNewPasswordToOld(updateUserInput.password, existUserRecord.password);
-      updateUserInput.password = await this.passwordService.encryptPassword(password);
+      updateUserInput.password = await this.passwordService.hash(password);
     }
     return this.prismaService.user.update({ where: { id }, data: updateUserInput });
   }
 
   private async compareNewPasswordToOld(newPassword: string, oldEncryptedPassword: string) {
-    const result = await this.passwordService.comparePassword(newPassword, oldEncryptedPassword);
+    const result = await this.passwordService.compare(newPassword, oldEncryptedPassword);
     if (result) {
       throw new ForbiddenException('New password must be different from old password');
     }

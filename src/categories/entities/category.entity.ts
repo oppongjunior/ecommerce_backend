@@ -13,12 +13,12 @@ export class Category {
   @Field(() => String, { description: 'Description of the category', nullable: true })
   description?: string;
 
-  @Field(() => [Product])
+  @Field(() => [Product], { defaultValue: [] })
   products: Product[];
 
-  @Field({ description: 'url of category' })
+  @Field({ description: 'url of category', nullable: true })
   image?: string;
 
-  @Field(() => [SubCategory])
+  @Field(() => [SubCategory], { defaultValue: [] })
   subcategories: SubCategory[];
 }

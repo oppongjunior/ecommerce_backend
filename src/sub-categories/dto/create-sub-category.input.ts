@@ -7,7 +7,7 @@ export class CreateSubCategoryInput {
   @IsNotEmpty()
   @Length(2, 50, { message: 'Name must be between 2 and 50 characters.' })
   @Field(() => String, { description: 'Name of the category', nullable: false })
-  @Transform(({ value }) => value.trim().toLocaleLowerCase())
+  @Transform(({ value }) => value?.trim().toLowerCase())
   name: string;
 
   @IsNotEmpty()
@@ -16,7 +16,7 @@ export class CreateSubCategoryInput {
 
   @IsOptional()
   @IsUrl()
-  @Field({ description: 'url of sub category' })
+  @Field({ description: 'url of sub category', nullable: true })
   image?: string;
 
   @IsOptional()

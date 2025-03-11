@@ -14,73 +14,99 @@ datasource db {
 }
 
 model User {
-  id             String    @id @default(cuid())
-  name           String?   @db.VarChar(100)
-  email          String    @unique
+  id             String         @id @default(cuid())
+  name           String?
+  email          String         @unique
   password       String?
-  phoneNumber    String?   @unique
-  role           Role      @default(USER)
-  googleId       String?   @unique
-  facebookId     String?   @unique
-  isActive       Boolean   @default(true)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  phoneNumber    String?        @unique
+  role           Role           @default(USER)
+  isActive       Boolean        @default(true)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
   lastLoginAt    DateTime?
   profilePicture String?
   addresses      Address[]
-  Rating         Rating[]
+  reviews        Review[]
+  Cart           Cart?
+  Order          Order[]
+  AuthProvider   AuthProvider[]
+  AuditLog       AuditLog[]
+  Wishlist       Wishlist[]
 }
 
-enum Role {
-  USER
-  ADMIN
+model AuthProvider {
+  id         String   @id @default(cuid())
+  userId     String
+  provider   String
+  providerId String   @unique
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@unique([provider, providerId])
+  @@unique([userId, provider])
 }
 
 model Address {
-  id      String @id @default(cuid())
-  street  String
-  city    String
-  state   String
-  zipCode String
-  country String
-  userId  String
-  user    User   @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
+  street    String
+  city      String
+  state     String
+  zipCode   String
+  country   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Order     Order[]
 
   @@index([userId])
 }
 
 model Category {
   id            String        @id @default(cuid())
-  name          String        @unique @db.VarChar(100)
+  name          String
   description   String?       @db.Text
   image         String?
   products      Product[]
   subcategories Subcategory[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  Discount      Discount?     @relation(fields: [discountId], references: [id])
+  discountId    String?
 }
 
 model Subcategory {
   id          String    @id @default(cuid())
-  name        String    @unique @db.VarChar(100)
+  name        String
   description String?   @db.Text
   image       String?
   categoryId  String
   category    Category  @relation(fields: [categoryId], references: [id])
   products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
 
 model Tag {
-  id       String    @id @default(cuid())
-  name     String    @unique @db.VarChar(256)
-  products Product[]
+  id        String    @id @default(cuid())
+  name      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Variant {
-  id        String  @id @default(cuid())
-  size      String?
-  color     String?
-  price     Decimal @db.Decimal(10, 2)
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+  id         String      @id @default(cuid())
+  size       String?
+  color      String?
+  quantity   Int         @default(0)
+  price      Decimal     @db.Decimal(10, 2)
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id])
+  CartItem   CartItem[]
+  OrderItem  OrderItem[]
+  Discount   Discount?   @relation(fields: [discountId], references: [id])
+  discountId String?
 }
 
 model Product {
@@ -100,11 +126,17 @@ model Product {
   subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
   brand         String?      @db.VarChar(100)
   tags          Tag[]
-  ratings       Rating[]
+  reviews       Review[]
   variants      Variant[]
+  discounts     Discount[]
+  CartItem      CartItem[]
+  OrderItem     OrderItem[]
+  Wishlist      Wishlist[]
+
+  @@index([sku])
 }
 
-model Rating {
+model Review {
   id        String  @id @default(cuid())
   score     Int
   comment   String?
@@ -112,4 +144,136 @@ model Rating {
   userId    String
   user      User    @relation(fields: [userId], references: [id])
   product   Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+}
+
+model Discount {
+  id              String       @id @default(cuid())
+  name            String
+  description     String
+  type            DiscountType
+  value           Decimal
+  startDate       DateTime
+  endDate         DateTime
+  isActive        Boolean      @default(false)
+  products        Product[]
+  variants        Variant[]
+  categories      Category[]
+  minimumPurchase Decimal?     @db.Decimal(10, 2)
+
+  @@index([startDate, endDate, isActive])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  variantId String? // Optional variant reference
+  quantity  Int      @default(1)
+  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant   Variant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  userId            String
+  user              User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  totalAmount       Float
+  status            OrderStatus @default(PENDING)
+  shippingAddressId String
+  shippingAddress   Address     @relation(fields: [shippingAddressId], references: [id])
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  items             OrderItem[]
+  payment           Payment?
+
+  @@index([userId])
+}
+
+model OrderItem {
+  id           String   @id @default(cuid())
+  orderId      String
+  productId    String
+  variantId    String?
+  quantity     Int      @default(1)
+  priceAtOrder Float
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant      Variant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  createdAt    DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Payment {
+  id             String        @id @default(cuid())
+  orderId        String        @unique
+  order          Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amount         Float
+  currency       String        @default("GHS")
+  paymentMethod  String
+  status         PaymentStatus @default(PENDING)
+  transactionId  String?
+  paymentDetails Json?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  entity    String
+  entityId  String
+  action    String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  details   Json?
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT
 }

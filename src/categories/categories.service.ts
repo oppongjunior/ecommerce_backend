@@ -14,6 +14,7 @@ export class CategoriesService {
    * @returns The created category object.
    */
   create(createCategoryInput: CreateCategoryInput) {
+    console.log(createCategoryInput.name);
     return this.prismaService.category.create({ data: createCategoryInput });
   }
 
