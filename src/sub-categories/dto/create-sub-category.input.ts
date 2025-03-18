@@ -1,25 +1,29 @@
-import { Field, ID, InputType } from '@nestjs/graphql';
-import { IsNotEmpty, IsOptional, IsUrl, Length } from 'class-validator';
+import { Field, InputType } from '@nestjs/graphql';
+import { IsNotEmpty, IsOptional, IsUrl, Length, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 @InputType()
 export class CreateSubCategoryInput {
-  @IsNotEmpty()
-  @Length(2, 50, { message: 'Name must be between 2 and 50 characters.' })
-  @Field(() => String, { description: 'Name of the category', nullable: false })
-  @Transform(({ value }) => value?.trim().toLowerCase())
+  @Field(() => String, { description: 'The name of the subcategory (e.g., "Shirts")' })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @IsNotEmpty({ message: 'Subcategory name is required' })
+  @Length(2, 50, { message: 'Subcategory name must be between 2 and 50 characters' })
+  @Matches(/^[a-zA-Z0-9\s-]+$/, {
+    message: 'Subcategory name can only contain letters, numbers, spaces, and hyphens',
+  })
   name: string;
 
-  @IsNotEmpty()
-  @Field(() => ID, { description: 'Id of parent category', nullable: false })
+  @Field(() => String, { description: 'The ID of the parent category' })
+  @IsNotEmpty({ message: 'Category ID is required' })
   categoryId: string;
 
+  @Field(() => String, { nullable: true, description: 'Optional HTTPS URL to an image' })
   @IsOptional()
-  @IsUrl()
-  @Field({ description: 'url of sub category', nullable: true })
+  @IsUrl({ protocols: ['https'], require_protocol: true }, { message: 'Image must be a valid HTTPS URL' })
   image?: string;
 
+  @Field(() => String, { nullable: true, description: 'Optional description (max 500 characters)' })
   @IsOptional()
-  @Field(() => String, { description: 'Description of the category', nullable: true })
+  @Length(0, 500, { message: 'Description must not exceed 500 characters' })
   description?: string;
 }

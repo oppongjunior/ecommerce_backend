@@ -10,6 +10,8 @@ import { AuthenticationResolver } from './authentication/authentication.resolver
 import { GoogleAuthenticationService } from './authentication/social/google-authentication.service';
 import { APP_GUARD } from '@nestjs/core';
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
+import { AuthenticationGuard } from './authentication/guards/authentication.guard';
+import { RolesGuard } from './authentication/guards/roles.guard';
 
 @Module({
   imports: [JwtModule.registerAsync(jwtConfig.asProvider()), UsersModule, ConfigModule.forFeature(jwtConfig)],
@@ -18,9 +20,14 @@ import { AccessTokenGuard } from './authentication/guards/access-token.guard';
     { provide: HashingService, useClass: BcryptService },
     AuthenticationResolver,
     GoogleAuthenticationService,
+    AccessTokenGuard,
     {
       provide: APP_GUARD,
-      useClass: AccessTokenGuard,
+      useClass: AuthenticationGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
     },
   ],
   controllers: [],

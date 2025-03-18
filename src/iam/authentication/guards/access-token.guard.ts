@@ -5,6 +5,7 @@ import { ConfigType } from '@nestjs/config';
 import { Request } from 'express';
 import { REQUEST_USER_KEY } from '../../iam.constants';
 import { GqlExecutionContext } from '@nestjs/graphql';
+import { UsersService } from '../../../users/users.service';
 
 @Injectable()
 export class AccessTokenGuard implements CanActivate {
@@ -12,6 +13,7 @@ export class AccessTokenGuard implements CanActivate {
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+    private readonly userService: UsersService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -20,11 +22,13 @@ export class AccessTokenGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
     if (!token) throw new UnauthorizedException();
     try {
-      request[REQUEST_USER_KEY] = await this.jwtService.verifyAsync(token, this.jwtConfiguration);
+      const authenticatedUser = await this.jwtService.verifyAsync(token, this.jwtConfiguration);
+      const id = authenticatedUser.sub;
+      request[REQUEST_USER_KEY] = await this.userService.findOne(id);
     } catch (e) {
+      console.log(e);
       throw new UnauthorizedException();
     }
-
     return true;
   }
 

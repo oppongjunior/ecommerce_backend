@@ -1,11 +1,11 @@
-import { ObjectType, Field } from '@nestjs/graphql';
+import { Field, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class User {
   @Field({ description: 'Unique identifier for the user' })
   id: string;
 
-  @Field(() => String, { description: 'User’s full name' })
+  @Field(() => String, { description: 'User’s full name', nullable: true })
   name: string;
 
   @Field(() => String, { description: 'Email address' })
@@ -15,7 +15,7 @@ export class User {
   phoneNumber?: string;
 
   @Field(() => String, { nullable: true, description: 'Google ID for social login' })
-  googleId?: string;
+  authProvider?: string;
 
   @Field(() => String, { nullable: true, description: 'Facebook ID for social login' })
   facebookId?: string;

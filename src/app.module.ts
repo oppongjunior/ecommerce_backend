@@ -15,6 +15,7 @@ import { RatingsModule } from './ratings/ratings.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { IamModule } from './iam/iam.module';
 import { BcryptService } from './iam/hashing/bcrypt.service';
+import { CartModule } from './cart/cart.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { BcryptService } from './iam/hashing/bcrypt.service';
       dest: './upload',
     }),
     IamModule,
+    CartModule,
   ],
   controllers: [AppController],
   providers: [AppService, BcryptService],

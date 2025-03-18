@@ -27,11 +27,11 @@ model User {
   profilePicture String?
   addresses      Address[]
   reviews        Review[]
-  Cart           Cart?
-  Order          Order[]
-  AuthProvider   AuthProvider[]
-  AuditLog       AuditLog[]
-  Wishlist       Wishlist[]
+  cart           Cart?
+  order          Order[]
+  authProvider   AuthProvider[]
+  auditLog       AuditLog[]
+  wishlist       Wishlist[]
 }
 
 model AuthProvider {
@@ -64,18 +64,18 @@ model Address {
 
 model Category {
   id            String        @id @default(cuid())
-  name          String
+  name          String        @unique
   description   String?       @db.Text
   image         String?
   products      Product[]
-  subcategories Subcategory[]
+  subcategories SubCategory[]
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
-  Discount      Discount?     @relation(fields: [discountId], references: [id])
+  discount      Discount?     @relation(fields: [discountId], references: [id])
   discountId    String?
 }
 
-model Subcategory {
+model SubCategory {
   id          String    @id @default(cuid())
   name        String
   description String?   @db.Text
@@ -103,9 +103,9 @@ model Variant {
   price      Decimal     @db.Decimal(10, 2)
   productId  String
   product    Product     @relation(fields: [productId], references: [id])
-  CartItem   CartItem[]
-  OrderItem  OrderItem[]
-  Discount   Discount?   @relation(fields: [discountId], references: [id])
+  cartItem   CartItem[]
+  orderItem  OrderItem[]
+  discount   Discount?   @relation(fields: [discountId], references: [id])
   discountId String?
 }
 
@@ -123,15 +123,15 @@ model Product {
   categoryId    String
   category      Category     @relation(fields: [categoryId], references: [id])
   subcategoryId String?
-  subcategory   Subcategory? @relation(fields: [subcategoryId], references: [id])
+  subcategory   SubCategory? @relation(fields: [subcategoryId], references: [id])
   brand         String?      @db.VarChar(100)
   tags          Tag[]
   reviews       Review[]
   variants      Variant[]
   discounts     Discount[]
-  CartItem      CartItem[]
-  OrderItem     OrderItem[]
-  Wishlist      Wishlist[]
+  cartItem      CartItem[]
+  orderItem     OrderItem[]
+  wishlist      Wishlist[]
 
   @@index([sku])
 }
@@ -178,7 +178,7 @@ model CartItem {
   id        String   @id @default(cuid())
   cartId    String
   productId String
-  variantId String? // Optional variant reference
+  variantId String?
   quantity  Int      @default(1)
   cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)

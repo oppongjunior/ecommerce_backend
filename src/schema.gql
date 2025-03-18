@@ -10,55 +10,125 @@ type AuthEntity {
   refreshToken: String!
 }
 
-type Category {
-  """Description of the category"""
-  description: String
+type Cart {
+  """Timestamp when the cart was created"""
+  createdAt: DateTime!
 
-  """Id of category"""
+  """Unique identifier of the cart"""
   id: ID!
 
-  """url of category"""
+  """Items in the cart"""
+  items: [CartItem!]!
+
+  """Timestamp when the cart was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the user owning the cart"""
+  userId: String!
+}
+
+type CartItem {
+  """Timestamp when the item was added"""
+  createdAt: DateTime!
+
+  """Unique identifier of the cart item"""
+  id: ID!
+
+  """The product in the cart"""
+  product: Product!
+
+  """ID of the product in the cart"""
+  productId: String!
+
+  """Quantity of the product in the cart"""
+  quantity: Int!
+
+  """Timestamp when the item was last updated"""
+  updatedAt: DateTime!
+}
+
+type Category {
+  """Timestamp when the category was created"""
+  createdAt: DateTime!
+
+  """Optional description of the category (max 500 characters)"""
+  description: String
+
+  """Unique identifier of the category"""
+  id: ID!
+
+  """Optional HTTPS URL to an image representing the category"""
   image: String
 
-  """Name of the category"""
+  """Name of the category (e.g., "Clothing")"""
   name: String!
+
+  """List of products belonging to this category (empty if none)"""
   products: [Product!]!
+
+  """List of subcategories under this category (empty if none)"""
   subcategories: [SubCategory!]!
+
+  """Timestamp when the category was last updated"""
+  updatedAt: DateTime!
+}
+
+input ChangeUserPasswordInput {
+  """The new password to set"""
+  newPassword: String!
+
+  """The current password for verification"""
+  oldPassword: String!
+}
+
+input CreateCartInput {
+  """ID of the product to add"""
+  productId: String!
+
+  """Quantity to add"""
+  quantity: Int!
 }
 
 input CreateCategoryInput {
-  """Description of the category"""
+  """A brief description of the category (max 500 characters)"""
   description: String
 
-  """url of category"""
+  """A URL to an image representing the category (must be HTTPS)"""
   image: String
 
-  """Name of the category"""
+  """The name of the category (e.g., "Electronics")"""
   name: String!
 }
 
 input CreateProductInput {
+  """Optional brand name (e.g., "Nike")"""
   brand: String
+
+  """ID of the parent category (e.g., "cat_clothing")"""
   categoryId: String!
 
-  """description of the product"""
+  """Optional description of the product (max 1000 characters)"""
   description: String
 
-  """links to url of product images"""
+  """Array of HTTPS URLs to product images (max 10)"""
   images: [String!]
-  isActive: Boolean! = false
 
-  """Name of the product"""
+  """Whether the product is active and visible (defaults to false)"""
+  isActive: Boolean!
+
+  """Name of the product (e.g., "Cotton T-Shirt")"""
   name: String!
 
-  """price of the product"""
+  """Price of the product in default currency (e.g., 29.99)"""
   price: Float!
 
-  """description of the product"""
+  """Available stock quantity (e.g., 100)"""
   quantity: Int!
 
-  """sku of product"""
+  """Optional Stock Keeping Unit (SKU) code (e.g., "TSHIRT-XL")"""
   sku: String
+
+  """Optional ID of the subcategory (e.g., "sub_shirts")"""
   subcategoryId: String
 }
 
@@ -77,16 +147,16 @@ input CreateRatingInput {
 }
 
 input CreateSubCategoryInput {
-  """Id of parent category"""
-  categoryId: ID!
+  """The ID of the parent category"""
+  categoryId: String!
 
-  """Description of the category"""
+  """Optional description (max 500 characters)"""
   description: String
 
-  """url of sub category"""
+  """Optional HTTPS URL to an image"""
   image: String
 
-  """Name of the category"""
+  """The name of the subcategory (e.g., "Shirts")"""
   name: String!
 }
 
@@ -119,24 +189,108 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
-  createCategory(createCategoryInput: CreateCategoryInput!): Category!
-  createProduct(createProductInput: CreateProductInput!): Product!
+  """Archives a product by setting isActive to false (admin only)"""
+  archiveProduct(
+    """The ID of the product to archive"""
+    id: String!
+  ): Product!
+
+  """Archive (soft delete) a user"""
+  archiveUser(id: String!): User!
+
+  """Change the password of the active user"""
+  changeUserPassword(input: ChangeUserPasswordInput!): User!
+  createCart(createCartInput: CreateCartInput!): Cart!
+
+  """Creates a new category (admin only)"""
+  createCategory(input: CreateCategoryInput!): Category!
+
+  """Creates a new product (admin only)"""
+  createProduct(
+    """Input data for the new product"""
+    input: CreateProductInput!
+  ): Product!
   createRating(createRatingInput: CreateRatingInput!): Rating!
-  createSubCategory(createSubCategoryInput: CreateSubCategoryInput!): SubCategory!
+
+  """Creates a new subcategory (admin only)"""
+  createSubCategory(
+    """Input data for the new subcategory"""
+    input: CreateSubCategoryInput!
+  ): SubCategory!
+
+  """Create a new user with email and password"""
   createUser(createUserInput: CreateUserInput!): User!
-  removeCategory(id: String!): Category!
-  removeProduct(id: String!): Product!
+
+  """Create a new user via OAuth provider"""
+  createUserByOAuth(email: String!, provider: String!, providerId: String!): User!
+
+  """Restore an archived user"""
+  deArchiveUser(id: String!): User!
+  removeCart(id: Int!): Cart!
+
+  """Deletes a category by ID (admin only)"""
+  removeCategory(
+    """The ID of the category to delete"""
+    id: String!
+  ): Category!
+
+  """Deletes a product by ID (admin only)"""
+  removeProduct(
+    """The ID of the product to delete"""
+    id: String!
+  ): Product!
   removeRating(id: ID!): Rating!
-  removeSubCategory(id: String!): SubCategory!
+
+  """Deletes a subcategory by ID (admin only)"""
+  removeSubCategory(
+    """The ID of the subcategory to delete"""
+    id: String!
+  ): SubCategory!
+
+  """Delete a user permanently"""
   removeUser(id: String!): User!
-  signIn(signInInput: SignInInput!): AuthEntity!
-  signInWithGoogle(socialSignInInput: SocialLoginInput!): AuthEntity!
-  signUp(signUpInput: SignUpInput!): AuthEntity!
-  updateCategory(updateCategoryInput: UpdateCategoryInput!): Category!
-  updateProduct(updateProductInput: UpdateProductInput!): Product!
+
+  """Restores an archived product by setting isActive to true (admin only)"""
+  restoreProduct(
+    """The ID of the product to restore"""
+    id: String!
+  ): Product!
+
+  """Sign in an existing user with email and password"""
+  signIn(input: SignInInput!): AuthEntity!
+
+  """Register a new user with email and password"""
+  signUp(input: SignUpInput!): AuthEntity!
+  updateCart(updateCartInput: UpdateCartInput!): Cart!
+
+  """Updates an existing category (admin only)"""
+  updateCategory(
+    """The ID of the category to update"""
+    id: String!
+    input: UpdateCategoryInput!
+  ): Category!
+
+  """Updates an existing product (admin only)"""
+  updateProduct(
+    """The ID of the product to update"""
+    id: String!
+
+    """Updated data for the product"""
+    input: UpdateProductInput!
+  ): Product!
   updateRating(updateRatingInput: UpdateRatingInput!): Rating!
-  updateSubCategory(updateSubCategoryInput: UpdateSubCategoryInput!): SubCategory!
-  updateUser(updateUserInput: UpdateUserInput!): User!
+
+  """Updates an existing subcategory (admin only)"""
+  updateSubCategory(
+    """The ID of the subcategory to update"""
+    id: String!
+
+    """Updated data for the subcategory"""
+    input: UpdateSubCategoryInput!
+  ): SubCategory!
+
+  """Update an existing user"""
+  updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
 }
 
 type PageInfo {
@@ -148,8 +302,7 @@ type PageInfo {
 input PaginateArgs {
   """the id of the cursor"""
   after: String
-  first: Int!
-  last: Int
+  first: Int! = 12
 }
 
 type Product {
@@ -180,17 +333,101 @@ type Product {
   subcategoryId: String
 }
 
+type ProductConnection {
+  edges: [ProductEdge!]!
+
+  """information about the page"""
+  pageInfo: PageInfo!
+}
+
+type ProductEdge {
+  """cursor to identity resource"""
+  cursor: String!
+
+  """product record"""
+  node: Product!
+}
+
+input ProductFilterArgs {
+  """Filter by brand name (exact match)"""
+  brand: String
+
+  """Filter by category ID"""
+  categoryId: String
+
+  """Filter products created after this ISO date"""
+  createdAfter: String
+
+  """Filter by active status"""
+  isActive: Boolean = true
+
+  """Filter by maximum price (inclusive)"""
+  priceMax: Float
+
+  """Filter by minimum price (inclusive)"""
+  priceMin: Float
+
+  """Filter by name, description, or tags (partial match)"""
+  search: String
+
+  """Filter by subcategory ID"""
+  subcategoryId: String
+}
+
 type Query {
+  cart(id: Int!): Cart!
+
+  """Retrieves a list of all categories, sorted alphabetically by name"""
   categories: [Category!]!
-  category(id: String!): Category!
-  product(id: String!): Product!
-  products(paginateFilter: PaginateArgs): [Product!]!
+
+  """Retrieves a category by its unique ID, or null if not found"""
+  category(
+    """The ID of the category"""
+    id: String!
+  ): Category
+
+  """Retrieves a single product by its ID, or null if not found"""
+  product(
+    """The unique ID of the product"""
+    id: String!
+  ): Product
+
+  """
+  Retrieves a paginated list of products with optional filtering (e.g., by category, price range)
+  """
+  products(
+    """Filter options (categoryId, search, etc.)"""
+    filter: ProductFilterArgs
+
+    """Pagination options (first, after)"""
+    paginate: PaginateArgs
+  ): ProductConnection!
   rating(id: ID!): Rating!
   ratings: [Rating!]!
+
+  """Retrieves a list of all subcategories, sorted alphabetically by name"""
   subCategories: [SubCategory!]!
-  subCategory(id: String!): SubCategory!
-  user(id: String!): User!
-  usersConnection(paginateFilter: PaginateArgs): UserConnection!
+
+  """Retrieves a subcategory by its unique ID, or null if not found"""
+  subCategory(
+    """The ID of the subcategory"""
+    id: String!
+  ): SubCategory
+
+  """Fetch a user by email"""
+  userByEmail(email: String!): User!
+
+  """Fetch a user by ID"""
+  userById(id: String!): User!
+
+  """Fetch a user by OAuth provider ID"""
+  userByProviderId(providerId: String!): User!
+
+  """Fetch a user’s profile with related data"""
+  userProfile: User!
+
+  """Fetch a paginated list of users"""
+  users(filter: UserPaginateArgs!): UserConnection!
 }
 
 type Rating {
@@ -234,11 +471,6 @@ input SignUpInput {
   password: String!
 }
 
-input SocialLoginInput {
-  """token"""
-  token: String!
-}
-
 type SubCategory {
   category: SubCategory
 
@@ -259,41 +491,58 @@ type SubCategory {
   products: [Product!]
 }
 
+input UpdateCartInput {
+  id: Int!
+
+  """ID of the product to add"""
+  productId: String
+
+  """Quantity to add"""
+  quantity: Int
+}
+
 input UpdateCategoryInput {
-  """Description of the category"""
+  """A brief description of the category (max 500 characters)"""
   description: String
   id: String!
 
-  """url of category"""
+  """A URL to an image representing the category (must be HTTPS)"""
   image: String
 
-  """Name of the category"""
+  """The name of the category (e.g., "Electronics")"""
   name: String
 }
 
 input UpdateProductInput {
+  """Optional brand name (e.g., "Nike")"""
   brand: String
+
+  """ID of the parent category (e.g., "cat_clothing")"""
   categoryId: String
 
-  """description of the product"""
+  """Optional description of the product (max 1000 characters)"""
   description: String
   id: String!
 
-  """links to url of product images"""
+  """Array of HTTPS URLs to product images (max 10)"""
   images: [String!]
-  isActive: Boolean = false
 
-  """Name of the product"""
+  """Whether the product is active and visible (defaults to false)"""
+  isActive: Boolean
+
+  """Name of the product (e.g., "Cotton T-Shirt")"""
   name: String
 
-  """price of the product"""
+  """Price of the product in default currency (e.g., 29.99)"""
   price: Float
 
-  """description of the product"""
+  """Available stock quantity (e.g., 100)"""
   quantity: Int
 
-  """sku of product"""
+  """Optional Stock Keeping Unit (SKU) code (e.g., "TSHIRT-XL")"""
   sku: String
+
+  """Optional ID of the subcategory (e.g., "sub_shirts")"""
   subcategoryId: String
 }
 
@@ -313,17 +562,17 @@ input UpdateRatingInput {
 }
 
 input UpdateSubCategoryInput {
-  """Id of parent category"""
-  categoryId: ID
+  """The ID of the parent category"""
+  categoryId: String
 
-  """Description of the category"""
+  """Optional description (max 500 characters)"""
   description: String
   id: ID!
 
-  """url of sub category"""
+  """Optional HTTPS URL to an image"""
   image: String
 
-  """Name of the category"""
+  """The name of the subcategory (e.g., "Shirts")"""
   name: String
 }
 
@@ -352,6 +601,9 @@ input UpdateUserInput {
 }
 
 type User {
+  """Google ID for social login"""
+  authProvider: String
+
   """Date of account creation"""
   createdAt: DateTime!
 
@@ -360,9 +612,6 @@ type User {
 
   """Facebook ID for social login"""
   facebookId: String
-
-  """Google ID for social login"""
-  googleId: String
 
   """Unique identifier for the user"""
   id: String!
@@ -374,7 +623,7 @@ type User {
   lastLoginAt: DateTime
 
   """User’s full name"""
-  name: String!
+  name: String
 
   """Phone number"""
   phoneNumber: String
@@ -402,4 +651,28 @@ type UserEdge {
 
   """user record"""
   node: User!
+}
+
+input UserPaginateArgs {
+  """the id of the cursor"""
+  after: String
+
+  """Filter by creation date (users created on or after this date)"""
+  createdAfter: DateTime
+
+  """Filter by email (partial match, case-insensitive)"""
+  email: String
+  first: Int! = 12
+
+  """Filter by active status (true for active, false for inactive)"""
+  isActive: Boolean
+
+  """Filter by name (partial match, case-insensitive)"""
+  name: String
+
+  """Filter by phone number (exact match)"""
+  phoneNumber: String
+
+  """Filter by user role (USER or ADMIN)"""
+  role: Role
 }

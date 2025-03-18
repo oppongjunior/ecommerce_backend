@@ -3,33 +3,47 @@ import { CategoriesService } from './categories.service';
 import { Category } from './entities/category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
+import { Role } from '@prisma/client';
+import { Roles } from '../iam/authentication/decorators/roles.decorator';
 
+@Roles(Role.ADMIN)
 @Resolver(() => Category)
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Mutation(() => Category)
-  createCategory(@Args('createCategoryInput') createCategoryInput: CreateCategoryInput) {
-    return this.categoriesService.create(createCategoryInput);
+  @Mutation(() => Category, { description: 'Creates a new category (admin only)' })
+  createCategory(@Args('input', { type: () => CreateCategoryInput }) input: CreateCategoryInput) {
+    return this.categoriesService.create(input);
   }
 
-  @Query(() => [Category], { name: 'categories' })
+  @Roles(Role.USER, Role.ADMIN)
+  @Query(() => [Category], {
+    name: 'categories',
+    description: 'Retrieves a list of all categories, sorted alphabetically by name',
+  })
   findAll() {
     return this.categoriesService.findAll();
   }
 
-  @Query(() => Category, { name: 'category' })
-  findOne(@Args('id', { type: () => String }) id: string) {
+  @Query(() => Category, {
+    name: 'category',
+    nullable: true,
+    description: 'Retrieves a category by its unique ID, or null if not found',
+  })
+  findOne(@Args('id', { type: () => String, description: 'The ID of the category' }) id: string) {
     return this.categoriesService.findOne(id);
   }
 
-  @Mutation(() => Category)
-  updateCategory(@Args('updateCategoryInput') updateCategoryInput: UpdateCategoryInput) {
-    return this.categoriesService.update(updateCategoryInput.id, updateCategoryInput);
+  @Mutation(() => Category, { description: 'Updates an existing category (admin only)' })
+  updateCategory(
+    @Args('id', { type: () => String, description: 'The ID of the category to update' }) id: string,
+    @Args('input', { type: () => UpdateCategoryInput }) input: UpdateCategoryInput,
+  ) {
+    return this.categoriesService.update(id, input);
   }
 
-  @Mutation(() => Category)
-  removeCategory(@Args('id', { type: () => String }) id: string) {
+  @Mutation(() => Category, { description: 'Deletes a category by ID (admin only)' })
+  removeCategory(@Args('id', { type: () => String, description: 'The ID of the category to delete' }) id: string) {
     return this.categoriesService.remove(id);
   }
 }

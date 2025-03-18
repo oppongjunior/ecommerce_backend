@@ -24,16 +24,20 @@ export class AuthenticationService {
   /**
    * Registers a new user by creating an account with the provided sign-up details.
    *
-   * @param signUpDto - The data transfer object containing the user's sign-up information.
    * @throws ConflictException - If a user with the provided email already exists.
    * @returns A promise that resolves to an object containing access and refresh tokens for the newly created user.
+   * @param signUpInput
    */
-  async signUp(signUpDto: SignUpInput) {
-    const findUser = await this.userService.findUserByEmail(signUpDto.email);
+  async signUp(signUpInput: SignUpInput) {
+    const { email, password, name } = signUpInput;
+    const findUser = await this.userService.findUserByEmail(email);
     if (findUser) throw new ConflictException('User already exist!');
-    const hashedPassword = await this.passwordService.hash(signUpDto.password);
-    const user = await this.prisma.user.create({
-      data: { email: signUpDto.email, password: hashedPassword, role: Role.USER },
+    const user = await this.userService.createUserByCredentials({
+      email,
+      password,
+      name,
+      role: Role.USER,
+      isActive: true,
     });
     return this.generateTokens(user);
   }
@@ -47,10 +51,10 @@ export class AuthenticationService {
    */
   async signIn(signInDto: SignInInput) {
     const user = await this.userService.findUserByEmail(signInDto.email);
-    if (!user) throw new UnauthorizedException('Bad Credentials');
+    if (!user) throw new UnauthorizedException('Invalid email or password');
     const isPasswordEqual = await this.passwordService.compare(signInDto.password, user.password);
-    if (!isPasswordEqual) throw new UnauthorizedException('Bad Credentials');
-    return this.generateTokens(user);
+    if (!isPasswordEqual) throw new UnauthorizedException('Invalid email or password');
+    return await this.generateTokens(user);
   }
 
   async generateTokens(user: User) {
@@ -58,6 +62,7 @@ export class AuthenticationService {
       this.signToken(user.id, this.jwtConfiguration.accessTokenTtl),
       this.signToken(user.id, this.jwtConfiguration.refreshTokenTtl),
     ]);
+    await this.userService.updateLastLogin(user.id);
     return {
       accessToken,
       refreshToken,
@@ -66,10 +71,7 @@ export class AuthenticationService {
 
   private async signToken<T>(userId: string, expiresIn: number, payload?: T) {
     return await this.jwtServices.signAsync(
-      {
-        sub: userId,
-        ...payload,
-      },
+      { sub: userId, ...payload },
       {
         audience: this.jwtConfiguration.audience,
         issuer: this.jwtConfiguration.issuer,

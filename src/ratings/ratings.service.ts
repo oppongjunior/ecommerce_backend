@@ -8,29 +8,29 @@ export class RatingsService {
   constructor(private readonly prismaService: PrismaService) {}
 
   create(createRatingInput: CreateRatingInput) {
-    return this.prismaService.rating.create({ data: createRatingInput });
+    return this.prismaService.review.create({ data: createRatingInput });
   }
 
   findAll() {
-    return this.prismaService.rating.findMany();
+    return this.prismaService.review.findMany();
   }
 
   findOne(id: string) {
-    return this.prismaService.rating.findUnique({ where: { id } });
+    return this.prismaService.review.findUnique({ where: { id } });
   }
 
   async update(id: string, updateRatingInput: UpdateRatingInput) {
     await this.checkRating(id);
-    return this.prismaService.rating.update({ where: { id }, data: updateRatingInput });
+    return this.prismaService.review.update({ where: { id }, data: updateRatingInput });
   }
 
   async remove(id: string) {
     await this.checkRating(id);
-    return this.prismaService.rating.delete({ where: { id } });
+    return this.prismaService.review.delete({ where: { id } });
   }
 
   private async checkRating(id: string) {
-    const rating = await this.prismaService.rating.findUnique({ where: { id } });
+    const rating = await this.prismaService.review.findUnique({ where: { id } });
     if (!rating) throw new NotFoundException('Rating not found');
   }
 }

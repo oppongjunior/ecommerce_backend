@@ -2,8 +2,10 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from '../prisma/prisma.service';
-import { PaginateArgs } from '../commons/entities/paginate.args';
 import { HashingService } from '../iam/hashing/hashing.service';
+import { Prisma, User } from '@prisma/client';
+import { UserPaginateArgs } from './dto/user-paginate.args';
+import { ChangeUserPasswordInput } from './dto/change-user-password.input';
 
 @Injectable()
 export class UsersService {
@@ -18,34 +20,70 @@ export class UsersService {
     return this.prismaService.user.create({ data: createUserInput });
   }
 
-  async createUserByGoogle(googleId: string, email: string) {
-    return this.prismaService.user.create({ data: { email, googleId } });
+  async changePassword(id: string, input: ChangeUserPasswordInput): Promise<User> {
+    const { oldPassword, newPassword } = input;
+    const user = await this.findUserByIdOrThrow(id);
+    const isOldPasswordValid = await this.passwordService.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) throw new ForbiddenException('Old password is incorrect');
+    await this.compareNewPasswordToOld(newPassword, user.password);
+    const hashedNewPassword = await this.passwordService.hash(newPassword);
+    return this.prismaService.user.update({ where: { id }, data: { password: hashedNewPassword } });
   }
 
-  async findAll(filter: PaginateArgs) {
-    const take = filter.first;
-    const skip = filter?.after ? 1 : 0;
-    const cursor = filter?.after ? { id: filter.after } : undefined;
+  async createUserByAuthProvider(providerId: string, provider: string, email: string) {
+    return this.prismaService.user.create({ data: { email, authProvider: { create: { providerId, provider } } } });
+  }
 
-    const users = await this.prismaService.user.findMany({
-      take,
-      skip,
-      cursor,
-    });
+  async findAll(filter: UserPaginateArgs) {
+    const paginationOptions = this.buildPaginationOptions(filter);
+    const whereClause = this.buildWhereClause(filter);
 
-    const totalCount = await this.prismaService.user.count();
-    const lastUser = users[users.length - 1];
+    const users = await this.fetchUsers(paginationOptions, whereClause);
+    const totalCount = await this.countUsers(whereClause);
+    return this.formatPaginatedResponse(users, totalCount, paginationOptions);
+  }
+
+  private buildPaginationOptions({ first, after }: UserPaginateArgs) {
+    const pageSize = first;
+    const hasCursor = !!after;
+    return { take: pageSize, skip: hasCursor ? 1 : 0, cursor: hasCursor ? { id: after } : undefined };
+  }
+
+  private buildWhereClause(filter: UserPaginateArgs): Prisma.UserWhereInput {
+    const { email, phoneNumber, role, isActive, name, createdAfter } = filter;
     return {
-      edges: users.map((user) => {
-        return {
-          cursor: user.id,
-          node: user,
-        };
-      }),
+      ...(email && { email: { contains: email, mode: 'insensitive' as const } }),
+      ...(phoneNumber && { phoneNumber }),
+      ...(role && { role }),
+      ...(isActive !== undefined && { isActive }),
+      ...(name && { name: { contains: name, mode: 'insensitive' as const } }),
+      ...(createdAfter && { createdAt: { gte: createdAfter } }),
+    };
+  }
+
+  private async fetchUsers(
+    { take, skip, cursor }: { take: number; skip: number; cursor?: { id: string } },
+    where: Prisma.UserWhereInput,
+  ) {
+    return this.prismaService.user.findMany({ take, skip, cursor, where, orderBy: { name: 'asc' } });
+  }
+
+  private async countUsers(where: Prisma.UserWhereInput): Promise<number> {
+    return this.prismaService.user.count({ where });
+  }
+
+  private formatPaginatedResponse(users: User[], totalCount: number, { skip, take }: { take: number; skip: number }) {
+    const lastUser = users[users.length - 1];
+    const itemsFetched = skip + users.length;
+    return {
+      edges: users.map((user) => ({
+        cursor: user.id,
+        node: user,
+      })),
       pageInfo: {
         pageSize: take,
-        hasPreviousPage: !!filter.after,
-        hasNextPage: lastUser ? totalCount > users.length : false,
+        hasPreviousPage: skip > 0,
+        hasNextPage: !!lastUser && totalCount > itemsFetched,
       },
     };
   }
@@ -58,17 +96,12 @@ export class UsersService {
     return this.prismaService.user.findUnique({ where: { email } });
   }
 
-  findUserByGoogleId(googleId: string) {
-    return this.prismaService.user.findUnique({ where: { googleId } });
+  async findUserByProviderId(providerId: string) {
+    const users = await this.prismaService.user.findMany({ where: { authProvider: { every: { providerId } } } });
+    return users[0];
   }
 
   async update(id: string, updateUserInput: UpdateUserInput) {
-    const existUserRecord = await this.findUserByIdOrThrow(id);
-    const { password } = updateUserInput;
-    if (updateUserInput) {
-      await this.compareNewPasswordToOld(updateUserInput.password, existUserRecord.password);
-      updateUserInput.password = await this.passwordService.hash(password);
-    }
     return this.prismaService.user.update({ where: { id }, data: updateUserInput });
   }
 
@@ -82,6 +115,27 @@ export class UsersService {
   async remove(id: string) {
     await this.findUserByIdOrThrow(id);
     return this.prismaService.user.delete({ where: { id } });
+  }
+
+  async archiveUser(id: string) {
+    await this.findUserByIdOrThrow(id);
+    return this.prismaService.user.update({ where: { id }, data: { isActive: false } });
+  }
+
+  async deArchiveUser(id: string) {
+    await this.findUserByIdOrThrow(id);
+    return this.prismaService.user.update({ where: { id }, data: { isActive: true } });
+  }
+
+  async getUserProfile(id: string) {
+    return this.prismaService.user.findUnique({
+      where: { id },
+      include: { addresses: true, cart: true, wishlist: true, order: true },
+    });
+  }
+
+  async updateLastLogin(id: string) {
+    return this.prismaService.user.update({ where: { id }, data: { lastLoginAt: new Date() } });
   }
 
   private async findUserByIdOrThrow(id: string) {

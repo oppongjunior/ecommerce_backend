@@ -3,6 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 import { AuthenticationService } from '../authentication.service';
 import { UsersService } from '../../../users/users.service';
+import { PROVIDERS } from '../../iam.constants';
 
 @Injectable()
 export class GoogleAuthenticationService implements OnModuleInit {
@@ -22,11 +23,11 @@ export class GoogleAuthenticationService implements OnModuleInit {
 
   async authenticate(token: string) {
     const { email, googleId } = await this.getUserDetailsFromToken(token);
-    const user = await this.userService.findUserByGoogleId(googleId);
+    const user = await this.userService.findUserByProviderId(googleId);
     if (user) {
       return this.authService.generateTokens(user);
     } else {
-      const newUser = await this.userService.createUserByGoogle(googleId, email);
+      const newUser = await this.userService.createUserByAuthProvider(googleId, PROVIDERS.google, email);
       return this.authService.generateTokens(newUser);
     }
   }
