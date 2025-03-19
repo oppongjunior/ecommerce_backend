@@ -162,7 +162,7 @@ export class CartService {
    * @returns The user's cart with its items.
    * @throws {NotFoundException} If the cart does not exist.
    */
-  private async getCartOrThrow(userId: string): Promise<Cart & { items: CartItem[] }> {
+   async getCartOrThrow(userId: string): Promise<Cart & { items: CartItem[] }> {
     const cart = await this.prismaService.cart.findUnique({
       where: { userId },
       include: { items: { include: { product: true } } },

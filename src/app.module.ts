@@ -16,6 +16,7 @@ import { MulterModule } from '@nestjs/platform-express';
 import { IamModule } from './iam/iam.module';
 import { BcryptService } from './iam/hashing/bcrypt.service';
 import { CartModule } from './cart/cart.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CartModule } from './cart/cart.module';
     }),
     IamModule,
     CartModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService, BcryptService],

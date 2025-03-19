@@ -2,6 +2,14 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddToCartInput {
+  """ID of the product to add to the cart"""
+  productId: String!
+
+  """Quantity of the product to add"""
+  quantity: Int!
+}
+
 type AuthEntity {
   """authentication access token"""
   accessToken: String!
@@ -81,14 +89,6 @@ input ChangeUserPasswordInput {
   oldPassword: String!
 }
 
-input CreateCartInput {
-  """ID of the product to add"""
-  productId: String!
-
-  """Quantity to add"""
-  quantity: Int!
-}
-
 input CreateCategoryInput {
   """A brief description of the category (max 500 characters)"""
   description: String
@@ -98,6 +98,11 @@ input CreateCategoryInput {
 
   """The name of the category (e.g., "Electronics")"""
   name: String!
+}
+
+input CreateOrderInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 input CreateProductInput {
@@ -189,6 +194,9 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  """Adds a product to the user’s cart"""
+  addToCart(input: AddToCartInput!): Cart!
+
   """Archives a product by setting isActive to false (admin only)"""
   archiveProduct(
     """The ID of the product to archive"""
@@ -200,10 +208,13 @@ type Mutation {
 
   """Change the password of the active user"""
   changeUserPassword(input: ChangeUserPasswordInput!): User!
-  createCart(createCartInput: CreateCartInput!): Cart!
+
+  """Clears all items from the user’s cart"""
+  clearCart: Cart!
 
   """Creates a new category (admin only)"""
   createCategory(input: CreateCategoryInput!): Category!
+  createOrder(createOrderInput: CreateOrderInput!): Order!
 
   """Creates a new product (admin only)"""
   createProduct(
@@ -226,13 +237,16 @@ type Mutation {
 
   """Restore an archived user"""
   deArchiveUser(id: String!): User!
-  removeCart(id: Int!): Cart!
 
   """Deletes a category by ID (admin only)"""
   removeCategory(
     """The ID of the category to delete"""
     id: String!
   ): Category!
+
+  """Removes a specific item from the user’s cart"""
+  removeFromCart(cartItemId: String!): Cart!
+  removeOrder(id: Int!): Order!
 
   """Deletes a product by ID (admin only)"""
   removeProduct(
@@ -261,7 +275,9 @@ type Mutation {
 
   """Register a new user with email and password"""
   signUp(input: SignUpInput!): AuthEntity!
-  updateCart(updateCartInput: UpdateCartInput!): Cart!
+
+  """Updates the quantity of an item in the user’s cart"""
+  updateCartItem(input: UpdateCartItemInput!): Cart!
 
   """Updates an existing category (admin only)"""
   updateCategory(
@@ -269,6 +285,7 @@ type Mutation {
     id: String!
     input: UpdateCategoryInput!
   ): Category!
+  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
 
   """Updates an existing product (admin only)"""
   updateProduct(
@@ -291,6 +308,11 @@ type Mutation {
 
   """Update an existing user"""
   updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+}
+
+type Order {
+  """Example field (placeholder)"""
+  exampleField: Int!
 }
 
 type PageInfo {
@@ -375,7 +397,8 @@ input ProductFilterArgs {
 }
 
 type Query {
-  cart(id: Int!): Cart!
+  """Retrieves the current user’s cart"""
+  cart: Cart
 
   """Retrieves a list of all categories, sorted alphabetically by name"""
   categories: [Category!]!
@@ -385,6 +408,7 @@ type Query {
     """The ID of the category"""
     id: String!
   ): Category
+  order(id: Int!): Order!
 
   """Retrieves a single product by its ID, or null if not found"""
   product(
@@ -491,14 +515,12 @@ type SubCategory {
   products: [Product!]
 }
 
-input UpdateCartInput {
-  id: Int!
+input UpdateCartItemInput {
+  """ID of the cart item to update"""
+  cartItemId: String!
 
-  """ID of the product to add"""
-  productId: String
-
-  """Quantity to add"""
-  quantity: Int
+  """New quantity for the cart item (0 to remove)"""
+  quantity: Int!
 }
 
 input UpdateCategoryInput {
@@ -511,6 +533,12 @@ input UpdateCategoryInput {
 
   """The name of the category (e.g., "Electronics")"""
   name: String
+}
+
+input UpdateOrderInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
 }
 
 input UpdateProductInput {
