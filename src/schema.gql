@@ -10,6 +10,18 @@ input AddToCartInput {
   quantity: Int!
 }
 
+type Address {
+  city: String!
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  state: String!
+  street: String!
+  updatedAt: DateTime!
+  userId: ID!
+  zipCode: String!
+}
+
 type AuthEntity {
   """authentication access token"""
   accessToken: String!
@@ -89,6 +101,23 @@ input ChangeUserPasswordInput {
   oldPassword: String!
 }
 
+input CreateAddressInput {
+  """City"""
+  city: String!
+
+  """Country"""
+  country: String!
+
+  """State or province"""
+  state: String!
+
+  """Street address"""
+  street: String!
+
+  """ZIP or postal code"""
+  zipCode: String!
+}
+
 input CreateCategoryInput {
   """A brief description of the category (max 500 characters)"""
   description: String
@@ -101,8 +130,8 @@ input CreateCategoryInput {
 }
 
 input CreateOrderInput {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  """The ID of the shipping address for the order"""
+  shippingAddressId: ID!
 }
 
 input CreateProductInput {
@@ -206,15 +235,23 @@ type Mutation {
   """Archive (soft delete) a user"""
   archiveUser(id: String!): User!
 
+  """Cancels an order and restores stock"""
+  cancelOrder(orderId: String!): Order!
+
   """Change the password of the active user"""
   changeUserPassword(input: ChangeUserPasswordInput!): User!
 
   """Clears all items from the user’s cart"""
   clearCart: Cart!
 
+  """Creates a new address for the user"""
+  createAddress(input: CreateAddressInput!): Address!
+
   """Creates a new category (admin only)"""
   createCategory(input: CreateCategoryInput!): Category!
-  createOrder(createOrderInput: CreateOrderInput!): Order!
+
+  """Creates an order from the user’s cart"""
+  createOrder(input: CreateOrderInput!): Order!
 
   """Creates a new product (admin only)"""
   createProduct(
@@ -238,6 +275,15 @@ type Mutation {
   """Restore an archived user"""
   deArchiveUser(id: String!): User!
 
+  """Deletes an address for the user"""
+  deleteAddress(addressId: String!): Address!
+
+  """Deletes an order and restores stock (admin only)"""
+  deleteOrder(orderId: String!): Order!
+
+  """Marks an order as paid"""
+  markOrderAsPaid(orderId: String!): Order!
+
   """Deletes a category by ID (admin only)"""
   removeCategory(
     """The ID of the category to delete"""
@@ -246,7 +292,6 @@ type Mutation {
 
   """Removes a specific item from the user’s cart"""
   removeFromCart(cartItemId: String!): Cart!
-  removeOrder(id: Int!): Order!
 
   """Deletes a product by ID (admin only)"""
   removeProduct(
@@ -276,6 +321,9 @@ type Mutation {
   """Register a new user with email and password"""
   signUp(input: SignUpInput!): AuthEntity!
 
+  """Updates an existing address for the user"""
+  updateAddress(addressId: String!, input: UpdateAddressInput!): Address!
+
   """Updates the quantity of an item in the user’s cart"""
   updateCartItem(input: UpdateCartItemInput!): Cart!
 
@@ -285,7 +333,9 @@ type Mutation {
     id: String!
     input: UpdateCategoryInput!
   ): Category!
-  updateOrder(updateOrderInput: UpdateOrderInput!): Order!
+
+  """Updates the status of an order"""
+  updateOrderStatus(input: UpdateOrderStatusInput!): Order!
 
   """Updates an existing product (admin only)"""
   updateProduct(
@@ -311,8 +361,34 @@ type Mutation {
 }
 
 type Order {
-  """Example field (placeholder)"""
-  exampleField: Int!
+  createdAt: DateTime!
+  id: ID!
+  items: [OrderItem!]!
+  shippingAddressId: ID!
+  status: OrderStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  userId: ID!
+}
+
+type OrderItem {
+  createdAt: DateTime!
+  id: ID!
+  orderId: ID!
+  priceAtOrder: Float!
+  product: Product!
+  productId: ID!
+  quantity: Float!
+  updatedAt: DateTime!
+  variantId: ID
+}
+
+enum OrderStatus {
+  CANCELLED
+  DELIVERED
+  PENDING
+  PROCESSING
+  SHIPPED
 }
 
 type PageInfo {
@@ -397,6 +473,12 @@ input ProductFilterArgs {
 }
 
 type Query {
+  """Retrieves a specific address by ID for the current user"""
+  address(addressId: String!): Address!
+
+  """Retrieves all addresses (admin only)"""
+  addresses: [Address!]!
+
   """Retrieves the current user’s cart"""
   cart: Cart
 
@@ -408,7 +490,12 @@ type Query {
     """The ID of the category"""
     id: String!
   ): Category
-  order(id: Int!): Order!
+
+  """Retrieves a specific order by ID for the current user"""
+  order(orderId: String!): Order!
+
+  """Retrieves all orders (admin only)"""
+  orders: [Order!]!
 
   """Retrieves a single product by its ID, or null if not found"""
   product(
@@ -438,6 +525,9 @@ type Query {
     id: String!
   ): SubCategory
 
+  """Retrieves all addresses for the current user"""
+  userAddresses: [Address!]!
+
   """Fetch a user by email"""
   userByEmail(email: String!): User!
 
@@ -446,6 +536,9 @@ type Query {
 
   """Fetch a user by OAuth provider ID"""
   userByProviderId(providerId: String!): User!
+
+  """Retrieves all orders for the current user"""
+  userOrders: [Order!]!
 
   """Fetch a user’s profile with related data"""
   userProfile: User!
@@ -515,6 +608,24 @@ type SubCategory {
   products: [Product!]
 }
 
+input UpdateAddressInput {
+  """City"""
+  city: String
+
+  """Country"""
+  country: String
+  id: String!
+
+  """State or province"""
+  state: String
+
+  """Street address"""
+  street: String
+
+  """ZIP or postal code"""
+  zipCode: String
+}
+
 input UpdateCartItemInput {
   """ID of the cart item to update"""
   cartItemId: String!
@@ -535,10 +646,12 @@ input UpdateCategoryInput {
   name: String
 }
 
-input UpdateOrderInput {
-  """Example field (placeholder)"""
-  exampleField: Int
-  id: Int!
+input UpdateOrderStatusInput {
+  """The ID of the order to update"""
+  orderId: ID!
+
+  """The new status for the order"""
+  status: OrderStatus!
 }
 
 input UpdateProductInput {

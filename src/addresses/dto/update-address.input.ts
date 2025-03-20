@@ -1,9 +1,9 @@
-import { CreateProductInput } from './create-product.input';
+import { CreateAddressInput } from './create-address.input';
 import { Field, InputType, PartialType } from '@nestjs/graphql';
 import { IsNotEmpty, IsPositive } from 'class-validator';
 
 @InputType()
-export class UpdateProductInput extends PartialType(CreateProductInput) {
+export class UpdateAddressInput extends PartialType(CreateAddressInput) {
   @IsNotEmpty()
   @IsPositive()
   @Field(() => String)

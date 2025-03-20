@@ -17,6 +17,7 @@ import { IamModule } from './iam/iam.module';
 import { BcryptService } from './iam/hashing/bcrypt.service';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
+import { AddressesModule } from './addresses/addresses.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { OrderModule } from './order/order.module';
     IamModule,
     CartModule,
     OrderModule,
+    AddressesModule,
   ],
   controllers: [AppController],
   providers: [AppService, BcryptService],

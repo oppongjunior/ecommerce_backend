@@ -10,8 +10,6 @@ export class OrdersService {
     private readonly cartService: CartService,
   ) {}
 
-  // Public API Methods (Order Lifecycle)
-
   /**
    * Creates an order from the user's cart using the specified shipping address.
    * @param userId - The ID of the user placing the order.
