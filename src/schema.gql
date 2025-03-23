@@ -194,6 +194,11 @@ input CreateSubCategoryInput {
   name: String!
 }
 
+input CreateTagInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
 input CreateUserInput {
   """Email address"""
   email: String!
@@ -215,6 +220,26 @@ input CreateUserInput {
 
   """Role name"""
   role: Role! = USER
+}
+
+input CreateVariantInput {
+  """Color of the variant"""
+  color: String
+
+  """ID of the associated discount"""
+  discountId: ID
+
+  """Price of the variant"""
+  price: Float!
+
+  """ID of the associated product"""
+  productId: ID!
+
+  """Quantity in stock"""
+  quantity: Float!
+
+  """Size of the variant"""
+  size: String
 }
 
 """
@@ -265,12 +290,16 @@ type Mutation {
     """Input data for the new subcategory"""
     input: CreateSubCategoryInput!
   ): SubCategory!
+  createTag(createTagInput: CreateTagInput!): Tag!
 
   """Create a new user with email and password"""
   createUser(createUserInput: CreateUserInput!): User!
 
   """Create a new user via OAuth provider"""
   createUserByOAuth(email: String!, provider: String!, providerId: String!): User!
+
+  """Creates a new variant for a product"""
+  createVariant(input: CreateVariantInput!): Variant!
 
   """Restore an archived user"""
   deArchiveUser(id: String!): User!
@@ -280,6 +309,9 @@ type Mutation {
 
   """Deletes an order and restores stock (admin only)"""
   deleteOrder(orderId: String!): Order!
+
+  """Deletes a variant"""
+  deleteVariant(variantId: String!): Variant!
 
   """Marks an order as paid"""
   markOrderAsPaid(orderId: String!): Order!
@@ -305,6 +337,7 @@ type Mutation {
     """The ID of the subcategory to delete"""
     id: String!
   ): SubCategory!
+  removeTag(id: Int!): Tag!
 
   """Delete a user permanently"""
   removeUser(id: String!): User!
@@ -355,9 +388,13 @@ type Mutation {
     """Updated data for the subcategory"""
     input: UpdateSubCategoryInput!
   ): SubCategory!
+  updateTag(updateTagInput: UpdateTagInput!): Tag!
 
   """Update an existing user"""
   updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+
+  """Updates an existing variant"""
+  updateVariant(input: UpdateVariantInput!): Variant!
 }
 
 type Order {
@@ -503,6 +540,9 @@ type Query {
     id: String!
   ): Product
 
+  """Retrieves all variants for a product"""
+  productVariants(productId: String!): [Variant!]!
+
   """
   Retrieves a paginated list of products with optional filtering (e.g., by category, price range)
   """
@@ -524,6 +564,7 @@ type Query {
     """The ID of the subcategory"""
     id: String!
   ): SubCategory
+  tag(id: Int!): Tag!
 
   """Retrieves all addresses for the current user"""
   userAddresses: [Address!]!
@@ -545,6 +586,12 @@ type Query {
 
   """Fetch a paginated list of users"""
   users(filter: UserPaginateArgs!): UserConnection!
+
+  """Retrieves a specific variant by ID"""
+  variant(variantId: String!): Variant!
+
+  """Retrieves all variants (admin only)"""
+  variants: [Variant!]!
 }
 
 type Rating {
@@ -606,6 +653,13 @@ type SubCategory {
   """Name of the category"""
   name: String!
   products: [Product!]
+}
+
+type Tag {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
 }
 
 input UpdateAddressInput {
@@ -717,6 +771,12 @@ input UpdateSubCategoryInput {
   name: String
 }
 
+input UpdateTagInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
+
 input UpdateUserInput {
   """Email address"""
   email: String
@@ -739,6 +799,27 @@ input UpdateUserInput {
 
   """Role name"""
   role: Role = USER
+}
+
+input UpdateVariantInput {
+  """Color of the variant"""
+  color: String
+
+  """ID of the associated discount"""
+  discountId: ID
+  id: String!
+
+  """Price of the variant"""
+  price: Float
+
+  """ID of the associated product"""
+  productId: ID
+
+  """Quantity in stock"""
+  quantity: Float
+
+  """Size of the variant"""
+  size: String
 }
 
 type User {
@@ -816,4 +897,15 @@ input UserPaginateArgs {
 
   """Filter by user role (USER or ADMIN)"""
   role: Role
+}
+
+type Variant {
+  color: String
+  discountId: ID
+  id: ID!
+  price: Float!
+  product: Product!
+  productId: ID!
+  quantity: Float!
+  size: String
 }

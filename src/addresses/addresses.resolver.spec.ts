@@ -127,7 +127,6 @@ describe('AddressesResolver', () => {
     });
   });
 
-  // Role-Based Access Tests (Assuming decorator enforcement)
   describe('role-based access', () => {
     it('should allow USER role to access getAddress', async () => {
       mockAddressesService.getAddress.mockResolvedValue(mockAddress);

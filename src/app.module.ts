@@ -18,6 +18,8 @@ import { BcryptService } from './iam/hashing/bcrypt.service';
 import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { AddressesModule } from './addresses/addresses.module';
+import { VariantModule } from './variant/variant.module';
+import { TagModule } from './tag/tag.module';
 
 @Module({
   imports: [
@@ -42,6 +44,8 @@ import { AddressesModule } from './addresses/addresses.module';
     CartModule,
     OrderModule,
     AddressesModule,
+    VariantModule,
+    TagModule,
   ],
   controllers: [AppController],
   providers: [AppService, BcryptService],
