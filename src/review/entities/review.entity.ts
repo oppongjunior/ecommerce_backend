@@ -1,19 +1,19 @@
 import { Field, ID, Int, ObjectType } from '@nestjs/graphql';
-import { Product } from '../../products/entities/product.entity';
 import { User } from '../../users/entities/user.entity';
+import { Product } from '../../products/entities/product.entity';
 
 @ObjectType()
-export class Rating {
+export class Review {
   @Field(() => ID)
   id: string;
 
-  @Field(() => Int, { description: 'rating score' })
+  @Field(() => Int)
   score: number;
 
-  @Field(() => String, { description: 'comment about rating' })
+  @Field(() => String, { nullable: true })
   comment?: string;
 
-  @Field(() => ID, { description: 'Id of product' })
+  @Field(() => ID)
   productId: string;
 
   @Field(() => ID)
@@ -22,6 +22,6 @@ export class Rating {
   @Field(() => User)
   user: User;
 
-  @Field(() => Product, { description: 'Id of product' })
+  @Field(() => Product)
   product: Product;
 }

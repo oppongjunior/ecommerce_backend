@@ -4,5 +4,6 @@ import { TagResolver } from './tag.resolver';
 
 @Module({
   providers: [TagResolver, TagService],
+  exports: [TagService],
 })
 export class TagModule {}

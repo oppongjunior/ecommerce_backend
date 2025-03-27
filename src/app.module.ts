@@ -11,7 +11,6 @@ import { CommonsModule } from './commons/commons.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
-import { RatingsModule } from './ratings/ratings.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { IamModule } from './iam/iam.module';
 import { BcryptService } from './iam/hashing/bcrypt.service';
@@ -20,6 +19,8 @@ import { OrderModule } from './order/order.module';
 import { AddressesModule } from './addresses/addresses.module';
 import { VariantModule } from './variant/variant.module';
 import { TagModule } from './tag/tag.module';
+import { WishlistModule } from './wishlist/wishlist.module';
+import { ReviewModule } from './review/review.module';
 
 @Module({
   imports: [
@@ -36,7 +37,6 @@ import { TagModule } from './tag/tag.module';
     ProductsModule,
     CategoriesModule,
     SubCategoriesModule,
-    RatingsModule,
     MulterModule.register({
       dest: './upload',
     }),
@@ -46,6 +46,8 @@ import { TagModule } from './tag/tag.module';
     AddressesModule,
     VariantModule,
     TagModule,
+    WishlistModule,
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [AppService, BcryptService],

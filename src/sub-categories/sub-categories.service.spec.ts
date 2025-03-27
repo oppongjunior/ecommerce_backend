@@ -48,10 +48,10 @@ describe('SubCategoriesService', () => {
 
       const result = await service.create(input);
 
-      expect(prisma.subcategory.findFirst).toHaveBeenCalledWith({
+      expect(prisma.subCategory.findFirst).toHaveBeenCalledWith({
         where: { name: { mode: 'insensitive', equals: 'Shirts' }, categoryId: 'cat1' },
       });
-      expect(prisma.subcategory.create).toHaveBeenCalledWith({ data: input });
+      expect(prisma.subCategory.create).toHaveBeenCalledWith({ data: input });
       expect(result).toEqual(subcategory);
     });
 
@@ -77,7 +77,7 @@ describe('SubCategoriesService', () => {
 
       const result = await service.findAll();
 
-      expect(prisma.subcategory.findMany).toHaveBeenCalledWith({ orderBy: { name: 'asc' } });
+      expect(prisma.subCategory.findMany).toHaveBeenCalledWith({ orderBy: { name: 'asc' } });
       expect(result).toEqual(subcategories);
     });
   });
@@ -89,7 +89,7 @@ describe('SubCategoriesService', () => {
 
       const result = await service.findOne('1');
 
-      expect(prisma.subcategory.findUnique).toHaveBeenCalledWith({ where: { id: '1' } });
+      expect(prisma.subCategory.findUnique).toHaveBeenCalledWith({ where: { id: '1' } });
       expect(result).toEqual(subcategory);
     });
 
@@ -115,7 +115,7 @@ describe('SubCategoriesService', () => {
 
       const result = await service.update(id, input);
 
-      expect(prisma.subcategory.update).toHaveBeenCalledWith({ where: { id }, data: input });
+      expect(prisma.subCategory.update).toHaveBeenCalledWith({ where: { id }, data: input });
       expect(result).toEqual(updated);
     });
 
@@ -153,7 +153,7 @@ describe('SubCategoriesService', () => {
       const result = await service.remove(id);
 
       expect(prisma.product.count).toHaveBeenCalledWith({ where: { subcategoryId: id } });
-      expect(prisma.subcategory.delete).toHaveBeenCalledWith({ where: { id } });
+      expect(prisma.subCategory.delete).toHaveBeenCalledWith({ where: { id } });
       expect(result).toEqual(subcategory);
     });
 

@@ -5,10 +5,14 @@ import { UpdateProductInput } from './dto/update-product.input';
 import { ProductFilterArgs } from './dto/product-filter.args';
 import { Prisma, Product } from '@prisma/client';
 import { PaginateArgs } from '../commons/entities/paginate.args';
+import { TagService } from '../tag/tag.service';
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly tagService: TagService,
+  ) {}
 
   /**
    * Creates a new product in the database.
@@ -100,6 +104,21 @@ export class ProductsService {
     return this.prismaService.product.delete({ where: { id } });
   }
 
+  async addTagToProduct(productId: string, tagId: string): Promise<Product> {
+    return this.updateProductTag(productId, tagId, 'connect');
+  }
+
+  async removeTagFromProduct(productId: string, tagId: string): Promise<Product> {
+    return this.updateProductTag(productId, tagId, 'disconnect');
+  }
+
+
+
+  private async ensureTagExists(tagId: string): Promise<void> {
+    const tag = await this.prismaService.tag.findUnique({ where: { id: tagId } });
+    if (!tag) throw new NotFoundException(`Tag "${tagId}" not found`);
+  }
+
   /**
    * Archives a product by setting its isActive status to false.
    * Validates the product's existence before proceeding.
@@ -126,7 +145,6 @@ export class ProductsService {
     return this.prismaService.product.update({ where: { id }, data: { isActive: true } });
   }
 
-  // --- Private Helper Methods ---
   private buildPaginationOptions({ first, after }: PaginateArgs) {
     const pageSize = Math.min(first, 100);
     const hasCursor = !!after;
@@ -244,5 +262,18 @@ export class ProductsService {
         hasNextPage: !!lastProduct && totalCount > itemsFetched,
       },
     };
+  }
+  private async updateProductTag(
+    productId: string,
+    tagId: string,
+    operation: 'connect' | 'disconnect',
+  ): Promise<Product> {
+    await this.checkProductExists(productId);
+    await this.ensureTagExists(tagId);
+    return this.prismaService.product.update({
+      where: { id: productId },
+      data: { tags: { [operation]: { id: tagId } } },
+      include: { tags: true },
+    });
   }
 }

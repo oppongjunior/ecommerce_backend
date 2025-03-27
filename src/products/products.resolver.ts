@@ -72,4 +72,20 @@ export class ProductsResolver {
   restoreProduct(@Args('id', { type: () => String, description: 'The ID of the product to restore' }) id: string) {
     return this.productsService.restoreProduct(id);
   }
+
+  @Mutation(() => Product, { name: 'addTagToProduct' })
+  async addTagToProduct(
+    @Args('productId', { type: () => String }) productId: string,
+    @Args('tagId', { type: () => String }) tagId: string,
+  ) {
+    return this.productsService.addTagToProduct(productId, tagId);
+  }
+
+  @Mutation(() => Product, { name: 'addTagToProduct' })
+  async removeTagFromProduct(
+    @Args('productId', { type: () => String }) productId: string,
+    @Args('tagId', { type: () => String }) tagId: string,
+  ) {
+    return this.productsService.removeTagFromProduct(productId, tagId);
+  }
 }
