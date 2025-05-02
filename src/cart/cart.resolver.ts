@@ -16,27 +16,45 @@ import { Cart } from './entities/cart.entity';
 export class CartResolver {
   constructor(private readonly cartService: CartService) {}
 
-  @Query(() => Cart, { nullable: true, description: 'Retrieves the current user’s cart' })
+  @Query(() => Cart, {
+    nullable: true,
+    description: 'Retrieves the current user’s cart',
+  })
   async cart(@ActiveUser('id') userId: string) {
     return this.cartService.getCart(userId);
   }
 
   @Mutation(() => Cart, { description: 'Adds a product to the user’s cart' })
-  async addToCart(@ActiveUser('id') userId: string, @Args('input') input: AddToCartInput) {
+  async addToCart(
+    @ActiveUser('id') userId: string,
+    @Args('input') input: AddToCartInput,
+  ) {
     return this.cartService.addToCart(userId, input);
   }
 
-  @Mutation(() => Cart, { description: 'Updates the quantity of an item in the user’s cart' })
-  async updateCartItem(@ActiveUser('id') userId: string, @Args('input') input: UpdateCartItemInput) {
+  @Mutation(() => Cart, {
+    description: 'Updates the quantity of an item in the user’s cart',
+  })
+  async updateCartItem(
+    @ActiveUser('id') userId: string,
+    @Args('input') input: UpdateCartItemInput,
+  ) {
     return this.cartService.updateCartItem(userId, input);
   }
 
-  @Mutation(() => Cart, { description: 'Removes a specific item from the user’s cart' })
-  async removeFromCart(@ActiveUser('id') userId: string, @Args('cartItemId') cartItemId: string) {
+  @Mutation(() => Cart, {
+    description: 'Removes a specific item from the user’s cart',
+  })
+  async removeFromCart(
+    @ActiveUser('id') userId: string,
+    @Args('cartItemId') cartItemId: string,
+  ) {
     return this.cartService.removeFromCart(userId, cartItemId);
   }
 
-  @Mutation(() => Cart, { description: 'Clears all items from the user’s cart' })
+  @Mutation(() => Cart, {
+    description: 'Clears all items from the user’s cart',
+  })
   async clearCart(@ActiveUser('id') userId: string) {
     return this.cartService.clearCart(userId);
   }

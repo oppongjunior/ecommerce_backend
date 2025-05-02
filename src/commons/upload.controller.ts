@@ -25,7 +25,10 @@ export class UploadController {
       throw new Error('No files were uploaded!');
     }
     const uploadedFiles = images.map((file) => file.filename);
-    return { message: 'Product images uploaded successfully', files: uploadedFiles };
+    return {
+      message: 'Product images uploaded successfully',
+      files: uploadedFiles,
+    };
   }
 
   @Post('/category-image')

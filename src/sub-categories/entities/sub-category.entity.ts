@@ -10,7 +10,10 @@ export class SubCategory {
   @Field(() => String, { description: 'Name of the category' })
   name: string;
 
-  @Field(() => String, { description: 'Description of the category', nullable: true })
+  @Field(() => String, {
+    description: 'Description of the category',
+    nullable: true,
+  })
   description?: string;
 
   @Field(() => ID, { description: 'Id of parent category', nullable: false })

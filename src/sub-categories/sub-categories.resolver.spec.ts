@@ -19,7 +19,10 @@ describe('SubCategoriesResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [SubCategoriesResolver, { provide: SubCategoriesService, useValue: mockSubCategoriesService }],
+      providers: [
+        SubCategoriesResolver,
+        { provide: SubCategoriesService, useValue: mockSubCategoriesService },
+      ],
     }).compile();
 
     resolver = module.get<SubCategoriesResolver>(SubCategoriesResolver);
@@ -29,7 +32,11 @@ describe('SubCategoriesResolver', () => {
 
   describe('createSubCategory', () => {
     it('should create a new subcategory', async () => {
-      const input: CreateSubCategoryInput = { name: 'Shirts', categoryId: 'cat1', description: 'Shirt subcategory' };
+      const input: CreateSubCategoryInput = {
+        name: 'Shirts',
+        categoryId: 'cat1',
+        description: 'Shirt subcategory',
+      };
       const subcategory: SubCategory = {
         id: '1',
         name: 'Shirts',

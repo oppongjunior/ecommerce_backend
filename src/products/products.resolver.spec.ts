@@ -23,7 +23,10 @@ describe('ProductsResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProductsResolver, { provide: ProductsService, useValue: mockProductsService }],
+      providers: [
+        ProductsResolver,
+        { provide: ProductsService, useValue: mockProductsService },
+      ],
     }).compile();
 
     resolver = module.get<ProductsResolver>(ProductsResolver);
@@ -82,7 +85,10 @@ describe('ProductsResolver', () => {
     });
 
     it('should use defaults if paginate is omitted', async () => {
-      const response = { edges: [], pageInfo: { hasNextPage: false, hasPreviousPage: false, pageSize: 10 } };
+      const response = {
+        edges: [],
+        pageInfo: { hasNextPage: false, hasPreviousPage: false, pageSize: 10 },
+      };
       mockProductsService.findAll.mockResolvedValue(response);
 
       await resolver.findAll(undefined, {});
@@ -113,7 +119,11 @@ describe('ProductsResolver', () => {
 
   describe('updateProduct', () => {
     it('should update a product', async () => {
-      const input: UpdateProductInput = { name: 'Updated T-Shirt', price: 29.99, id: 'prod1' };
+      const input: UpdateProductInput = {
+        name: 'Updated T-Shirt',
+        price: 29.99,
+        id: 'prod1',
+      };
       const product: Product = {
         id: 'prod1',
         name: 'Updated T-Shirt',

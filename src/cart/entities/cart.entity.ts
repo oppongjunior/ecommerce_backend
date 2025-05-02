@@ -15,6 +15,8 @@ export class Cart {
   @Field(() => Date, { description: 'Timestamp when the cart was created' })
   createdAt: Date;
 
-  @Field(() => Date, { description: 'Timestamp when the cart was last updated' })
+  @Field(() => Date, {
+    description: 'Timestamp when the cart was last updated',
+  })
   updatedAt: Date;
 }

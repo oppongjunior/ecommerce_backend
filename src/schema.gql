@@ -2,6 +2,26 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddToCartInput {
+  """ID of the product to add to the cart"""
+  productId: String!
+
+  """Quantity of the product to add"""
+  quantity: Int!
+}
+
+type Address {
+  city: String!
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  state: String!
+  street: String!
+  updatedAt: DateTime!
+  userId: ID!
+  zipCode: String!
+}
+
 type AuthEntity {
   """authentication access token"""
   accessToken: String!
@@ -81,12 +101,21 @@ input ChangeUserPasswordInput {
   oldPassword: String!
 }
 
-input CreateCartInput {
-  """ID of the product to add"""
-  productId: String!
+input CreateAddressInput {
+  """City"""
+  city: String!
 
-  """Quantity to add"""
-  quantity: Int!
+  """Country"""
+  country: String!
+
+  """State or province"""
+  state: String!
+
+  """Street address"""
+  street: String!
+
+  """ZIP or postal code"""
+  zipCode: String!
 }
 
 input CreateCategoryInput {
@@ -98,6 +127,11 @@ input CreateCategoryInput {
 
   """The name of the category (e.g., "Electronics")"""
   name: String!
+}
+
+input CreateOrderInput {
+  """The ID of the shipping address for the order"""
+  shippingAddressId: ID!
 }
 
 input CreateProductInput {
@@ -132,18 +166,12 @@ input CreateProductInput {
   subcategoryId: String
 }
 
-input CreateRatingInput {
-  """comment about rating"""
+input CreateReviewInput {
   comment: String
+  productId: String!
 
-  """Id of product"""
-  productId: ID!
-
-  """rating score"""
+  """Rate number 1 - 5"""
   score: Int!
-
-  """Id of user"""
-  userId: ID!
 }
 
 input CreateSubCategoryInput {
@@ -183,12 +211,40 @@ input CreateUserInput {
   role: Role! = USER
 }
 
+input CreateVariantInput {
+  """Color of the variant"""
+  color: String
+
+  """ID of the associated discount"""
+  discountId: ID
+
+  """Price of the variant"""
+  price: Float!
+
+  """ID of the associated product"""
+  productId: ID!
+
+  """Quantity in stock"""
+  quantity: Float!
+
+  """Size of the variant"""
+  size: String
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
 type Mutation {
+  addTagToProduct(productId: String!, tagId: String!): Product!
+
+  """Adds a product to the user’s cart"""
+  addToCart(input: AddToCartInput!): Cart!
+
+  """Adds a product to the user’s wishlist"""
+  addToWishlist(productId: String!): Wishlist!
+
   """Archives a product by setting isActive to false (admin only)"""
   archiveProduct(
     """The ID of the product to archive"""
@@ -198,19 +254,35 @@ type Mutation {
   """Archive (soft delete) a user"""
   archiveUser(id: String!): User!
 
+  """Cancels an order and restores stock"""
+  cancelOrder(orderId: String!): Order!
+
   """Change the password of the active user"""
   changeUserPassword(input: ChangeUserPasswordInput!): User!
-  createCart(createCartInput: CreateCartInput!): Cart!
+
+  """Clears all items from the user’s cart"""
+  clearCart: Cart!
+
+  """Clears the user’s wishlist"""
+  clearWishlist: Wishlist!
+
+  """Creates a new address for the user"""
+  createAddress(input: CreateAddressInput!): Address!
 
   """Creates a new category (admin only)"""
   createCategory(input: CreateCategoryInput!): Category!
+
+  """Creates an order from the user’s cart"""
+  createOrder(input: CreateOrderInput!): Order!
 
   """Creates a new product (admin only)"""
   createProduct(
     """Input data for the new product"""
     input: CreateProductInput!
   ): Product!
-  createRating(createRatingInput: CreateRatingInput!): Rating!
+
+  """Creates a review for a product"""
+  createReview(input: CreateReviewInput!): Review!
 
   """Creates a new subcategory (admin only)"""
   createSubCategory(
@@ -218,15 +290,38 @@ type Mutation {
     input: CreateSubCategoryInput!
   ): SubCategory!
 
+  """Creates a new tag"""
+  createTag(name: String!): Tag!
+
   """Create a new user with email and password"""
   createUser(createUserInput: CreateUserInput!): User!
 
   """Create a new user via OAuth provider"""
   createUserByOAuth(email: String!, provider: String!, providerId: String!): User!
 
+  """Creates a new variant for a product"""
+  createVariant(input: CreateVariantInput!): Variant!
+
   """Restore an archived user"""
   deArchiveUser(id: String!): User!
-  removeCart(id: Int!): Cart!
+
+  """Deletes an address for the user"""
+  deleteAddress(addressId: String!): Address!
+
+  """Deletes an order and restores stock (admin only)"""
+  deleteOrder(orderId: String!): Order!
+
+  """Deletes a user’s review"""
+  deleteReview(reviewId: String!): Review!
+
+  """Deletes a tag"""
+  deleteTag(tagId: String!): Tag!
+
+  """Deletes a variant"""
+  deleteVariant(variantId: String!): Variant!
+
+  """Marks an order as paid"""
+  markOrderAsPaid(orderId: String!): Order!
 
   """Deletes a category by ID (admin only)"""
   removeCategory(
@@ -234,12 +329,18 @@ type Mutation {
     id: String!
   ): Category!
 
+  """Removes a specific item from the user’s cart"""
+  removeFromCart(cartItemId: String!): Cart!
+
+  """Removes a product from the user’s wishlist"""
+  removeFromWishlist(productId: String!): Wishlist!
+  removePayment(id: String!): Payment!
+
   """Deletes a product by ID (admin only)"""
   removeProduct(
     """The ID of the product to delete"""
     id: String!
   ): Product!
-  removeRating(id: ID!): Rating!
 
   """Deletes a subcategory by ID (admin only)"""
   removeSubCategory(
@@ -249,6 +350,7 @@ type Mutation {
 
   """Delete a user permanently"""
   removeUser(id: String!): User!
+  restorePayment(id: String!): Payment!
 
   """Restores an archived product by setting isActive to true (admin only)"""
   restoreProduct(
@@ -261,7 +363,13 @@ type Mutation {
 
   """Register a new user with email and password"""
   signUp(input: SignUpInput!): AuthEntity!
-  updateCart(updateCartInput: UpdateCartInput!): Cart!
+  softDeletePayment(id: String!): Payment!
+
+  """Updates an existing address for the user"""
+  updateAddress(addressId: String!, input: UpdateAddressInput!): Address!
+
+  """Updates the quantity of an item in the user’s cart"""
+  updateCartItem(input: UpdateCartItemInput!): Cart!
 
   """Updates an existing category (admin only)"""
   updateCategory(
@@ -269,6 +377,9 @@ type Mutation {
     id: String!
     input: UpdateCategoryInput!
   ): Category!
+
+  """Updates the status of an order"""
+  updateOrderStatus(input: UpdateOrderStatusInput!): Order!
 
   """Updates an existing product (admin only)"""
   updateProduct(
@@ -278,7 +389,9 @@ type Mutation {
     """Updated data for the product"""
     input: UpdateProductInput!
   ): Product!
-  updateRating(updateRatingInput: UpdateRatingInput!): Rating!
+
+  """Updates a user’s review"""
+  updateReview(input: UpdateReviewInput!): Review!
 
   """Updates an existing subcategory (admin only)"""
   updateSubCategory(
@@ -289,8 +402,46 @@ type Mutation {
     input: UpdateSubCategoryInput!
   ): SubCategory!
 
+  """Updates an existing tag"""
+  updateTag(name: String!, tagId: String!): Tag!
+
   """Update an existing user"""
   updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+
+  """Updates an existing variant"""
+  updateVariant(input: UpdateVariantInput!): Variant!
+  verifyPayment(verifyPaymentInput: VerifyPaymentInput!): Payment!
+}
+
+type Order {
+  createdAt: DateTime!
+  id: ID!
+  items: [OrderItem!]!
+  shippingAddressId: ID!
+  status: OrderStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  userId: ID!
+}
+
+type OrderItem {
+  createdAt: DateTime!
+  id: ID!
+  orderId: ID!
+  priceAtOrder: Float!
+  product: Product!
+  productId: ID!
+  quantity: Float!
+  updatedAt: DateTime!
+  variantId: ID
+}
+
+enum OrderStatus {
+  CANCELLED
+  DELIVERED
+  PENDING
+  PROCESSING
+  SHIPPED
 }
 
 type PageInfo {
@@ -303,6 +454,28 @@ input PaginateArgs {
   """the id of the cursor"""
   after: String
   first: Int! = 12
+}
+
+type Payment {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  id: ID!
+  order: Order!
+  orderId: ID!
+
+  """JSON string representing the transaction details"""
+  paymentDetails: String
+  paymentMethod: String!
+  status: PaymentStatus!
+  transactionId: String
+  updatedAt: DateTime!
+}
+
+enum PaymentStatus {
+  FAILED
+  PENDING
+  SUCCESS
 }
 
 type Product {
@@ -375,7 +548,14 @@ input ProductFilterArgs {
 }
 
 type Query {
-  cart(id: Int!): Cart!
+  """Retrieves a specific address by ID for the current user"""
+  address(addressId: String!): Address!
+
+  """Retrieves all addresses (admin only)"""
+  addresses: [Address!]!
+
+  """Retrieves the current user’s cart"""
+  cart: Cart
 
   """Retrieves a list of all categories, sorted alphabetically by name"""
   categories: [Category!]!
@@ -385,12 +565,27 @@ type Query {
     """The ID of the category"""
     id: String!
   ): Category
+  getMyPayments: [Payment!]!
+  getUserPayment(userId: String!): [Payment!]!
+
+  """Retrieves a specific order by ID for the current user"""
+  order(orderId: String!): Order!
+
+  """Retrieves all orders (admin only)"""
+  orders: [Order!]!
+  payment(id: String!): Payment!
 
   """Retrieves a single product by its ID, or null if not found"""
   product(
     """The unique ID of the product"""
     id: String!
   ): Product
+
+  """Retrieves all reviews for a product"""
+  productReviews(productId: String!): [Review!]!
+
+  """Retrieves all variants for a product"""
+  productVariants(productId: String!): [Variant!]!
 
   """
   Retrieves a paginated list of products with optional filtering (e.g., by category, price range)
@@ -402,8 +597,9 @@ type Query {
     """Pagination options (first, after)"""
     paginate: PaginateArgs
   ): ProductConnection!
-  rating(id: ID!): Rating!
-  ratings: [Rating!]!
+
+  """Retrieves a specific review by ID"""
+  review(reviewId: String!): Review!
 
   """Retrieves a list of all subcategories, sorted alphabetically by name"""
   subCategories: [SubCategory!]!
@@ -414,6 +610,15 @@ type Query {
     id: String!
   ): SubCategory
 
+  """Retrieves a specific tag by ID"""
+  tag(tagId: String!): Tag!
+
+  """Retrieves all tags"""
+  tags: [Tag!]!
+
+  """Retrieves all addresses for the current user"""
+  userAddresses: [Address!]!
+
   """Fetch a user by email"""
   userByEmail(email: String!): User!
 
@@ -423,25 +628,33 @@ type Query {
   """Fetch a user by OAuth provider ID"""
   userByProviderId(providerId: String!): User!
 
+  """Retrieves all orders for the current user"""
+  userOrders: [Order!]!
+
   """Fetch a user’s profile with related data"""
   userProfile: User!
 
+  """Retrieves all reviews by the user"""
+  userReviews: [Review!]!
+
   """Fetch a paginated list of users"""
   users(filter: UserPaginateArgs!): UserConnection!
+
+  """Retrieves a specific variant by ID"""
+  variant(variantId: String!): Variant!
+
+  """Retrieves all variants (admin only)"""
+  variants: [Variant!]!
+
+  """Retrieves the user’s wishlist"""
+  wishlist: Wishlist!
 }
 
-type Rating {
-  """comment about rating"""
-  comment: String!
+type Review {
+  comment: String
   id: ID!
-
-  """Id of product"""
   product: Product!
-
-  """Id of product"""
   productId: ID!
-
-  """rating score"""
   score: Int!
   user: User!
   userId: ID!
@@ -491,14 +704,37 @@ type SubCategory {
   products: [Product!]
 }
 
-input UpdateCartInput {
-  id: Int!
+type Tag {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
 
-  """ID of the product to add"""
-  productId: String
+input UpdateAddressInput {
+  """City"""
+  city: String
 
-  """Quantity to add"""
-  quantity: Int
+  """Country"""
+  country: String
+  id: String!
+
+  """State or province"""
+  state: String
+
+  """Street address"""
+  street: String
+
+  """ZIP or postal code"""
+  zipCode: String
+}
+
+input UpdateCartItemInput {
+  """ID of the cart item to update"""
+  cartItemId: String!
+
+  """New quantity for the cart item (0 to remove)"""
+  quantity: Int!
 }
 
 input UpdateCategoryInput {
@@ -511,6 +747,14 @@ input UpdateCategoryInput {
 
   """The name of the category (e.g., "Electronics")"""
   name: String
+}
+
+input UpdateOrderStatusInput {
+  """The ID of the order to update"""
+  orderId: ID!
+
+  """The new status for the order"""
+  status: OrderStatus!
 }
 
 input UpdateProductInput {
@@ -546,19 +790,13 @@ input UpdateProductInput {
   subcategoryId: String
 }
 
-input UpdateRatingInput {
-  """comment about rating"""
+input UpdateReviewInput {
   comment: String
-  id: ID!
+  id: String!
+  productId: String
 
-  """Id of product"""
-  productId: ID
-
-  """rating score"""
+  """Rate number 1 - 5"""
   score: Int
-
-  """Id of user"""
-  userId: ID
 }
 
 input UpdateSubCategoryInput {
@@ -598,6 +836,27 @@ input UpdateUserInput {
 
   """Role name"""
   role: Role = USER
+}
+
+input UpdateVariantInput {
+  """Color of the variant"""
+  color: String
+
+  """ID of the associated discount"""
+  discountId: ID
+  id: String!
+
+  """Price of the variant"""
+  price: Float
+
+  """ID of the associated product"""
+  productId: ID
+
+  """Quantity in stock"""
+  quantity: Float
+
+  """Size of the variant"""
+  size: String
 }
 
 type User {
@@ -675,4 +934,28 @@ input UserPaginateArgs {
 
   """Filter by user role (USER or ADMIN)"""
   role: Role
+}
+
+type Variant {
+  color: String
+  discountId: ID
+  id: ID!
+  price: Float!
+  product: Product!
+  productId: ID!
+  quantity: Float!
+  size: String
+}
+
+input VerifyPaymentInput {
+  reference: String!
+}
+
+type Wishlist {
+  createdAt: DateTime!
+  id: ID!
+  products: [Product!]!
+  updatedAt: DateTime!
+  user: User!
+  userId: ID!
 }

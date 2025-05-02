@@ -1,0 +1,964 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input AddToCartInput {
+  """ID of the product to add to the cart"""
+  productId: String!
+
+  """Quantity of the product to add"""
+  quantity: Int!
+}
+
+type Address {
+  city: String!
+  country: String!
+  createdAt: DateTime!
+  id: ID!
+  state: String!
+  street: String!
+  updatedAt: DateTime!
+  userId: ID!
+  zipCode: String!
+}
+
+type AuthEntity {
+  """authentication access token"""
+  accessToken: String!
+
+  """authentication refresh token"""
+  refreshToken: String!
+}
+
+type Cart {
+  """Timestamp when the cart was created"""
+  createdAt: DateTime!
+
+  """Unique identifier of the cart"""
+  id: ID!
+
+  """Items in the cart"""
+  items: [CartItem!]!
+
+  """Timestamp when the cart was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the user owning the cart"""
+  userId: String!
+}
+
+type CartItem {
+  """Timestamp when the item was added"""
+  createdAt: DateTime!
+
+  """Unique identifier of the cart item"""
+  id: ID!
+
+  """The product in the cart"""
+  product: Product!
+
+  """ID of the product in the cart"""
+  productId: String!
+
+  """Quantity of the product in the cart"""
+  quantity: Int!
+
+  """Timestamp when the item was last updated"""
+  updatedAt: DateTime!
+}
+
+type Category {
+  """Timestamp when the category was created"""
+  createdAt: DateTime!
+
+  """Optional description of the category (max 500 characters)"""
+  description: String
+
+  """Unique identifier of the category"""
+  id: ID!
+
+  """Optional HTTPS URL to an image representing the category"""
+  image: String
+
+  """Name of the category (e.g., "Clothing")"""
+  name: String!
+
+  """List of products belonging to this category (empty if none)"""
+  products: [Product!]!
+
+  """List of subcategories under this category (empty if none)"""
+  subcategories: [SubCategory!]!
+
+  """Timestamp when the category was last updated"""
+  updatedAt: DateTime!
+}
+
+input ChangeUserPasswordInput {
+  """The new password to set"""
+  newPassword: String!
+
+  """The current password for verification"""
+  oldPassword: String!
+}
+
+input CreateAddressInput {
+  """City"""
+  city: String!
+
+  """Country"""
+  country: String!
+
+  """State or province"""
+  state: String!
+
+  """Street address"""
+  street: String!
+
+  """ZIP or postal code"""
+  zipCode: String!
+}
+
+input CreateCategoryInput {
+  """A brief description of the category (max 500 characters)"""
+  description: String
+
+  """A URL to an image representing the category (must be HTTPS)"""
+  image: String
+
+  """The name of the category (e.g., "Electronics")"""
+  name: String!
+}
+
+input CreateOrderInput {
+  """The ID of the shipping address for the order"""
+  shippingAddressId: ID!
+}
+
+input CreateProductInput {
+  """Optional brand name (e.g., "Nike")"""
+  brand: String
+
+  """ID of the parent category (e.g., "cat_clothing")"""
+  categoryId: String!
+
+  """Optional description of the product (max 1000 characters)"""
+  description: String
+
+  """Array of HTTPS URLs to product images (max 10)"""
+  images: [String!]
+
+  """Whether the product is active and visible (defaults to false)"""
+  isActive: Boolean!
+
+  """Name of the product (e.g., "Cotton T-Shirt")"""
+  name: String!
+
+  """Price of the product in default currency (e.g., 29.99)"""
+  price: Float!
+
+  """Available stock quantity (e.g., 100)"""
+  quantity: Int!
+
+  """Optional Stock Keeping Unit (SKU) code (e.g., "TSHIRT-XL")"""
+  sku: String
+
+  """Optional ID of the subcategory (e.g., "sub_shirts")"""
+  subcategoryId: String
+}
+
+input CreateReviewInput {
+  comment: String
+  productId: String!
+
+  """Rate number 1 - 5"""
+  score: Int!
+}
+
+input CreateSubCategoryInput {
+  """The ID of the parent category"""
+  categoryId: String!
+
+  """Optional description (max 500 characters)"""
+  description: String
+
+  """Optional HTTPS URL to an image"""
+  image: String
+
+  """The name of the subcategory (e.g., "Shirts")"""
+  name: String!
+}
+
+input CreateUserInput {
+  """Email address"""
+  email: String!
+
+  """Whether the account is active"""
+  isActive: Boolean! = true
+
+  """User’s name"""
+  name: String!
+
+  """Password (required for manual signup)"""
+  password: String!
+
+  """Phone number"""
+  phoneNumber: String
+
+  """Profile picture URL"""
+  profilePicture: String
+
+  """Role name"""
+  role: Role! = USER
+}
+
+input CreateVariantInput {
+  """Color of the variant"""
+  color: String
+
+  """ID of the associated discount"""
+  discountId: ID
+
+  """Price of the variant"""
+  price: Float!
+
+  """ID of the associated product"""
+  productId: ID!
+
+  """Quantity in stock"""
+  quantity: Float!
+
+  """Size of the variant"""
+  size: String
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  addTagToProduct(productId: String!, tagId: String!): Product!
+
+  """Adds a product to the user’s cart"""
+  addToCart(input: AddToCartInput!): Cart!
+
+  """Adds a product to the user’s wishlist"""
+  addToWishlist(productId: String!): Wishlist!
+
+  """Archives a product by setting isActive to false (admin only)"""
+  archiveProduct(
+    """The ID of the product to archive"""
+    id: String!
+  ): Product!
+
+  """Archive (soft delete) a user"""
+  archiveUser(id: String!): User!
+
+  """Cancels an order and restores stock"""
+  cancelOrder(orderId: String!): Order!
+
+  """Change the password of the active user"""
+  changeUserPassword(input: ChangeUserPasswordInput!): User!
+
+  """Clears all items from the user’s cart"""
+  clearCart: Cart!
+
+  """Clears the user’s wishlist"""
+  clearWishlist: Wishlist!
+
+  """Creates a new address for the user"""
+  createAddress(input: CreateAddressInput!): Address!
+
+  """Creates a new category (admin only)"""
+  createCategory(input: CreateCategoryInput!): Category!
+
+  """Creates an order from the user’s cart"""
+  createOrder(input: CreateOrderInput!): Order!
+
+  """Creates a new product (admin only)"""
+  createProduct(
+    """Input data for the new product"""
+    input: CreateProductInput!
+  ): Product!
+
+  """Creates a review for a product"""
+  createReview(input: CreateReviewInput!): Review!
+
+  """Creates a new subcategory (admin only)"""
+  createSubCategory(
+    """Input data for the new subcategory"""
+    input: CreateSubCategoryInput!
+  ): SubCategory!
+
+  """Creates a new tag"""
+  createTag(name: String!): Tag!
+
+  """Create a new user with email and password"""
+  createUser(createUserInput: CreateUserInput!): User!
+
+  """Creates a new variant for a product"""
+  createVariant(input: CreateVariantInput!): Variant!
+
+  """Restore an archived user"""
+  deArchiveUser(id: String!): User!
+
+  """Deletes an address for the user"""
+  deleteAddress(addressId: String!): Address!
+
+  """Deletes an order and restores stock (admin only)"""
+  deleteOrder(orderId: String!): Order!
+
+  """Deletes a user’s review"""
+  deleteReview(reviewId: String!): Review!
+
+  """Deletes a tag"""
+  deleteTag(tagId: String!): Tag!
+
+  """Deletes a variant"""
+  deleteVariant(variantId: String!): Variant!
+
+  """Marks an order as paid"""
+  markOrderAsPaid(orderId: String!): Order!
+
+  """Deletes a category by ID (admin only)"""
+  removeCategory(
+    """The ID of the category to delete"""
+    id: String!
+  ): Category!
+
+  """Removes a specific item from the user’s cart"""
+  removeFromCart(cartItemId: String!): Cart!
+
+  """Removes a product from the user’s wishlist"""
+  removeFromWishlist(productId: String!): Wishlist!
+  removePayment(id: String!): Payment!
+
+  """Deletes a product by ID (admin only)"""
+  removeProduct(
+    """The ID of the product to delete"""
+    id: String!
+  ): Product!
+
+  """Deletes a subcategory by ID (admin only)"""
+  removeSubCategory(
+    """The ID of the subcategory to delete"""
+    id: String!
+  ): SubCategory!
+
+  """Delete a user permanently"""
+  removeUser(id: String!): User!
+  restorePayment(id: String!): Payment!
+
+  """Restores an archived product by setting isActive to true (admin only)"""
+  restoreProduct(
+    """The ID of the product to restore"""
+    id: String!
+  ): Product!
+
+  """Sign in an existing user with email and password"""
+  signIn(input: SignInInput!): AuthEntity!
+
+  """Register a new user with email and password"""
+  signUp(input: SignUpInput!): AuthEntity!
+  softDeletePayment(id: String!): Payment!
+
+  """Updates an existing address for the user"""
+  updateAddress(addressId: String!, input: UpdateAddressInput!): Address!
+
+  """Updates the quantity of an item in the user’s cart"""
+  updateCartItem(input: UpdateCartItemInput!): Cart!
+
+  """Updates an existing category (admin only)"""
+  updateCategory(
+    """The ID of the category to update"""
+    id: String!
+    input: UpdateCategoryInput!
+  ): Category!
+
+  """Update user profile"""
+  updateMyProfile(updateMyProfileInput: UpdateUserInput!): User!
+
+  """Updates the status of an order"""
+  updateOrderStatus(input: UpdateOrderStatusInput!): Order!
+
+  """Updates an existing product (admin only)"""
+  updateProduct(
+    """The ID of the product to update"""
+    id: String!
+
+    """Updated data for the product"""
+    input: UpdateProductInput!
+  ): Product!
+
+  """Updates a user’s review"""
+  updateReview(input: UpdateReviewInput!): Review!
+
+  """Updates an existing subcategory (admin only)"""
+  updateSubCategory(
+    """The ID of the subcategory to update"""
+    id: String!
+
+    """Updated data for the subcategory"""
+    input: UpdateSubCategoryInput!
+  ): SubCategory!
+
+  """Updates an existing tag"""
+  updateTag(name: String!, tagId: String!): Tag!
+
+  """Update an existing user"""
+  updateUser(id: String!, updateUserInput: UpdateUserInput!): User!
+
+  """Updates an existing variant"""
+  updateVariant(input: UpdateVariantInput!): Variant!
+  verifyPayment(verifyPaymentInput: VerifyPaymentInput!): Payment!
+}
+
+type Order {
+  createdAt: DateTime!
+  id: ID!
+  items: [OrderItem!]!
+  shippingAddressId: ID!
+  status: OrderStatus!
+  totalAmount: Float!
+  updatedAt: DateTime!
+  userId: ID!
+}
+
+type OrderItem {
+  createdAt: DateTime!
+  id: ID!
+  orderId: ID!
+  priceAtOrder: Float!
+  product: Product!
+  productId: ID!
+  quantity: Float!
+  updatedAt: DateTime!
+  variantId: ID
+}
+
+enum OrderStatus {
+  CANCELLED
+  DELIVERED
+  PENDING
+  PROCESSING
+  SHIPPED
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  pageSize: Int!
+}
+
+input PaginateArgs {
+  """the id of the cursor"""
+  after: String
+  first: Int! = 12
+
+  """field to order by"""
+  orderBy: String
+
+  """boolean to determine order preference"""
+  orderInAsc: Boolean = true
+}
+
+type Payment {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  id: ID!
+  order: Order!
+  orderId: ID!
+
+  """JSON string representing the transaction details"""
+  paymentDetails: String
+  paymentMethod: String!
+  status: PaymentStatus!
+  transactionId: String
+  updatedAt: DateTime!
+}
+
+enum PaymentStatus {
+  FAILED
+  PENDING
+  SUCCESS
+}
+
+type Product {
+  brand: String
+  categoryId: String!
+
+  """description of the product"""
+  description: String
+
+  """Id of product"""
+  id: String!
+
+  """links to url of product images"""
+  images: [String!]
+  isActive: Boolean!
+
+  """Name of the product"""
+  name: String!
+
+  """price of the product"""
+  price: Float!
+
+  """description of the product"""
+  quantity: Int!
+
+  """sku of product"""
+  sku: String
+  subcategoryId: String
+}
+
+type ProductConnection {
+  edges: [ProductEdge!]!
+
+  """information about the page"""
+  pageInfo: PageInfo!
+}
+
+type ProductEdge {
+  """cursor to identity resource"""
+  cursor: String!
+
+  """product record"""
+  node: Product!
+}
+
+input ProductFilterArgs {
+  """Filter by brand name (exact match)"""
+  brand: String
+
+  """Filter by category ID"""
+  categoryId: String
+
+  """Filter products created after this ISO date"""
+  createdAfter: String
+
+  """Filter by active status"""
+  isActive: Boolean = true
+
+  """Filter by maximum price (inclusive)"""
+  priceMax: Float
+
+  """Filter by minimum price (inclusive)"""
+  priceMin: Float
+
+  """Filter by name, description, or tags (partial match)"""
+  search: String
+
+  """Filter by subcategory ID"""
+  subcategoryId: String
+}
+
+type Query {
+  """Retrieves a specific address by ID for the current user"""
+  address(addressId: String!): Address!
+
+  """Retrieves all addresses (admin only)"""
+  addresses: [Address!]!
+
+  """Retrieves the current user’s cart"""
+  cart: Cart
+
+  """Retrieves a list of all categories, sorted alphabetically by name"""
+  categories: [Category!]!
+
+  """Retrieves a category by its unique ID, or null if not found"""
+  category(
+    """The ID of the category"""
+    id: String!
+  ): Category
+  getMyPayments: [Payment!]!
+  getUserPayment(userId: String!): [Payment!]!
+
+  """Retrieves a specific order by ID for the current user"""
+  order(orderId: String!): Order!
+
+  """Retrieves all orders (admin only)"""
+  orders: [Order!]!
+  payment(id: String!): Payment!
+
+  """Retrieves a single product by its ID, or null if not found"""
+  product(
+    """The unique ID of the product"""
+    id: String!
+  ): Product
+
+  """Retrieves all reviews for a product"""
+  productReviews(productId: String!): [Review!]!
+
+  """Retrieves all variants for a product"""
+  productVariants(productId: String!): [Variant!]!
+
+  """
+  Retrieves a paginated list of products with optional filtering (e.g., by category, price range)
+  """
+  products(
+    """Filter options (categoryId, search, etc.)"""
+    filter: ProductFilterArgs
+
+    """Pagination options (first, after)"""
+    paginate: PaginateArgs
+  ): ProductConnection!
+
+  """Retrieves a specific review by ID"""
+  review(reviewId: String!): Review!
+
+  """Retrieves a list of all subcategories, sorted alphabetically by name"""
+  subCategories: [SubCategory!]!
+
+  """Retrieves a subcategory by its unique ID, or null if not found"""
+  subCategory(
+    """The ID of the subcategory"""
+    id: String!
+  ): SubCategory
+
+  """Retrieves a specific tag by ID"""
+  tag(tagId: String!): Tag!
+
+  """Retrieves all tags"""
+  tags: [Tag!]!
+
+  """Retrieves all addresses for the current user"""
+  userAddresses: [Address!]!
+
+  """Fetch a user by email"""
+  userByEmail(email: String!): User!
+
+  """Fetch a user by ID"""
+  userById(id: String!): User!
+
+  """Fetch a user by OAuth provider ID"""
+  userByProviderId(providerId: String!): User!
+
+  """Retrieves all orders for the current user"""
+  userOrders: [Order!]!
+
+  """Fetch a user’s profile with related data"""
+  userProfile: User!
+
+  """Retrieves all reviews by the user"""
+  userReviews: [Review!]!
+
+  """Fetch a paginated list of users"""
+  users(filter: UserPaginateArgs!): UserConnection!
+
+  """Retrieves a specific variant by ID"""
+  variant(variantId: String!): Variant!
+
+  """Retrieves all variants (admin only)"""
+  variants: [Variant!]!
+
+  """Retrieves the user’s wishlist"""
+  wishlist: Wishlist!
+}
+
+type Review {
+  comment: String
+  id: ID!
+  product: Product!
+  productId: ID!
+  score: Int!
+  user: User!
+  userId: ID!
+}
+
+enum Role {
+  ADMIN
+  SUPER_ADMIN
+  USER
+}
+
+input SignInInput {
+  """Email address"""
+  email: String!
+
+  """Password (required for manual signup)"""
+  password: String!
+}
+
+input SignUpInput {
+  """Email address"""
+  email: String!
+
+  """User’s name"""
+  name: String!
+
+  """Password (required for manual signup)"""
+  password: String!
+}
+
+type SubCategory {
+  category: SubCategory
+
+  """Id of parent category"""
+  categoryId: ID!
+
+  """Description of the category"""
+  description: String
+
+  """Id of category"""
+  id: ID!
+
+  """url of sub category"""
+  image: String
+
+  """Name of the category"""
+  name: String!
+  products: [Product!]
+}
+
+type Tag {
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  updatedAt: DateTime!
+}
+
+input UpdateAddressInput {
+  """City"""
+  city: String
+
+  """Country"""
+  country: String
+  id: String!
+
+  """State or province"""
+  state: String
+
+  """Street address"""
+  street: String
+
+  """ZIP or postal code"""
+  zipCode: String
+}
+
+input UpdateCartItemInput {
+  """ID of the cart item to update"""
+  cartItemId: String!
+
+  """New quantity for the cart item (0 to remove)"""
+  quantity: Int!
+}
+
+input UpdateCategoryInput {
+  """A brief description of the category (max 500 characters)"""
+  description: String
+  id: String!
+
+  """A URL to an image representing the category (must be HTTPS)"""
+  image: String
+
+  """The name of the category (e.g., "Electronics")"""
+  name: String
+}
+
+input UpdateOrderStatusInput {
+  """The ID of the order to update"""
+  orderId: ID!
+
+  """The new status for the order"""
+  status: OrderStatus!
+}
+
+input UpdateProductInput {
+  """Optional brand name (e.g., "Nike")"""
+  brand: String
+
+  """ID of the parent category (e.g., "cat_clothing")"""
+  categoryId: String
+
+  """Optional description of the product (max 1000 characters)"""
+  description: String
+  id: String!
+
+  """Array of HTTPS URLs to product images (max 10)"""
+  images: [String!]
+
+  """Whether the product is active and visible (defaults to false)"""
+  isActive: Boolean
+
+  """Name of the product (e.g., "Cotton T-Shirt")"""
+  name: String
+
+  """Price of the product in default currency (e.g., 29.99)"""
+  price: Float
+
+  """Available stock quantity (e.g., 100)"""
+  quantity: Int
+
+  """Optional Stock Keeping Unit (SKU) code (e.g., "TSHIRT-XL")"""
+  sku: String
+
+  """Optional ID of the subcategory (e.g., "sub_shirts")"""
+  subcategoryId: String
+}
+
+input UpdateReviewInput {
+  comment: String
+  id: String!
+  productId: String
+
+  """Rate number 1 - 5"""
+  score: Int
+}
+
+input UpdateSubCategoryInput {
+  """The ID of the parent category"""
+  categoryId: String
+
+  """Optional description (max 500 characters)"""
+  description: String
+  id: ID!
+
+  """Optional HTTPS URL to an image"""
+  image: String
+
+  """The name of the subcategory (e.g., "Shirts")"""
+  name: String
+}
+
+input UpdateUserInput {
+  """Email address"""
+  email: String
+
+  """User’s name"""
+  name: String
+
+  """Phone number"""
+  phoneNumber: String
+
+  """Profile picture URL"""
+  profilePicture: String
+}
+
+input UpdateVariantInput {
+  """Color of the variant"""
+  color: String
+
+  """ID of the associated discount"""
+  discountId: ID
+  id: String!
+
+  """Price of the variant"""
+  price: Float
+
+  """ID of the associated product"""
+  productId: ID
+
+  """Quantity in stock"""
+  quantity: Float
+
+  """Size of the variant"""
+  size: String
+}
+
+type User {
+  """Google ID for social login"""
+  authProvider: String
+
+  """Date of account creation"""
+  createdAt: DateTime!
+
+  """Email address"""
+  email: String!
+
+  """Facebook ID for social login"""
+  facebookId: String
+
+  """Unique identifier for the user"""
+  id: String!
+
+  """Account activation status"""
+  isActive: Boolean!
+
+  """Date of last login"""
+  lastLoginAt: DateTime
+
+  """User’s full name"""
+  name: String
+
+  """Phone number"""
+  phoneNumber: String
+
+  """Profile picture URL"""
+  profilePicture: String
+
+  """Role of the user"""
+  role: String!
+
+  """Date of last update"""
+  updatedAt: DateTime!
+}
+
+type UserConnection {
+  edges: [UserEdge!]!
+
+  """information about the page"""
+  pageInfo: PageInfo!
+}
+
+type UserEdge {
+  """cursor to identity resource"""
+  cursor: String!
+
+  """user record"""
+  node: User!
+}
+
+input UserPaginateArgs {
+  """the id of the cursor"""
+  after: String
+
+  """Filter by creation date (users created on or after this date)"""
+  createdAfter: DateTime
+
+  """Filter by email (partial match, case-insensitive)"""
+  email: String
+  first: Int! = 12
+
+  """Filter by active status (true for active, false for inactive)"""
+  isActive: Boolean
+
+  """Filter by name (partial match, case-insensitive)"""
+  name: String
+
+  """field to order by"""
+  orderBy: String
+
+  """boolean to determine order preference"""
+  orderInAsc: Boolean = true
+
+  """Filter by phone number (exact match)"""
+  phoneNumber: String
+
+  """Filter by user role (USER or ADMIN)"""
+  role: Role
+}
+
+type Variant {
+  color: String
+  discountId: ID
+  id: ID!
+  price: Float!
+  product: Product!
+  productId: ID!
+  quantity: Float!
+  size: String
+}
+
+input VerifyPaymentInput {
+  reference: String!
+}
+
+type Wishlist {
+  createdAt: DateTime!
+  id: ID!
+  products: [Product!]!
+  updatedAt: DateTime!
+  user: User!
+  userId: ID!
+}

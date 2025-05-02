@@ -16,7 +16,10 @@ describe('AuthenticationResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AuthenticationResolver, { provide: AuthenticationService, useValue: mockAuthService }],
+      providers: [
+        AuthenticationResolver,
+        { provide: AuthenticationService, useValue: mockAuthService },
+      ],
     }).compile();
 
     resolver = module.get<AuthenticationResolver>(AuthenticationResolver);
@@ -27,8 +30,15 @@ describe('AuthenticationResolver', () => {
 
   describe('signUp', () => {
     it('should register a new user and return tokens', async () => {
-      const input: SignUpInput = { email: 'test@example.com', password: 'password123', name: 'Test' };
-      const authResult: AuthEntity = { accessToken: 'access', refreshToken: 'refresh' };
+      const input: SignUpInput = {
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test',
+      };
+      const authResult: AuthEntity = {
+        accessToken: 'access',
+        refreshToken: 'refresh',
+      };
 
       mockAuthService.signUp.mockResolvedValue(authResult);
 
@@ -41,8 +51,14 @@ describe('AuthenticationResolver', () => {
 
   describe('signIn', () => {
     it('should sign in an existing user and return tokens', async () => {
-      const input: SignInInput = { email: 'test@example.com', password: 'password123' };
-      const authResult: AuthEntity = { accessToken: 'access', refreshToken: 'refresh' };
+      const input: SignInInput = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
+      const authResult: AuthEntity = {
+        accessToken: 'access',
+        refreshToken: 'refresh',
+      };
 
       mockAuthService.signIn.mockResolvedValue(authResult);
 

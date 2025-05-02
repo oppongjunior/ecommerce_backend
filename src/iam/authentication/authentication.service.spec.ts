@@ -69,15 +69,27 @@ describe('AuthenticationService', () => {
 
   describe('signUp', () => {
     it('should sign up a new user and return tokens', async () => {
-      const input: SignUpInput = { email: 'test@example.com', password: 'password123', name: 'Test' };
+      const input: SignUpInput = {
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test',
+      };
       const hashedPassword = 'hashedPass';
-      const user = { id: '1', email: input.email, role: Role.USER, isActive: true, password: hashedPassword };
+      const user = {
+        id: '1',
+        email: input.email,
+        role: Role.USER,
+        isActive: true,
+        password: hashedPassword,
+      };
       const tokens = { accessToken: 'access', refreshToken: 'refresh' };
 
       mockUsersService.findUserByEmail.mockResolvedValue(null);
       mockHashingService.hash.mockResolvedValue(hashedPassword);
       mockUsersService.createUserByCredentials.mockResolvedValue(user);
-      mockJwtService.signAsync.mockResolvedValueOnce('access').mockResolvedValueOnce('refresh');
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access')
+        .mockResolvedValueOnce('refresh');
       mockUsersService.updateLastLogin.mockResolvedValue(undefined);
 
       const result = await service.signUp(input);
@@ -96,55 +108,86 @@ describe('AuthenticationService', () => {
     });
 
     it('should throw if user already exists', async () => {
-      const input: SignUpInput = { email: 'test@example.com', password: 'password123', name: 'Test' };
+      const input: SignUpInput = {
+        email: 'test@example.com',
+        password: 'password123',
+        name: 'Test',
+      };
       mockUsersService.findUserByEmail.mockResolvedValue({ id: '1' });
 
-      await expect(service.signUp(input)).rejects.toThrow('User already exist!');
+      await expect(service.signUp(input)).rejects.toThrow(
+        'User already exist!',
+      );
     });
   });
 
   describe('signIn', () => {
     it('should sign in a user and return tokens', async () => {
-      const input: SignInInput = { email: 'test@example.com', password: 'password123' };
-      const user = { id: '1', email: input.email, role: Role.USER, password: 'hashedPass' };
+      const input: SignInInput = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
+      const user = {
+        id: '1',
+        email: input.email,
+        role: Role.USER,
+        password: 'hashedPass',
+      };
       const tokens = { accessToken: 'access', refreshToken: 'refresh' };
 
       mockUsersService.findUserByEmail.mockResolvedValue(user);
       mockHashingService.compare.mockResolvedValue(true);
-      mockJwtService.signAsync.mockResolvedValueOnce('access').mockResolvedValueOnce('refresh');
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access')
+        .mockResolvedValueOnce('refresh');
       mockUsersService.updateLastLogin.mockResolvedValue(undefined);
 
       const result = await service.signIn(input);
 
       expect(usersService.findUserByEmail).toHaveBeenCalledWith(input.email);
-      expect(hashingService.compare).toHaveBeenCalledWith(input.password, user.password);
+      expect(hashingService.compare).toHaveBeenCalledWith(
+        input.password,
+        user.password,
+      );
       expect(jwtService.signAsync).toHaveBeenCalledTimes(2);
       expect(usersService.updateLastLogin).toHaveBeenCalledWith(user.id);
       expect(result).toEqual(tokens);
     });
 
     it('should throw if user not found', async () => {
-      const input: SignInInput = { email: 'test@example.com', password: 'password123' };
+      const input: SignInInput = {
+        email: 'test@example.com',
+        password: 'password123',
+      };
       mockUsersService.findUserByEmail.mockResolvedValue(null);
 
-      await expect(service.signIn(input)).rejects.toThrow('Invalid email or password');
+      await expect(service.signIn(input)).rejects.toThrow(
+        'Invalid email or password',
+      );
     });
 
     it('should throw if password is incorrect', async () => {
-      const input: SignInInput = { email: 'test@example.com', password: 'wrongPass' };
+      const input: SignInInput = {
+        email: 'test@example.com',
+        password: 'wrongPass',
+      };
       const user = { id: '1', email: input.email, password: 'hashedPass' };
 
       mockUsersService.findUserByEmail.mockResolvedValue(user);
       mockHashingService.compare.mockResolvedValue(false);
 
-      await expect(service.signIn(input)).rejects.toThrow('Invalid email or password');
+      await expect(service.signIn(input)).rejects.toThrow(
+        'Invalid email or password',
+      );
     });
   });
 
   describe('generateTokens', () => {
     it('should generate access and refresh tokens without role', async () => {
       const user = { id: '1', email: 'test@example.com', role: Role.USER };
-      mockJwtService.signAsync.mockResolvedValueOnce('access').mockResolvedValueOnce('refresh');
+      mockJwtService.signAsync
+        .mockResolvedValueOnce('access')
+        .mockResolvedValueOnce('refresh');
       mockUsersService.updateLastLogin.mockResolvedValue(undefined);
 
       const result = await service.generateTokens(user as User);
@@ -158,7 +201,10 @@ describe('AuthenticationService', () => {
         expect.objectContaining({ expiresIn: mockJwtConfig.refreshTokenTtl }),
       );
       expect(usersService.updateLastLogin).toHaveBeenCalledWith(user.id);
-      expect(result).toEqual({ accessToken: 'access', refreshToken: 'refresh' });
+      expect(result).toEqual({
+        accessToken: 'access',
+        refreshToken: 'refresh',
+      });
     });
   });
 });

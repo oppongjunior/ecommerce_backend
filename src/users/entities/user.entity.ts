@@ -14,10 +14,16 @@ export class User {
   @Field(() => String, { nullable: true, description: 'Phone number' })
   phoneNumber?: string;
 
-  @Field(() => String, { nullable: true, description: 'Google ID for social login' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Google ID for social login',
+  })
   authProvider?: string;
 
-  @Field(() => String, { nullable: true, description: 'Facebook ID for social login' })
+  @Field(() => String, {
+    nullable: true,
+    description: 'Facebook ID for social login',
+  })
   facebookId?: string;
 
   @Field(() => Boolean, { description: 'Account activation status' })

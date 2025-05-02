@@ -14,7 +14,11 @@ import { AuthenticationGuard } from './authentication/guards/authentication.guar
 import { RolesGuard } from './authentication/guards/roles.guard';
 
 @Module({
-  imports: [JwtModule.registerAsync(jwtConfig.asProvider()), UsersModule, ConfigModule.forFeature(jwtConfig)],
+  imports: [
+    JwtModule.registerAsync(jwtConfig.asProvider()),
+    UsersModule,
+    ConfigModule.forFeature(jwtConfig),
+  ],
   providers: [
     AuthenticationService,
     { provide: HashingService, useClass: BcryptService },

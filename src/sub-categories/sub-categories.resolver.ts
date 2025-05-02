@@ -12,9 +12,14 @@ import { SubCategory } from './entities/sub-category.entity';
 export class SubCategoriesResolver {
   constructor(private readonly subCategoriesService: SubCategoriesService) {}
 
-  @Mutation(() => SubCategory, { description: 'Creates a new subcategory (admin only)' })
+  @Mutation(() => SubCategory, {
+    description: 'Creates a new subcategory (admin only)',
+  })
   createSubCategory(
-    @Args('input', { type: () => CreateSubCategoryInput, description: 'Input data for the new subcategory' })
+    @Args('input', {
+      type: () => CreateSubCategoryInput,
+      description: 'Input data for the new subcategory',
+    })
     input: CreateSubCategoryInput,
   ) {
     return this.subCategoriesService.create(input);
@@ -23,7 +28,8 @@ export class SubCategoriesResolver {
   @Roles(Role.USER, Role.ADMIN)
   @Query(() => [SubCategory], {
     name: 'subCategories',
-    description: 'Retrieves a list of all subcategories, sorted alphabetically by name',
+    description:
+      'Retrieves a list of all subcategories, sorted alphabetically by name',
   })
   findAll() {
     return this.subCategoriesService.findAll();
@@ -32,26 +38,48 @@ export class SubCategoriesResolver {
   @Query(() => SubCategory, {
     name: 'subCategory',
     nullable: true,
-    description: 'Retrieves a subcategory by its unique ID, or null if not found',
+    description:
+      'Retrieves a subcategory by its unique ID, or null if not found',
   })
-  findOne(@Args('id', { type: () => String, description: 'The ID of the subcategory' }) id: string) {
+  findOne(
+    @Args('id', {
+      type: () => String,
+      description: 'The ID of the subcategory',
+    })
+    id: string,
+  ) {
     return this.subCategoriesService.findOne(id);
   }
 
-  @Mutation(() => SubCategory, { description: 'Updates an existing subcategory (admin only)' })
+  @Mutation(() => SubCategory, {
+    description: 'Updates an existing subcategory (admin only)',
+  })
   @Roles(Role.ADMIN)
   updateSubCategory(
-    @Args('id', { type: () => String, description: 'The ID of the subcategory to update' }) id: string,
-    @Args('input', { type: () => UpdateSubCategoryInput, description: 'Updated data for the subcategory' })
+    @Args('id', {
+      type: () => String,
+      description: 'The ID of the subcategory to update',
+    })
+    id: string,
+    @Args('input', {
+      type: () => UpdateSubCategoryInput,
+      description: 'Updated data for the subcategory',
+    })
     input: UpdateSubCategoryInput,
   ) {
     return this.subCategoriesService.update(id, input);
   }
 
-  @Mutation(() => SubCategory, { description: 'Deletes a subcategory by ID (admin only)' })
+  @Mutation(() => SubCategory, {
+    description: 'Deletes a subcategory by ID (admin only)',
+  })
   @Roles(Role.ADMIN)
   removeSubCategory(
-    @Args('id', { type: () => String, description: 'The ID of the subcategory to delete' }) id: string,
+    @Args('id', {
+      type: () => String,
+      description: 'The ID of the subcategory to delete',
+    })
+    id: string,
   ) {
     return this.subCategoriesService.remove(id);
   }

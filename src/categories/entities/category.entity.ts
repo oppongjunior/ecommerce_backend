@@ -7,7 +7,9 @@ export class Category {
   @Field(() => ID, { description: 'Unique identifier of the category' })
   id: string;
 
-  @Field(() => String, { description: 'Name of the category (e.g., "Clothing")' })
+  @Field(() => String, {
+    description: 'Name of the category (e.g., "Clothing")',
+  })
   name: string;
 
   @Field(() => String, {
@@ -35,6 +37,8 @@ export class Category {
   @Field(() => Date, { description: 'Timestamp when the category was created' })
   createdAt: Date;
 
-  @Field(() => Date, { description: 'Timestamp when the category was last updated' })
+  @Field(() => Date, {
+    description: 'Timestamp when the category was last updated',
+  })
   updatedAt: Date;
 }
