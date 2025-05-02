@@ -8,10 +8,16 @@ export class Product {
   @Field(() => String, { description: 'Name of the product', nullable: false })
   name: string;
 
-  @Field(() => [String], { description: 'links to url of product images', nullable: true })
+  @Field(() => [String], {
+    description: 'links to url of product images',
+    nullable: true,
+  })
   images: string[];
 
-  @Field(() => String, { description: 'description of the product', nullable: true })
+  @Field(() => String, {
+    description: 'description of the product',
+    nullable: true,
+  })
   description?: string;
 
   @Field(() => Float, { description: 'price of the product' })

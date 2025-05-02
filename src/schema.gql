@@ -166,18 +166,12 @@ input CreateProductInput {
   subcategoryId: String
 }
 
-input CreateRatingInput {
-  """comment about rating"""
+input CreateReviewInput {
   comment: String
+  productId: String!
 
-  """Id of product"""
-  productId: ID!
-
-  """rating score"""
+  """Rate number 1 - 5"""
   score: Int!
-
-  """Id of user"""
-  userId: ID!
 }
 
 input CreateSubCategoryInput {
@@ -248,6 +242,9 @@ type Mutation {
   """Adds a product to the user’s cart"""
   addToCart(input: AddToCartInput!): Cart!
 
+  """Adds a product to the user’s wishlist"""
+  addToWishlist(productId: String!): Wishlist!
+
   """Archives a product by setting isActive to false (admin only)"""
   archiveProduct(
     """The ID of the product to archive"""
@@ -266,6 +263,9 @@ type Mutation {
   """Clears all items from the user’s cart"""
   clearCart: Cart!
 
+  """Clears the user’s wishlist"""
+  clearWishlist: Wishlist!
+
   """Creates a new address for the user"""
   createAddress(input: CreateAddressInput!): Address!
 
@@ -280,7 +280,9 @@ type Mutation {
     """Input data for the new product"""
     input: CreateProductInput!
   ): Product!
-  createRating(createRatingInput: CreateRatingInput!): Rating!
+
+  """Creates a review for a product"""
+  createReview(input: CreateReviewInput!): Review!
 
   """Creates a new subcategory (admin only)"""
   createSubCategory(
@@ -309,6 +311,9 @@ type Mutation {
   """Deletes an order and restores stock (admin only)"""
   deleteOrder(orderId: String!): Order!
 
+  """Deletes a user’s review"""
+  deleteReview(reviewId: String!): Review!
+
   """Deletes a tag"""
   deleteTag(tagId: String!): Tag!
 
@@ -327,12 +332,15 @@ type Mutation {
   """Removes a specific item from the user’s cart"""
   removeFromCart(cartItemId: String!): Cart!
 
+  """Removes a product from the user’s wishlist"""
+  removeFromWishlist(productId: String!): Wishlist!
+  removePayment(id: String!): Payment!
+
   """Deletes a product by ID (admin only)"""
   removeProduct(
     """The ID of the product to delete"""
     id: String!
   ): Product!
-  removeRating(id: ID!): Rating!
 
   """Deletes a subcategory by ID (admin only)"""
   removeSubCategory(
@@ -342,6 +350,7 @@ type Mutation {
 
   """Delete a user permanently"""
   removeUser(id: String!): User!
+  restorePayment(id: String!): Payment!
 
   """Restores an archived product by setting isActive to true (admin only)"""
   restoreProduct(
@@ -354,6 +363,7 @@ type Mutation {
 
   """Register a new user with email and password"""
   signUp(input: SignUpInput!): AuthEntity!
+  softDeletePayment(id: String!): Payment!
 
   """Updates an existing address for the user"""
   updateAddress(addressId: String!, input: UpdateAddressInput!): Address!
@@ -379,7 +389,9 @@ type Mutation {
     """Updated data for the product"""
     input: UpdateProductInput!
   ): Product!
-  updateRating(updateRatingInput: UpdateRatingInput!): Rating!
+
+  """Updates a user’s review"""
+  updateReview(input: UpdateReviewInput!): Review!
 
   """Updates an existing subcategory (admin only)"""
   updateSubCategory(
@@ -398,6 +410,7 @@ type Mutation {
 
   """Updates an existing variant"""
   updateVariant(input: UpdateVariantInput!): Variant!
+  verifyPayment(verifyPaymentInput: VerifyPaymentInput!): Payment!
 }
 
 type Order {
@@ -441,6 +454,28 @@ input PaginateArgs {
   """the id of the cursor"""
   after: String
   first: Int! = 12
+}
+
+type Payment {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  id: ID!
+  order: Order!
+  orderId: ID!
+
+  """JSON string representing the transaction details"""
+  paymentDetails: String
+  paymentMethod: String!
+  status: PaymentStatus!
+  transactionId: String
+  updatedAt: DateTime!
+}
+
+enum PaymentStatus {
+  FAILED
+  PENDING
+  SUCCESS
 }
 
 type Product {
@@ -530,18 +565,24 @@ type Query {
     """The ID of the category"""
     id: String!
   ): Category
+  getMyPayments: [Payment!]!
+  getUserPayment(userId: String!): [Payment!]!
 
   """Retrieves a specific order by ID for the current user"""
   order(orderId: String!): Order!
 
   """Retrieves all orders (admin only)"""
   orders: [Order!]!
+  payment(id: String!): Payment!
 
   """Retrieves a single product by its ID, or null if not found"""
   product(
     """The unique ID of the product"""
     id: String!
   ): Product
+
+  """Retrieves all reviews for a product"""
+  productReviews(productId: String!): [Review!]!
 
   """Retrieves all variants for a product"""
   productVariants(productId: String!): [Variant!]!
@@ -556,8 +597,9 @@ type Query {
     """Pagination options (first, after)"""
     paginate: PaginateArgs
   ): ProductConnection!
-  rating(id: ID!): Rating!
-  ratings: [Rating!]!
+
+  """Retrieves a specific review by ID"""
+  review(reviewId: String!): Review!
 
   """Retrieves a list of all subcategories, sorted alphabetically by name"""
   subCategories: [SubCategory!]!
@@ -592,6 +634,9 @@ type Query {
   """Fetch a user’s profile with related data"""
   userProfile: User!
 
+  """Retrieves all reviews by the user"""
+  userReviews: [Review!]!
+
   """Fetch a paginated list of users"""
   users(filter: UserPaginateArgs!): UserConnection!
 
@@ -600,20 +645,16 @@ type Query {
 
   """Retrieves all variants (admin only)"""
   variants: [Variant!]!
+
+  """Retrieves the user’s wishlist"""
+  wishlist: Wishlist!
 }
 
-type Rating {
-  """comment about rating"""
-  comment: String!
+type Review {
+  comment: String
   id: ID!
-
-  """Id of product"""
   product: Product!
-
-  """Id of product"""
   productId: ID!
-
-  """rating score"""
   score: Int!
   user: User!
   userId: ID!
@@ -749,19 +790,13 @@ input UpdateProductInput {
   subcategoryId: String
 }
 
-input UpdateRatingInput {
-  """comment about rating"""
+input UpdateReviewInput {
   comment: String
-  id: ID!
+  id: String!
+  productId: String
 
-  """Id of product"""
-  productId: ID
-
-  """rating score"""
+  """Rate number 1 - 5"""
   score: Int
-
-  """Id of user"""
-  userId: ID
 }
 
 input UpdateSubCategoryInput {
@@ -910,4 +945,17 @@ type Variant {
   productId: ID!
   quantity: Float!
   size: String
+}
+
+input VerifyPaymentInput {
+  reference: String!
+}
+
+type Wishlist {
+  createdAt: DateTime!
+  id: ID!
+  products: [Product!]!
+  updatedAt: DateTime!
+  user: User!
+  userId: ID!
 }

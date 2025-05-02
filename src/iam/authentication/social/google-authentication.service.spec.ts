@@ -9,7 +9,9 @@ describe('GoogleAuthenticationService', () => {
       providers: [GoogleAuthenticationService],
     }).compile();
 
-    service = module.get<GoogleAuthenticationService>(GoogleAuthenticationService);
+    service = module.get<GoogleAuthenticationService>(
+      GoogleAuthenticationService,
+    );
   });
 
   it('should be defined', () => {

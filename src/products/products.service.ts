@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
@@ -24,7 +28,10 @@ export class ProductsService {
    * @throws ConflictException if the SKU is already in use.
    */
   async create(createProductInput: CreateProductInput): Promise<Product> {
-    await this.validateCategoryAndSubcategory(createProductInput.categoryId, createProductInput.subcategoryId);
+    await this.validateCategoryAndSubcategory(
+      createProductInput.categoryId,
+      createProductInput.subcategoryId,
+    );
     await this.validateSkuUniqueness(createProductInput.sku);
 
     return this.prismaService.product.create({
@@ -47,14 +54,22 @@ export class ProductsService {
     filter: ProductFilterArgs = {},
   ): Promise<{
     edges: { cursor: string; node: Product }[];
-    pageInfo: { hasNextPage: boolean; hasPreviousPage: boolean; pageSize: number };
+    pageInfo: {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      pageSize: number;
+    };
   }> {
     const paginationOptions = this.buildPaginationOptions(paginate);
     const whereClause = this.buildWhereClause(filter);
 
     const products = await this.fetchProducts(paginationOptions, whereClause);
     const totalCount = await this.countProducts(whereClause);
-    return this.formatPaginatedResponse(products, totalCount, paginationOptions);
+    return this.formatPaginatedResponse(
+      products,
+      totalCount,
+      paginationOptions,
+    );
   }
 
   /**
@@ -64,7 +79,10 @@ export class ProductsService {
    * @returns The product with its associated category and subcategory, or null if not found.
    */
   async findOne(id: string): Promise<Product | null> {
-    return this.prismaService.product.findUnique({ where: { id }, include: { category: true, subcategory: true } });
+    return this.prismaService.product.findUnique({
+      where: { id },
+      include: { category: true, subcategory: true },
+    });
   }
 
   /**
@@ -77,7 +95,10 @@ export class ProductsService {
    * @throws NotFoundException if the product does not exist.
    * @throws ConflictException if the SKU is already in use by another product.
    */
-  async update(id: string, updateProductInput: UpdateProductInput): Promise<Product> {
+  async update(
+    id: string,
+    updateProductInput: UpdateProductInput,
+  ): Promise<Product> {
     await this.checkProductExists(id);
     await this.validateUpdateInput(id, updateProductInput);
 
@@ -108,14 +129,17 @@ export class ProductsService {
     return this.updateProductTag(productId, tagId, 'connect');
   }
 
-  async removeTagFromProduct(productId: string, tagId: string): Promise<Product> {
+  async removeTagFromProduct(
+    productId: string,
+    tagId: string,
+  ): Promise<Product> {
     return this.updateProductTag(productId, tagId, 'disconnect');
   }
 
-
-
   private async ensureTagExists(tagId: string): Promise<void> {
-    const tag = await this.prismaService.tag.findUnique({ where: { id: tagId } });
+    const tag = await this.prismaService.tag.findUnique({
+      where: { id: tagId },
+    });
     if (!tag) throw new NotFoundException(`Tag "${tagId}" not found`);
   }
 
@@ -129,7 +153,10 @@ export class ProductsService {
    */
   async archiveProduct(id: string): Promise<Product> {
     await this.checkProductExists(id);
-    return this.prismaService.product.update({ where: { id }, data: { isActive: false } });
+    return this.prismaService.product.update({
+      where: { id },
+      data: { isActive: false },
+    });
   }
 
   /**
@@ -142,24 +169,44 @@ export class ProductsService {
    */
   async restoreProduct(id: string): Promise<Product> {
     await this.checkProductExists(id);
-    return this.prismaService.product.update({ where: { id }, data: { isActive: true } });
+    return this.prismaService.product.update({
+      where: { id },
+      data: { isActive: true },
+    });
   }
 
   private buildPaginationOptions({ first, after }: PaginateArgs) {
     const pageSize = Math.min(first, 100);
     const hasCursor = !!after;
-    return { take: pageSize, skip: hasCursor ? 1 : 0, cursor: hasCursor ? { id: after } : undefined };
+    return {
+      take: pageSize,
+      skip: hasCursor ? 1 : 0,
+      cursor: hasCursor ? { id: after } : undefined,
+    };
   }
 
-  private async validateCategoryAndSubcategory(categoryId: string, subcategoryId?: string): Promise<void> {
-    const category = await this.prismaService.category.findUnique({ where: { id: categoryId } });
-    if (!category) throw new NotFoundException(`Category ID "${categoryId}" not found`);
+  private async validateCategoryAndSubcategory(
+    categoryId: string,
+    subcategoryId?: string,
+  ): Promise<void> {
+    const category = await this.prismaService.category.findUnique({
+      where: { id: categoryId },
+    });
+    if (!category)
+      throw new NotFoundException(`Category ID "${categoryId}" not found`);
 
     if (subcategoryId) {
-      const subcategory = await this.prismaService.subCategory.findUnique({ where: { id: subcategoryId } });
-      if (!subcategory) throw new NotFoundException(`Subcategory ID "${subcategoryId}" not found`);
+      const subcategory = await this.prismaService.subCategory.findUnique({
+        where: { id: subcategoryId },
+      });
+      if (!subcategory)
+        throw new NotFoundException(
+          `Subcategory ID "${subcategoryId}" not found`,
+        );
       if (subcategory.categoryId !== categoryId) {
-        throw new ConflictException(`Subcategory ID "${subcategoryId}" does not belong to category ID "${categoryId}"`);
+        throw new ConflictException(
+          `Subcategory ID "${subcategoryId}" does not belong to category ID "${categoryId}"`,
+        );
       }
     }
   }
@@ -169,18 +216,25 @@ export class ProductsService {
       const existing = await this.prismaService.product.findFirst({
         where: { sku: { equals: sku, mode: 'insensitive' } },
       });
-      if (existing) throw new ConflictException(`SKU "${sku}" is already in use`);
+      if (existing)
+        throw new ConflictException(`SKU "${sku}" is already in use`);
     }
   }
 
-  private async validateUpdateInput(id: string, updateProductInput: UpdateProductInput): Promise<void> {
+  private async validateUpdateInput(
+    id: string,
+    updateProductInput: UpdateProductInput,
+  ): Promise<void> {
     const { sku, categoryId, subcategoryId } = updateProductInput;
 
     if (sku) {
       const existing = await this.prismaService.product.findFirst({
         where: { sku: { equals: sku, mode: 'insensitive' }, NOT: { id } },
       });
-      if (existing) throw new ConflictException(`SKU "${sku}" is already in use by another product`);
+      if (existing)
+        throw new ConflictException(
+          `SKU "${sku}" is already in use by another product`,
+        );
     }
 
     if (categoryId || subcategoryId) {
@@ -196,15 +250,32 @@ export class ProductsService {
   }
 
   private async checkProductDependencies(id: string): Promise<void> {
-    const cartItemCount = await this.prismaService.cartItem.count({ where: { productId: id } });
-    const orderItemCount = await this.prismaService.orderItem.count({ where: { productId: id } });
+    const cartItemCount = await this.prismaService.cartItem.count({
+      where: { productId: id },
+    });
+    const orderItemCount = await this.prismaService.orderItem.count({
+      where: { productId: id },
+    });
     if (cartItemCount > 0 || orderItemCount > 0) {
-      throw new ConflictException('Cannot delete product referenced in active carts or orders');
+      throw new ConflictException(
+        'Cannot delete product referenced in active carts or orders',
+      );
     }
   }
 
-  private buildWhereClause(filter: ProductFilterArgs): Prisma.ProductWhereInput {
-    const { categoryId, subcategoryId, isActive, search, createdAfter, priceMin, priceMax, brand } = filter;
+  private buildWhereClause(
+    filter: ProductFilterArgs,
+  ): Prisma.ProductWhereInput {
+    const {
+      categoryId,
+      subcategoryId,
+      isActive,
+      search,
+      createdAfter,
+      priceMin,
+      priceMax,
+      brand,
+    } = filter;
     return {
       ...(categoryId && { categoryId }),
       ...(subcategoryId && { subcategoryId }),
@@ -213,7 +284,9 @@ export class ProductsService {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
           { description: { contains: search, mode: 'insensitive' } },
-          { tags: { some: { name: { contains: search, mode: 'insensitive' } } } },
+          {
+            tags: { some: { name: { contains: search, mode: 'insensitive' } } },
+          },
         ],
       }),
       ...(createdAfter && { createdAt: { gte: new Date(createdAfter) } }),
@@ -224,7 +297,11 @@ export class ProductsService {
   }
 
   private async fetchProducts(
-    { take, skip, cursor }: { take: number; skip: number; cursor?: { id: string } },
+    {
+      take,
+      skip,
+      cursor,
+    }: { take: number; skip: number; cursor?: { id: string } },
     where: Prisma.ProductWhereInput,
   ): Promise<Product[]> {
     return this.prismaService.product.findMany({
@@ -237,7 +314,9 @@ export class ProductsService {
     });
   }
 
-  private async countProducts(where: Prisma.ProductWhereInput): Promise<number> {
+  private async countProducts(
+    where: Prisma.ProductWhereInput,
+  ): Promise<number> {
     return this.prismaService.product.count({ where });
   }
 
@@ -247,7 +326,11 @@ export class ProductsService {
     { skip, take }: { take: number; skip: number },
   ): {
     edges: { cursor: string; node: Product }[];
-    pageInfo: { hasNextPage: boolean; hasPreviousPage: boolean; pageSize: number };
+    pageInfo: {
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      pageSize: number;
+    };
   } {
     const lastProduct = products[products.length - 1];
     const itemsFetched = skip + products.length;

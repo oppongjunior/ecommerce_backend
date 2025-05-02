@@ -7,7 +7,11 @@ import { BcryptService } from '../iam/hashing/bcrypt.service';
 
 @Module({
   imports: [CommonsModule],
-  providers: [UsersResolver, UsersService, { provide: HashingService, useClass: BcryptService }],
+  providers: [
+    UsersResolver,
+    UsersService,
+    { provide: HashingService, useClass: BcryptService },
+  ],
   exports: [UsersService],
 })
 export class UsersModule {}

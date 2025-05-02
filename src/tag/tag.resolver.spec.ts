@@ -25,7 +25,10 @@ describe('TagResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TagResolver, { provide: TagService, useValue: mockTagService }],
+      providers: [
+        TagResolver,
+        { provide: TagService, useValue: mockTagService },
+      ],
     }).compile();
 
     resolver = module.get<TagResolver>(TagResolver);

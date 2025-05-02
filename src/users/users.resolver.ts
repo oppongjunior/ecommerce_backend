@@ -13,45 +13,55 @@ import { ActiveUser } from '../iam/authentication/decorators/active-user.decorat
 import { ChangeUserPasswordInput } from './dto/change-user-password.input';
 
 @Auth(AuthType.Bearer)
-@Roles(Role.ADMIN)
+@Roles(Role.SUPER_ADMIN)
 @Resolver(() => User)
 export class UsersResolver {
   constructor(private readonly usersService: UsersService) {}
 
-  @Mutation(() => User, { description: 'Create a new user with email and password' })
+  @Mutation(() => User, {
+    description: 'Create a new user with email and password',
+  })
   createUser(@Args('createUserInput') createUserInput: CreateUserInput) {
     return this.usersService.createUserByCredentials(createUserInput);
   }
 
-  @Mutation(() => User, { description: 'Create a new user via OAuth provider' })
-  createUserByOAuth(
-    @Args('provider', { type: () => String }) provider: string,
-    @Args('providerId', { type: () => String }) providerId: string,
-    @Args('email', { type: () => String }) email: string,
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => UserConnection, {
+    name: 'users',
+    description: 'Fetch a paginated list of users',
+  })
+  async usersConnection(
+    @Args('filter', { type: () => UserPaginateArgs }) filter: UserPaginateArgs,
   ) {
-    return this.usersService.createUserByAuthProvider(providerId, provider, email);
-  }
-
-  @Query(() => UserConnection, { name: 'users', description: 'Fetch a paginated list of users' })
-  async usersConnection(@Args('filter', { type: () => UserPaginateArgs }) filter: UserPaginateArgs) {
     return this.usersService.findAll(filter);
   }
 
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => User, { name: 'userById', description: 'Fetch a user by ID' })
   findUserById(@Args('id', { type: () => String }) id: string) {
     return this.usersService.findOne(id);
   }
 
-  @Query(() => User, { name: 'userByEmail', description: 'Fetch a user by email' })
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => User, {
+    name: 'userByEmail',
+    description: 'Fetch a user by email',
+  })
   findUserByEmail(@Args('email', { type: () => String }) email: string) {
     return this.usersService.findUserByEmail(email);
   }
-
-  @Query(() => User, { name: 'userByProviderId', description: 'Fetch a user by OAuth provider ID' })
-  findUserByProviderId(@Args('providerId', { type: () => String }) providerId: string) {
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => User, {
+    name: 'userByProviderId',
+    description: 'Fetch a user by OAuth provider ID',
+  })
+  findUserByProviderId(
+    @Args('providerId', { type: () => String }) providerId: string,
+  ) {
     return this.usersService.findUserByProviderId(providerId);
   }
 
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Mutation(() => User, { description: 'Update an existing user' })
   updateUser(
     @Args('id', { type: () => String }) id: string,
@@ -60,10 +70,23 @@ export class UsersResolver {
     return this.usersService.update(id, updateUserInput);
   }
 
-  @Mutation(() => User, { description: 'Change the password of the active user' })
+  @Roles(Role.USER)
+  @Mutation(() => User, { description: 'Update user profile' })
+  updateMyProfile(
+    @ActiveUser('id') id: string,
+    @Args('updateMyProfileInput') updateMyProfileInput: UpdateUserInput,
+  ) {
+    return this.usersService.update(id, updateMyProfileInput);
+  }
+
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
+  @Mutation(() => User, {
+    description: 'Change the password of the active user',
+  })
   async changeUserPassword(
     @ActiveUser('id') id: string,
-    @Args('input', { type: () => ChangeUserPasswordInput }) input: ChangeUserPasswordInput,
+    @Args('input', { type: () => ChangeUserPasswordInput })
+    input: ChangeUserPasswordInput,
   ) {
     return this.usersService.changePassword(id, input);
   }
@@ -73,18 +96,23 @@ export class UsersResolver {
     return this.usersService.remove(id);
   }
 
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Mutation(() => User, { description: 'Archive (soft delete) a user' })
   archiveUser(@Args('id', { type: () => String }) id: string) {
     return this.usersService.archiveUser(id);
   }
 
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Mutation(() => User, { description: 'Restore an archived user' })
   deArchiveUser(@Args('id', { type: () => String }) id: string) {
     return this.usersService.deArchiveUser(id);
   }
 
-  @Roles(Role.USER)
-  @Query(() => User, { name: 'userProfile', description: 'Fetch a user’s profile with related data' })
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => User, {
+    name: 'userProfile',
+    description: 'Fetch a user’s profile with related data',
+  })
   userProfile(@ActiveUser('id') id: string) {
     return this.usersService.getUserProfile(id);
   }

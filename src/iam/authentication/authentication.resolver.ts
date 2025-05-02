@@ -11,12 +11,16 @@ import { Auth } from './decorators/auth.decorator';
 export class AuthenticationResolver {
   constructor(private readonly authService: AuthenticationService) {}
 
-  @Mutation(() => AuthEntity, { description: 'Register a new user with email and password' })
+  @Mutation(() => AuthEntity, {
+    description: 'Register a new user with email and password',
+  })
   signUp(@Args('input', { type: () => SignUpInput }) input: SignUpInput) {
     return this.authService.signUp(input);
   }
 
-  @Mutation(() => AuthEntity, { description: 'Sign in an existing user with email and password' })
+  @Mutation(() => AuthEntity, {
+    description: 'Sign in an existing user with email and password',
+  })
   signIn(@Args('input', { type: () => SignInInput }) input: SignInInput) {
     return this.authService.signIn(input);
   }

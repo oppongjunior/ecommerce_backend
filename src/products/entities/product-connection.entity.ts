@@ -7,6 +7,9 @@ export class ProductConnection {
   @Field(() => [ProductEdge], { nullable: false })
   edges: ProductEdge[];
 
-  @Field(() => PageInfo, { description: 'information about the page', nullable: false })
+  @Field(() => PageInfo, {
+    description: 'information about the page',
+    nullable: false,
+  })
   pageInfo: PageInfo;
 }

@@ -3,6 +3,7 @@ import { AddressesService } from './addresses.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotFoundException } from '@nestjs/common';
 import { Address } from '@prisma/client';
+import { UpdateAddressInput } from './dto/update-address.input';
 
 describe('AddressesService', () => {
   let service: AddressesService;
@@ -41,7 +42,10 @@ describe('AddressesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AddressesService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        AddressesService,
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
     }).compile();
 
     service = module.get<AddressesService>(AddressesService);
@@ -78,15 +82,22 @@ describe('AddressesService', () => {
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
       await expect(service.getAddress(mockUserId, 'addr1')).rejects.toThrow(
-        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
+        new NotFoundException(
+          `Address "addr1" not found for user "${mockUserId}"`,
+        ),
       );
     });
 
     it('should throw NotFoundException if address belongs to another user', async () => {
-      mockPrismaService.address.findUnique.mockResolvedValue({ ...mockAddress, userId: 'user2' });
+      mockPrismaService.address.findUnique.mockResolvedValue({
+        ...mockAddress,
+        userId: 'user2',
+      });
 
       await expect(service.getAddress(mockUserId, 'addr1')).rejects.toThrow(
-        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
+        new NotFoundException(
+          `Address "addr1" not found for user "${mockUserId}"`,
+        ),
       );
     });
   });
@@ -132,7 +143,9 @@ describe('AddressesService', () => {
       mockPrismaService.address.findUnique.mockResolvedValue(mockAddress);
       mockPrismaService.address.update.mockResolvedValue(updatedAddress);
 
-      const result = await service.updateAddress(mockUserId, 'addr1', { street: '456 Elm St' });
+      const result = await service.updateAddress(mockUserId, 'addr1', {
+        street: '456 Elm St',
+      } as UpdateAddressInput);
 
       expect(prismaService.address.findUnique).toHaveBeenCalledWith({
         where: { id: 'addr1' },
@@ -147,8 +160,14 @@ describe('AddressesService', () => {
     it('should throw NotFoundException if address doesn’t exist', async () => {
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateAddress(mockUserId, 'addr1', { street: '456 Elm St' })).rejects.toThrow(
-        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
+      await expect(
+        service.updateAddress(mockUserId, 'addr1', {
+          street: '456 Elm St',
+        } as UpdateAddressInput),
+      ).rejects.toThrow(
+        new NotFoundException(
+          `Address "addr1" not found for user "${mockUserId}"`,
+        ),
       );
     });
   });
@@ -173,7 +192,9 @@ describe('AddressesService', () => {
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
       await expect(service.deleteAddress(mockUserId, 'addr1')).rejects.toThrow(
-        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
+        new NotFoundException(
+          `Address "addr1" not found for user "${mockUserId}"`,
+        ),
       );
     });
   });

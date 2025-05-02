@@ -12,31 +12,52 @@ export class AddressesResolver {
   constructor(private readonly addressService: AddressesService) {}
 
   @Roles(Role.USER)
-  @Query(() => Address, { name: 'address', description: 'Retrieves a specific address by ID for the current user' })
-  async getAddress(@ActiveUser('id') userId: string, @Args('addressId', { type: () => String }) addressId: string) {
+  @Query(() => Address, {
+    name: 'address',
+    description: 'Retrieves a specific address by ID for the current user',
+  })
+  async getAddress(
+    @ActiveUser('id') userId: string,
+    @Args('addressId', { type: () => String }) addressId: string,
+  ) {
     return this.addressService.getAddress(userId, addressId);
   }
 
   @Roles(Role.USER)
-  @Query(() => [Address], { name: 'userAddresses', description: 'Retrieves all addresses for the current user' })
+  @Query(() => [Address], {
+    name: 'userAddresses',
+    description: 'Retrieves all addresses for the current user',
+  })
   async getUserAddresses(@ActiveUser('id') userId: string) {
     return this.addressService.getUserAddresses(userId);
   }
 
   @Roles(Role.ADMIN)
-  @Query(() => [Address], { name: 'addresses', description: 'Retrieves all addresses (admin only)' })
+  @Query(() => [Address], {
+    name: 'addresses',
+    description: 'Retrieves all addresses (admin only)',
+  })
   async getAllAddresses() {
     return this.addressService.getAllAddresses();
   }
 
   @Roles(Role.USER)
-  @Mutation(() => Address, { name: 'createAddress', description: 'Creates a new address for the user' })
-  async createAddress(@ActiveUser('id') userId: string, @Args('input') input: CreateAddressInput) {
+  @Mutation(() => Address, {
+    name: 'createAddress',
+    description: 'Creates a new address for the user',
+  })
+  async createAddress(
+    @ActiveUser('id') userId: string,
+    @Args('input') input: CreateAddressInput,
+  ) {
     return this.addressService.createAddress(userId, input);
   }
 
   @Roles(Role.USER)
-  @Mutation(() => Address, { name: 'updateAddress', description: 'Updates an existing address for the user' })
+  @Mutation(() => Address, {
+    name: 'updateAddress',
+    description: 'Updates an existing address for the user',
+  })
   async updateAddress(
     @ActiveUser('id') userId: string,
     @Args('addressId', { type: () => String }) addressId: string,
@@ -46,8 +67,14 @@ export class AddressesResolver {
   }
 
   @Roles(Role.USER)
-  @Mutation(() => Address, { name: 'deleteAddress', description: 'Deletes an address for the user' })
-  async deleteAddress(@ActiveUser('id') userId: string, @Args('addressId', { type: () => String }) addressId: string) {
+  @Mutation(() => Address, {
+    name: 'deleteAddress',
+    description: 'Deletes an address for the user',
+  })
+  async deleteAddress(
+    @ActiveUser('id') userId: string,
+    @Args('addressId', { type: () => String }) addressId: string,
+  ) {
     return this.addressService.deleteAddress(userId, addressId);
   }
 }

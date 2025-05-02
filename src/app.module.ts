@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -6,7 +6,6 @@ import { UsersModule } from './users/users.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
-import { join } from 'path';
 import { CommonsModule } from './commons/commons.module';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
@@ -21,17 +20,29 @@ import { VariantModule } from './variant/variant.module';
 import { TagModule } from './tag/tag.module';
 import { WishlistModule } from './wishlist/wishlist.module';
 import { ReviewModule } from './review/review.module';
+import { PaymentModule } from './payment/payment.module';
+import { LoggerMiddleware } from './commons/middlewares/logger.middleware';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { GraphqlLoggingInterceptor } from './commons/interceptors/graphql-logging.interceptor';
+import { formatError } from './commons/error-formatters/grapqhl-error.formatter';
+import { LoggerService } from './commons/logger.service';
 
 @Module({
   imports: [
     PrismaModule,
     UsersModule,
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-      sortSchema: true,
+      imports: [CommonsModule],
+      useFactory: (logger: LoggerService) => ({
+        playground: false,
+        formatError: formatError(logger),
+        plugins: [ApolloServerPluginLandingPageLocalDefault()],
+        sortSchema: true,
+        autoSchemaFile: 'schema.gql',
+        context: ({ req }) => ({ req }),
+      }),
+      inject: [LoggerService],
     }),
     CommonsModule,
     ProductsModule,
@@ -48,8 +59,20 @@ import { ReviewModule } from './review/review.module';
     TagModule,
     WishlistModule,
     ReviewModule,
+    PaymentModule,
   ],
   controllers: [AppController],
-  providers: [AppService, BcryptService],
+  providers: [
+    AppService,
+    BcryptService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: GraphqlLoggingInterceptor,
+    },
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): any {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}

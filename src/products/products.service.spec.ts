@@ -36,7 +36,10 @@ describe('ProductsService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ProductsService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        ProductsService,
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
@@ -57,16 +60,28 @@ describe('ProductsService', () => {
     };
 
     it('should create a product successfully', async () => {
-      const product = { id: 'prod1', ...input, createdAt: new Date(), updatedAt: new Date() };
+      const product = {
+        id: 'prod1',
+        ...input,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       mockPrismaService.category.findUnique.mockResolvedValue({ id: 'cat1' });
-      mockPrismaService.subCategory.findUnique.mockResolvedValue({ id: 'sub1', categoryId: 'cat1' });
+      mockPrismaService.subCategory.findUnique.mockResolvedValue({
+        id: 'sub1',
+        categoryId: 'cat1',
+      });
       mockPrismaService.product.findFirst.mockResolvedValue(null);
       mockPrismaService.product.create.mockResolvedValue(product);
 
       const result = await service.create(input);
 
-      expect(prisma.category.findUnique).toHaveBeenCalledWith({ where: { id: 'cat1' } });
-      expect(prisma.subCategory.findUnique).toHaveBeenCalledWith({ where: { id: 'sub1' } });
+      expect(prisma.category.findUnique).toHaveBeenCalledWith({
+        where: { id: 'cat1' },
+      });
+      expect(prisma.subCategory.findUnique).toHaveBeenCalledWith({
+        where: { id: 'sub1' },
+      });
       expect(prisma.product.findFirst).toHaveBeenCalledWith({
         where: { sku: { equals: 'TSHIRT001', mode: 'insensitive' } },
       });
@@ -80,15 +95,25 @@ describe('ProductsService', () => {
     it('should throw NotFoundException if category does not exist', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue(null);
 
-      await expect(service.create(input)).rejects.toThrow(new NotFoundException('Category ID "cat1" not found'));
+      await expect(service.create(input)).rejects.toThrow(
+        new NotFoundException('Category ID "cat1" not found'),
+      );
     });
 
     it('should throw ConflictException if SKU is already in use', async () => {
       mockPrismaService.category.findUnique.mockResolvedValue({ id: 'cat1' });
-      mockPrismaService.subCategory.findUnique.mockResolvedValue({ id: 'sub1', categoryId: 'cat1' });
-      mockPrismaService.product.findFirst.mockResolvedValue({ id: 'prod2', sku: 'TSHIRT001' });
+      mockPrismaService.subCategory.findUnique.mockResolvedValue({
+        id: 'sub1',
+        categoryId: 'cat1',
+      });
+      mockPrismaService.product.findFirst.mockResolvedValue({
+        id: 'prod2',
+        sku: 'TSHIRT001',
+      });
 
-      await expect(service.create(input)).rejects.toThrow(new ConflictException('SKU "TSHIRT001" is already in use'));
+      await expect(service.create(input)).rejects.toThrow(
+        new ConflictException('SKU "TSHIRT001" is already in use'),
+      );
     });
   });
 
@@ -134,7 +159,9 @@ describe('ProductsService', () => {
         orderBy: { createdAt: 'desc' },
         include: { category: true, subcategory: true },
       });
-      expect(prisma.product.count).toHaveBeenCalledWith({ where: { categoryId: 'cat1', isActive: true } });
+      expect(prisma.product.count).toHaveBeenCalledWith({
+        where: { categoryId: 'cat1', isActive: true },
+      });
       expect(result).toEqual({
         edges: products.map((p) => ({ cursor: p.id, node: p })),
         pageInfo: { pageSize: 2, hasPreviousPage: false, hasNextPage: true },
@@ -154,7 +181,11 @@ describe('ProductsService', () => {
             OR: [
               { name: { contains: 'shirt', mode: 'insensitive' } },
               { description: { contains: 'shirt', mode: 'insensitive' } },
-              { tags: { some: { name: { contains: 'shirt', mode: 'insensitive' } } } },
+              {
+                tags: {
+                  some: { name: { contains: 'shirt', mode: 'insensitive' } },
+                },
+              },
             ],
           },
         }),
@@ -226,7 +257,11 @@ describe('ProductsService', () => {
         isActive: true,
         images: [],
       };
-      const updatedProduct = { ...product, ...updateInput, updatedAt: new Date() };
+      const updatedProduct = {
+        ...product,
+        ...updateInput,
+        updatedAt: new Date(),
+      };
       mockPrismaService.product.findUnique.mockResolvedValue(product);
       mockPrismaService.product.findFirst.mockResolvedValue(null);
       mockPrismaService.product.update.mockResolvedValue(updatedProduct);
@@ -244,16 +279,26 @@ describe('ProductsService', () => {
     it('should throw NotFoundException if product does not exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.update('prod999', updateInput)).rejects.toThrow(new NotFoundException('Product not found'));
+      await expect(service.update('prod999', updateInput)).rejects.toThrow(
+        new NotFoundException('Product not found'),
+      );
     });
 
     it('should throw ConflictException if SKU conflicts', async () => {
       const skuInput: UpdateProductInput = { sku: 'TSHIRT002', id: 'prod1' };
-      mockPrismaService.product.findUnique.mockResolvedValue({ id: 'prod1', categoryId: 'cat1' });
-      mockPrismaService.product.findFirst.mockResolvedValue({ id: 'prod2', sku: 'TSHIRT002' });
+      mockPrismaService.product.findUnique.mockResolvedValue({
+        id: 'prod1',
+        categoryId: 'cat1',
+      });
+      mockPrismaService.product.findFirst.mockResolvedValue({
+        id: 'prod2',
+        sku: 'TSHIRT002',
+      });
 
       await expect(service.update('prod1', skuInput)).rejects.toThrow(
-        new ConflictException('SKU "TSHIRT002" is already in use by another product'),
+        new ConflictException(
+          'SKU "TSHIRT002" is already in use by another product',
+        ),
       );
     });
   });
@@ -278,7 +323,9 @@ describe('ProductsService', () => {
 
       const result = await service.remove('prod1');
 
-      expect(prisma.product.delete).toHaveBeenCalledWith({ where: { id: 'prod1' } });
+      expect(prisma.product.delete).toHaveBeenCalledWith({
+        where: { id: 'prod1' },
+      });
       expect(result).toEqual(product);
     });
 
@@ -287,7 +334,9 @@ describe('ProductsService', () => {
       mockPrismaService.cartItem.count.mockResolvedValue(1);
 
       await expect(service.remove('prod1')).rejects.toThrow(
-        new ConflictException('Cannot delete product referenced in active carts or orders'),
+        new ConflictException(
+          'Cannot delete product referenced in active carts or orders',
+        ),
       );
     });
   });
@@ -321,7 +370,9 @@ describe('ProductsService', () => {
     it('should throw NotFoundException if product does not exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.archiveProduct('prod999')).rejects.toThrow(new NotFoundException('Product not found'));
+      await expect(service.archiveProduct('prod999')).rejects.toThrow(
+        new NotFoundException('Product not found'),
+      );
     });
   });
 
@@ -353,7 +404,9 @@ describe('ProductsService', () => {
 
     it('should throw NotFoundException if product does not exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
-      await expect(service.restoreProduct('prod999')).rejects.toThrow(new NotFoundException('Product not found'));
+      await expect(service.restoreProduct('prod999')).rejects.toThrow(
+        new NotFoundException('Product not found'),
+      );
     });
   });
 });

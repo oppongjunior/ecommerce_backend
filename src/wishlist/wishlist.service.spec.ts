@@ -22,13 +22,14 @@ describe('WishlistService', () => {
   const mockUserId = 'user1';
   const mockProductId = 'prod1';
   const fixedDate = new Date('2025-03-18T00:00:00.000Z');
-  const mockWishlist: Wishlist & { products: { id: string; name: string }[] } = {
-    id: 'wish1',
-    userId: mockUserId,
-    createdAt: fixedDate,
-    updatedAt: fixedDate,
-    products: [],
-  };
+  const mockWishlist: Wishlist & { products: { id: string; name: string }[] } =
+    {
+      id: 'wish1',
+      userId: mockUserId,
+      createdAt: fixedDate,
+      updatedAt: fixedDate,
+      products: [],
+    };
   const mockWishlistWithProduct = {
     ...mockWishlist,
     products: [{ id: mockProductId, name: 'T-Shirt' }],
@@ -42,7 +43,10 @@ describe('WishlistService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WishlistService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        WishlistService,
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
     }).compile();
 
     service = module.get<WishlistService>(WishlistService);
@@ -86,11 +90,15 @@ describe('WishlistService', () => {
     it('should add a product to the wishlist successfully', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
       mockPrismaService.wishlist.findUnique.mockResolvedValue(mockWishlist);
-      mockPrismaService.wishlist.update.mockResolvedValue(mockWishlistWithProduct);
+      mockPrismaService.wishlist.update.mockResolvedValue(
+        mockWishlistWithProduct,
+      );
 
       const result = await service.addToWishlist(mockUserId, mockProductId);
 
-      expect(prismaService.product.findUnique).toHaveBeenCalledWith({ where: { id: mockProductId } });
+      expect(prismaService.product.findUnique).toHaveBeenCalledWith({
+        where: { id: mockProductId },
+      });
       expect(prismaService.wishlist.findUnique).toHaveBeenCalled();
       expect(prismaService.wishlist.update).toHaveBeenCalledWith({
         where: { id: mockWishlist.id },
@@ -103,7 +111,9 @@ describe('WishlistService', () => {
     it('should throw NotFoundException if product doesn’t exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.addToWishlist(mockUserId, mockProductId)).rejects.toThrow(
+      await expect(
+        service.addToWishlist(mockUserId, mockProductId),
+      ).rejects.toThrow(
         new NotFoundException(`Product "${mockProductId}" not found`),
       );
       expect(prismaService.wishlist.findUnique).not.toHaveBeenCalled();
@@ -111,10 +121,16 @@ describe('WishlistService', () => {
 
     it('should throw BadRequestException if product is already in wishlist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrismaService.wishlist.findUnique.mockResolvedValue(mockWishlistWithProduct);
+      mockPrismaService.wishlist.findUnique.mockResolvedValue(
+        mockWishlistWithProduct,
+      );
 
-      await expect(service.addToWishlist(mockUserId, mockProductId)).rejects.toThrow(
-        new BadRequestException(`Product "${mockProductId}" is already in your wishlist`),
+      await expect(
+        service.addToWishlist(mockUserId, mockProductId),
+      ).rejects.toThrow(
+        new BadRequestException(
+          `Product "${mockProductId}" is already in your wishlist`,
+        ),
       );
       expect(prismaService.wishlist.update).not.toHaveBeenCalled();
     });
@@ -122,10 +138,15 @@ describe('WishlistService', () => {
 
   describe('removeFromWishlist', () => {
     it('should remove a product from the wishlist successfully', async () => {
-      mockPrismaService.wishlist.findUnique.mockResolvedValue(mockWishlistWithProduct);
+      mockPrismaService.wishlist.findUnique.mockResolvedValue(
+        mockWishlistWithProduct,
+      );
       mockPrismaService.wishlist.update.mockResolvedValue(mockWishlist);
 
-      const result = await service.removeFromWishlist(mockUserId, mockProductId);
+      const result = await service.removeFromWishlist(
+        mockUserId,
+        mockProductId,
+      );
 
       expect(prismaService.wishlist.findUnique).toHaveBeenCalled();
       expect(prismaService.wishlist.update).toHaveBeenCalledWith({
@@ -139,8 +160,12 @@ describe('WishlistService', () => {
     it('should throw NotFoundException if product is not in wishlist', async () => {
       mockPrismaService.wishlist.findUnique.mockResolvedValue(mockWishlist);
 
-      await expect(service.removeFromWishlist(mockUserId, mockProductId)).rejects.toThrow(
-        new NotFoundException(`Product "${mockProductId}" not found in your wishlist`),
+      await expect(
+        service.removeFromWishlist(mockUserId, mockProductId),
+      ).rejects.toThrow(
+        new NotFoundException(
+          `Product "${mockProductId}" not found in your wishlist`,
+        ),
       );
       expect(prismaService.wishlist.update).not.toHaveBeenCalled();
     });
@@ -148,7 +173,9 @@ describe('WishlistService', () => {
 
   describe('clearWishlist', () => {
     it('should clear all products from the wishlist', async () => {
-      mockPrismaService.wishlist.findUnique.mockResolvedValue(mockWishlistWithProduct);
+      mockPrismaService.wishlist.findUnique.mockResolvedValue(
+        mockWishlistWithProduct,
+      );
       mockPrismaService.wishlist.update.mockResolvedValue(mockWishlist);
 
       const result = await service.clearWishlist(mockUserId);
@@ -191,12 +218,18 @@ describe('WishlistService', () => {
 
     describe('isProductInWishlist', () => {
       it('should return true if product is in wishlist', () => {
-        const result = service['isProductInWishlist'](mockWishlistWithProduct, mockProductId);
+        const result = service['isProductInWishlist'](
+          mockWishlistWithProduct,
+          mockProductId,
+        );
         expect(result).toBe(true);
       });
 
       it('should return false if product is not in wishlist', () => {
-        const result = service['isProductInWishlist'](mockWishlist, mockProductId);
+        const result = service['isProductInWishlist'](
+          mockWishlist,
+          mockProductId,
+        );
         expect(result).toBe(false);
       });
     });

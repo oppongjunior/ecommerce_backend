@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Tag } from '@prisma/client';
 
@@ -55,8 +59,13 @@ export class TagService {
     return this.removeTag(tagId);
   }
 
-  private async ensureTagNameUnique(name: string, excludeTagId?: string): Promise<void> {
-    const existingTag = await this.prismaService.tag.findUnique({ where: { name } });
+  private async ensureTagNameUnique(
+    name: string,
+    excludeTagId?: string,
+  ): Promise<void> {
+    const existingTag = await this.prismaService.tag.findUnique({
+      where: { name },
+    });
     if (existingTag && existingTag.id !== excludeTagId) {
       throw new BadRequestException(`Tag name "${name}" is already in use`);
     }

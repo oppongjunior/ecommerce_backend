@@ -1,6 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Address } from '@prisma/client';
+import { CreateAddressInput } from './dto/create-address.input';
+import { UpdateAddressInput } from './dto/update-address.input';
 
 @Injectable()
 export class AddressesService {
@@ -14,7 +16,7 @@ export class AddressesService {
    */
   async createAddress(
     userId: string,
-    data: Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>,
+    data: CreateAddressInput,
   ): Promise<Address> {
     return this.saveAddress({ ...data, userId });
   }
@@ -56,7 +58,7 @@ export class AddressesService {
   async updateAddress(
     userId: string,
     addressId: string,
-    data: Partial<Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
+    data: UpdateAddressInput,
   ): Promise<Address> {
     await this.retrieveUserAddress(userId, addressId);
     return this.modifyAddress(addressId, data);
@@ -73,16 +75,23 @@ export class AddressesService {
     return this.removeAddress(addressId);
   }
 
-  private async saveAddress(data: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>): Promise<Address> {
+  private async saveAddress(
+    data: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<Address> {
     return this.prismaService.address.create({ data });
   }
 
-  private async retrieveUserAddress(userId: string, addressId: string): Promise<Address> {
+  private async retrieveUserAddress(
+    userId: string,
+    addressId: string,
+  ): Promise<Address> {
     const address = await this.prismaService.address.findUnique({
       where: { id: addressId },
     });
     if (!address || address.userId !== userId) {
-      throw new NotFoundException(`Address "${addressId}" not found for user "${userId}"`);
+      throw new NotFoundException(
+        `Address "${addressId}" not found for user "${userId}"`,
+      );
     }
     return address;
   }
@@ -95,14 +104,19 @@ export class AddressesService {
   }
 
   private async fetchAllAddresses(): Promise<Address[]> {
-    return this.prismaService.address.findMany({ orderBy: { createdAt: 'desc' } });
+    return this.prismaService.address.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
   }
 
   private async modifyAddress(
     addressId: string,
     data: Partial<Omit<Address, 'id' | 'userId' | 'createdAt' | 'updatedAt'>>,
   ): Promise<Address> {
-    return this.prismaService.address.update({ where: { id: addressId }, data });
+    return this.prismaService.address.update({
+      where: { id: addressId },
+      data,
+    });
   }
 
   private async removeAddress(addressId: string): Promise<Address> {

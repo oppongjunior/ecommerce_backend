@@ -10,17 +10,29 @@ import { Role } from '../users/enums/role.enum';
 export class WishlistResolver {
   constructor(private readonly wishlistService: WishlistService) {}
 
-  @Query(() => Wishlist, { name: 'wishlist', description: 'Retrieves the user’s wishlist' })
+  @Query(() => Wishlist, {
+    name: 'wishlist',
+    description: 'Retrieves the user’s wishlist',
+  })
   async getWishlist(@ActiveUser('id') userId: string) {
     return this.wishlistService.getOrCreateWishlist(userId);
   }
 
-  @Mutation(() => Wishlist, { name: 'addToWishlist', description: 'Adds a product to the user’s wishlist' })
-  async addToWishlist(@ActiveUser('id') userId: string, @Args('productId', { type: () => String }) productId: string) {
+  @Mutation(() => Wishlist, {
+    name: 'addToWishlist',
+    description: 'Adds a product to the user’s wishlist',
+  })
+  async addToWishlist(
+    @ActiveUser('id') userId: string,
+    @Args('productId', { type: () => String }) productId: string,
+  ) {
     return this.wishlistService.addToWishlist(userId, productId);
   }
 
-  @Mutation(() => Wishlist, { name: 'removeFromWishlist', description: 'Removes a product from the user’s wishlist' })
+  @Mutation(() => Wishlist, {
+    name: 'removeFromWishlist',
+    description: 'Removes a product from the user’s wishlist',
+  })
   async removeFromWishlist(
     @ActiveUser('id') userId: string,
     @Args('productId', { type: () => String }) productId: string,
@@ -28,7 +40,10 @@ export class WishlistResolver {
     return this.wishlistService.removeFromWishlist(userId, productId);
   }
 
-  @Mutation(() => Wishlist, { name: 'clearWishlist', description: 'Clears the user’s wishlist' })
+  @Mutation(() => Wishlist, {
+    name: 'clearWishlist',
+    description: 'Clears the user’s wishlist',
+  })
   async clearWishlist(@ActiveUser('id') userId: string) {
     return this.wishlistService.clearWishlist(userId);
   }

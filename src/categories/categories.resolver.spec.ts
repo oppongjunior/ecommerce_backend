@@ -18,7 +18,10 @@ describe('CategoriesResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CategoriesResolver, { provide: CategoriesService, useValue: mockCategoriesService }],
+      providers: [
+        CategoriesResolver,
+        { provide: CategoriesService, useValue: mockCategoriesService },
+      ],
     }).compile();
 
     resolver = module.get<CategoriesResolver>(CategoriesResolver);
@@ -28,7 +31,10 @@ describe('CategoriesResolver', () => {
 
   describe('createCategory', () => {
     it('should create a new category', async () => {
-      const input: CreateCategoryInput = { name: 'Clothing', description: 'Clothing items' };
+      const input: CreateCategoryInput = {
+        name: 'Clothing',
+        description: 'Clothing items',
+      };
       const category = {
         id: '1',
         name: 'Clothing',
@@ -49,8 +55,18 @@ describe('CategoriesResolver', () => {
   describe('findAll', () => {
     it('should return all categories', async () => {
       const categories = [
-        { id: '1', name: 'Clothing', createdAt: new Date(), updatedAt: new Date() },
-        { id: '2', name: 'Electronics', createdAt: new Date(), updatedAt: new Date() },
+        {
+          id: '1',
+          name: 'Clothing',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: '2',
+          name: 'Electronics',
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
 
       mockCategoriesService.findAll.mockResolvedValue(categories);
@@ -64,7 +80,12 @@ describe('CategoriesResolver', () => {
 
   describe('findOne', () => {
     it('should return a category by ID', async () => {
-      const category = { id: '1', name: 'Clothing', createdAt: new Date(), updatedAt: new Date() };
+      const category = {
+        id: '1',
+        name: 'Clothing',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
       mockCategoriesService.findOne.mockResolvedValue(category);
 
       const result = await resolver.findOne('1');
@@ -86,7 +107,11 @@ describe('CategoriesResolver', () => {
   describe('updateCategory', () => {
     it('should update an existing category', async () => {
       const id = '1';
-      const input: UpdateCategoryInput = { name: 'Updated Clothing', description: 'Updated description', id };
+      const input: UpdateCategoryInput = {
+        name: 'Updated Clothing',
+        description: 'Updated description',
+        id,
+      };
       const updatedCategory = {
         id,
         name: 'Updated Clothing',
@@ -107,7 +132,12 @@ describe('CategoriesResolver', () => {
   describe('removeCategory', () => {
     it('should remove a category by ID', async () => {
       const id = '1';
-      const category = { id, name: 'Clothing', createdAt: new Date(), updatedAt: new Date() };
+      const category = {
+        id,
+        name: 'Clothing',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
 
       mockCategoriesService.remove.mockResolvedValue(category);
 

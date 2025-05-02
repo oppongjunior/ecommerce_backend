@@ -49,7 +49,10 @@ describe('AddressesResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [AddressesResolver, { provide: AddressesService, useValue: mockAddressesService }],
+      providers: [
+        AddressesResolver,
+        { provide: AddressesService, useValue: mockAddressesService },
+      ],
     })
       .overrideProvider(ActiveUser)
       .useValue(mockActiveUser)
@@ -66,7 +69,10 @@ describe('AddressesResolver', () => {
 
       const result = await resolver.getAddress(mockUserId, 'addr1');
 
-      expect(addressesService.getAddress).toHaveBeenCalledWith(mockUserId, 'addr1');
+      expect(addressesService.getAddress).toHaveBeenCalledWith(
+        mockUserId,
+        'addr1',
+      );
       expect(result).toEqual(mockAddress);
     });
   });
@@ -77,7 +83,9 @@ describe('AddressesResolver', () => {
 
       const result = await resolver.getUserAddresses(mockUserId);
 
-      expect(addressesService.getUserAddresses).toHaveBeenCalledWith(mockUserId);
+      expect(addressesService.getUserAddresses).toHaveBeenCalledWith(
+        mockUserId,
+      );
       expect(result).toEqual([mockAddress]);
     });
   });
@@ -97,9 +105,15 @@ describe('AddressesResolver', () => {
     it('should create an address for the user', async () => {
       mockAddressesService.createAddress.mockResolvedValue(mockAddress);
 
-      const result = await resolver.createAddress(mockUserId, mockCreateAddressInput);
+      const result = await resolver.createAddress(
+        mockUserId,
+        mockCreateAddressInput,
+      );
 
-      expect(addressesService.createAddress).toHaveBeenCalledWith(mockUserId, mockCreateAddressInput);
+      expect(addressesService.createAddress).toHaveBeenCalledWith(
+        mockUserId,
+        mockCreateAddressInput,
+      );
       expect(result).toEqual(mockAddress);
     });
   });
@@ -109,9 +123,17 @@ describe('AddressesResolver', () => {
       const updatedAddress = { ...mockAddress, street: '456 Elm St' };
       mockAddressesService.updateAddress.mockResolvedValue(updatedAddress);
 
-      const result = await resolver.updateAddress(mockUserId, 'addr1', mockUpdateAddressInput);
+      const result = await resolver.updateAddress(
+        mockUserId,
+        'addr1',
+        mockUpdateAddressInput,
+      );
 
-      expect(addressesService.updateAddress).toHaveBeenCalledWith(mockUserId, 'addr1', mockUpdateAddressInput);
+      expect(addressesService.updateAddress).toHaveBeenCalledWith(
+        mockUserId,
+        'addr1',
+        mockUpdateAddressInput,
+      );
       expect(result).toEqual(updatedAddress);
     });
   });
@@ -122,7 +144,10 @@ describe('AddressesResolver', () => {
 
       const result = await resolver.deleteAddress(mockUserId, 'addr1');
 
-      expect(addressesService.deleteAddress).toHaveBeenCalledWith(mockUserId, 'addr1');
+      expect(addressesService.deleteAddress).toHaveBeenCalledWith(
+        mockUserId,
+        'addr1',
+      );
       expect(result).toEqual(mockAddress);
     });
   });

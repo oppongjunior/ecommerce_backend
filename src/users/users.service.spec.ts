@@ -60,7 +60,11 @@ describe('UsersService', () => {
         name: 'sean paul',
       };
       const hashedPassword = 'hashedPassword123';
-      const createdUser = { id: '1', email: input.email, password: hashedPassword };
+      const createdUser = {
+        id: '1',
+        email: input.email,
+        password: hashedPassword,
+      };
 
       mockHashingService.hash.mockResolvedValue(hashedPassword);
       mockPrismaService.user.create.mockResolvedValue(createdUser);
@@ -80,11 +84,19 @@ describe('UsersService', () => {
       const provider = 'google';
       const providerId = 'google123';
       const email = 'test@example.com';
-      const createdUser = { id: '1', email, authProvider: [{ provider, providerId }] };
+      const createdUser = {
+        id: '1',
+        email,
+        authProvider: [{ provider, providerId }],
+      };
 
       mockPrismaService.user.create.mockResolvedValue(createdUser);
 
-      const result = await service.createUserByAuthProvider(providerId, provider, email);
+      const result = await service.createUserByAuthProvider(
+        providerId,
+        provider,
+        email,
+      );
 
       expect(prismaService.user.create).toHaveBeenCalledWith({
         data: {
@@ -98,7 +110,11 @@ describe('UsersService', () => {
 
   describe('findAll', () => {
     it('should return paginated users with filters', async () => {
-      const filter: UserPaginateArgs = { first: 2, name: 'John', isActive: true };
+      const filter: UserPaginateArgs = {
+        first: 2,
+        name: 'John',
+        isActive: true,
+      };
       const users: User[] = [
         {
           id: '1',
@@ -138,11 +154,17 @@ describe('UsersService', () => {
         take: 2,
         skip: 0,
         cursor: undefined,
-        where: { name: { contains: 'John', mode: 'insensitive' }, isActive: true },
+        where: {
+          name: { contains: 'John', mode: 'insensitive' },
+          isActive: true,
+        },
         orderBy: { name: 'asc' },
       });
       expect(prismaService.user.count).toHaveBeenCalledWith({
-        where: { name: { contains: 'John', mode: 'insensitive' }, isActive: true },
+        where: {
+          name: { contains: 'John', mode: 'insensitive' },
+          isActive: true,
+        },
       });
       expect(result).toEqual({
         edges: [
@@ -195,7 +217,9 @@ describe('UsersService', () => {
 
       const result = await service.findOne('1');
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { id: '1' } });
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
       expect(result).toEqual(user);
     });
   });
@@ -217,7 +241,9 @@ describe('UsersService', () => {
 
       const result = await service.findUserByEmail(email);
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { email } });
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email },
+      });
       expect(result).toEqual(user);
     });
 
@@ -228,7 +254,9 @@ describe('UsersService', () => {
 
       const result = await service.findUserByEmail(email);
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { email } });
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { email },
+      });
       expect(result).toBeNull();
     });
   });
@@ -307,7 +335,11 @@ describe('UsersService', () => {
   describe('update', () => {
     it('should update a user with new password', async () => {
       const id = '1';
-      const existingUser = { id, email: 'test@example.com', password: 'oldHash' };
+      const existingUser = {
+        id,
+        email: 'test@example.com',
+        password: 'oldHash',
+      };
       const input = { password: 'newPassword' } as UpdateUserInput;
       const updatedUser = { ...existingUser, password: 'newHash' };
 
@@ -318,8 +350,13 @@ describe('UsersService', () => {
 
       const result = await service.update(id, input);
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { id } });
-      expect(hashingService.compare).toHaveBeenCalledWith('newPassword', 'oldHash');
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id },
+      });
+      expect(hashingService.compare).toHaveBeenCalledWith(
+        'newPassword',
+        'oldHash',
+      );
       expect(hashingService.hash).toHaveBeenCalledWith('newPassword');
       expect(prismaService.user.update).toHaveBeenCalledWith({
         where: { id },
@@ -330,13 +367,19 @@ describe('UsersService', () => {
 
     it('should throw if new password matches old', async () => {
       const id = '1';
-      const existingUser = { id, email: 'test@example.com', password: 'oldHash' };
+      const existingUser = {
+        id,
+        email: 'test@example.com',
+        password: 'oldHash',
+      };
       const input: UpdateUserInput = { id: '1', password: 'samePassword' };
 
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
       mockHashingService.compare.mockResolvedValue(true);
 
-      await expect(service.update(id, input)).rejects.toThrow(ForbiddenException);
+      await expect(service.update(id, input)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 
@@ -346,19 +389,33 @@ describe('UsersService', () => {
         oldPassword: 'oldPass123',
         newPassword: 'NewPass123',
       };
-      const existingUser = { id: '1', email: 'test@example.com', password: 'hashedOldPass' };
+      const existingUser = {
+        id: '1',
+        email: 'test@example.com',
+        password: 'hashedOldPass',
+      };
       const updatedUser = { ...existingUser, password: 'hashedNewPass' };
 
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
-      mockHashingService.compare.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+      mockHashingService.compare
+        .mockResolvedValueOnce(true)
+        .mockResolvedValueOnce(false);
       mockHashingService.hash.mockResolvedValue('hashedNewPass');
       mockPrismaService.user.update.mockResolvedValue(updatedUser);
 
       const result = await service.changePassword('1', input);
 
-      expect(prismaService.user.findUnique).toHaveBeenCalledWith({ where: { id: '1' } });
-      expect(hashingService.compare).toHaveBeenCalledWith('oldPass123', 'hashedOldPass');
-      expect(hashingService.compare).toHaveBeenCalledWith('NewPass123', 'hashedOldPass');
+      expect(prismaService.user.findUnique).toHaveBeenCalledWith({
+        where: { id: '1' },
+      });
+      expect(hashingService.compare).toHaveBeenCalledWith(
+        'oldPass123',
+        'hashedOldPass',
+      );
+      expect(hashingService.compare).toHaveBeenCalledWith(
+        'NewPass123',
+        'hashedOldPass',
+      );
       expect(hashingService.hash).toHaveBeenCalledWith('NewPass123');
       expect(prismaService.user.update).toHaveBeenCalledWith({
         where: { id: '1' },
@@ -372,12 +429,18 @@ describe('UsersService', () => {
         oldPassword: 'wrongPass',
         newPassword: 'NewPass123',
       };
-      const existingUser = { id: '1', email: 'test@example.com', password: 'hashedOldPass' };
+      const existingUser = {
+        id: '1',
+        email: 'test@example.com',
+        password: 'hashedOldPass',
+      };
 
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
       mockHashingService.compare.mockResolvedValue(false);
 
-      await expect(service.changePassword('1', input)).rejects.toThrow('Old password is incorrect');
+      await expect(service.changePassword('1', input)).rejects.toThrow(
+        'Old password is incorrect',
+      );
     });
 
     it('should throw if new password matches old', async () => {
@@ -385,7 +448,11 @@ describe('UsersService', () => {
         oldPassword: 'oldPass123',
         newPassword: 'oldPass123',
       };
-      const existingUser = { id: '1', email: 'test@example.com', password: 'hashedOldPass' };
+      const existingUser = {
+        id: '1',
+        email: 'test@example.com',
+        password: 'hashedOldPass',
+      };
 
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
       mockHashingService.compare.mockResolvedValue(true);

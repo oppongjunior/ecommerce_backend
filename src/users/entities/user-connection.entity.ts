@@ -7,6 +7,9 @@ export class UserConnection {
   @Field(() => [UserEdge], { nullable: false })
   edges: UserEdge[];
 
-  @Field(() => PageInfo, { description: 'information about the page', nullable: false })
+  @Field(() => PageInfo, {
+    description: 'information about the page',
+    nullable: false,
+  })
   pageInfo: PageInfo;
 }

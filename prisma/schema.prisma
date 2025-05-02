@@ -31,7 +31,7 @@ model User {
   order          Order[]
   authProvider   AuthProvider[]
   auditLog       AuditLog[]
-  Wishlist       Wishlist?
+  wishlist       WishList?
 }
 
 model AuthProvider {
@@ -131,7 +131,7 @@ model Product {
   discounts     Discount[]
   cartItem      CartItem[]
   orderItem     OrderItem[]
-  wishlist      Wishlist[]
+  wishlist      WishList[]
 
   @@index([sku])
 }
@@ -232,9 +232,11 @@ model Payment {
   paymentDetails Json?
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
+  deleted        Boolean       @default(false)
+  deletedAt      DateTime?
 }
 
-model Wishlist {
+model WishList {
   id        String    @id @default(cuid())
   userId    String    @unique
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -257,6 +259,7 @@ model AuditLog {
 enum Role {
   USER
   ADMIN
+  SUPER_ADMIN
 }
 
 enum PaymentStatus {

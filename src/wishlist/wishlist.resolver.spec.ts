@@ -30,7 +30,10 @@ describe('WishlistResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [WishlistResolver, { provide: WishlistService, useValue: mockWishlistService }],
+      providers: [
+        WishlistResolver,
+        { provide: WishlistService, useValue: mockWishlistService },
+      ],
     }).compile();
 
     resolver = module.get<WishlistResolver>(WishlistResolver);
@@ -44,18 +47,25 @@ describe('WishlistResolver', () => {
 
       const result = await resolver.getWishlist(mockUserId);
 
-      expect(wishlistService.getOrCreateWishlist).toHaveBeenCalledWith(mockUserId);
+      expect(wishlistService.getOrCreateWishlist).toHaveBeenCalledWith(
+        mockUserId,
+      );
       expect(result).toEqual(mockWishlist);
     });
   });
 
   describe('addToWishlist', () => {
     it('should add a product to the user’s wishlist', async () => {
-      mockWishlistService.addToWishlist.mockResolvedValue(mockWishlistWithProduct);
+      mockWishlistService.addToWishlist.mockResolvedValue(
+        mockWishlistWithProduct,
+      );
 
       const result = await resolver.addToWishlist(mockUserId, mockProductId);
 
-      expect(wishlistService.addToWishlist).toHaveBeenCalledWith(mockUserId, mockProductId);
+      expect(wishlistService.addToWishlist).toHaveBeenCalledWith(
+        mockUserId,
+        mockProductId,
+      );
       expect(result).toEqual(mockWishlistWithProduct);
     });
   });
@@ -64,9 +74,15 @@ describe('WishlistResolver', () => {
     it('should remove a product from the user’s wishlist', async () => {
       mockWishlistService.removeFromWishlist.mockResolvedValue(mockWishlist);
 
-      const result = await resolver.removeFromWishlist(mockUserId, mockProductId);
+      const result = await resolver.removeFromWishlist(
+        mockUserId,
+        mockProductId,
+      );
 
-      expect(wishlistService.removeFromWishlist).toHaveBeenCalledWith(mockUserId, mockProductId);
+      expect(wishlistService.removeFromWishlist).toHaveBeenCalledWith(
+        mockUserId,
+        mockProductId,
+      );
       expect(result).toEqual(mockWishlist);
     });
   });
@@ -89,16 +105,23 @@ describe('WishlistResolver', () => {
 
       const result = await resolver.getWishlist(mockUserId);
 
-      expect(wishlistService.getOrCreateWishlist).toHaveBeenCalledWith(mockUserId);
+      expect(wishlistService.getOrCreateWishlist).toHaveBeenCalledWith(
+        mockUserId,
+      );
       expect(result).toEqual(mockWishlist);
     });
 
     it('should allow USER role to addToWishlist', async () => {
-      mockWishlistService.addToWishlist.mockResolvedValue(mockWishlistWithProduct);
+      mockWishlistService.addToWishlist.mockResolvedValue(
+        mockWishlistWithProduct,
+      );
 
       const result = await resolver.addToWishlist(mockUserId, mockProductId);
 
-      expect(wishlistService.addToWishlist).toHaveBeenCalledWith(mockUserId, mockProductId);
+      expect(wishlistService.addToWishlist).toHaveBeenCalledWith(
+        mockUserId,
+        mockProductId,
+      );
       expect(result).toEqual(mockWishlistWithProduct);
     });
   });

@@ -50,8 +50,16 @@ describe('UsersResolver', () => {
 
   describe('createUser', () => {
     it('should create a user with credentials', async () => {
-      const input: CreateUserInput = { email: 'test@example.com', password: 'password123' } as CreateUserInput;
-      const createdUser: User = { id: '1', email: input.email, role: Role.USER, isActive: true } as User;
+      const input: CreateUserInput = {
+        email: 'test@example.com',
+        password: 'password123',
+      } as CreateUserInput;
+      const createdUser: User = {
+        id: '1',
+        email: input.email,
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.createUserByCredentials.mockResolvedValue(createdUser);
 
@@ -62,29 +70,29 @@ describe('UsersResolver', () => {
     });
   });
 
-  describe('createUserByOAuth', () => {
-    it('should create a user via OAuth', async () => {
-      const provider = 'google';
-      const providerId = 'google123';
-      const email = 'test@example.com';
-      const createdUser: User = { id: '1', email, role: Role.USER, isActive: true } as User;
-
-      mockUsersService.createUserByAuthProvider.mockResolvedValue(createdUser);
-
-      const result = await resolver.createUserByOAuth(provider, providerId, email);
-
-      expect(usersService.createUserByAuthProvider).toHaveBeenCalledWith(providerId, provider, email);
-      expect(result).toEqual(createdUser);
-    });
-  });
-
   describe('usersConnection', () => {
     it('should return a paginated list of users', async () => {
       const filter: UserPaginateArgs = { first: 2, name: 'John' };
       const userConnection: UserConnection = {
         edges: [
-          { cursor: '1', node: { id: '1', email: 'john@example.com', role: Role.USER, isActive: true } as User },
-          { cursor: '2', node: { id: '2', email: 'john2@example.com', role: Role.USER, isActive: true } as User },
+          {
+            cursor: '1',
+            node: {
+              id: '1',
+              email: 'john@example.com',
+              role: Role.USER,
+              isActive: true,
+            } as User,
+          },
+          {
+            cursor: '2',
+            node: {
+              id: '2',
+              email: 'john2@example.com',
+              role: Role.USER,
+              isActive: true,
+            } as User,
+          },
         ],
         pageInfo: { pageSize: 2, hasPreviousPage: false, hasNextPage: true },
       };
@@ -101,7 +109,12 @@ describe('UsersResolver', () => {
   describe('findUserById', () => {
     it('should return a user by ID', async () => {
       const id = '1';
-      const user: User = { id, email: 'test@example.com', role: Role.USER, isActive: true } as User;
+      const user: User = {
+        id,
+        email: 'test@example.com',
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.findOne.mockResolvedValue(user);
 
@@ -115,7 +128,12 @@ describe('UsersResolver', () => {
   describe('findUserByEmail', () => {
     it('should return a user by email', async () => {
       const email = 'test@example.com';
-      const user: User = { id: '1', email, role: Role.USER, isActive: true } as User;
+      const user: User = {
+        id: '1',
+        email,
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.findUserByEmail.mockResolvedValue(user);
 
@@ -140,13 +158,20 @@ describe('UsersResolver', () => {
   describe('findUserByProviderId', () => {
     it('should return a user by provider ID', async () => {
       const providerId = 'google123';
-      const user: User = { id: '1', email: 'test@example.com', role: Role.USER, isActive: true } as User;
+      const user: User = {
+        id: '1',
+        email: 'test@example.com',
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.findUserByProviderId.mockResolvedValue(user);
 
       const result = await resolver.findUserByProviderId(providerId);
 
-      expect(usersService.findUserByProviderId).toHaveBeenCalledWith(providerId);
+      expect(usersService.findUserByProviderId).toHaveBeenCalledWith(
+        providerId,
+      );
       expect(result).toEqual(user);
     });
   });
@@ -154,8 +179,13 @@ describe('UsersResolver', () => {
   describe('updateUser', () => {
     it('should update a user', async () => {
       const id = '1';
-      const input: UpdateUserInput = { id, email: 'new@example.com' };
-      const updatedUser: User = { id, email: 'new@example.com', role: Role.USER, isActive: true } as User;
+      const input: UpdateUserInput = { email: 'new@example.com' };
+      const updatedUser: User = {
+        id,
+        email: 'new@example.com',
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.update.mockResolvedValue(updatedUser);
 
@@ -169,7 +199,12 @@ describe('UsersResolver', () => {
   describe('removeUser', () => {
     it('should remove a user', async () => {
       const id = '1';
-      const removedUser: User = { id, email: 'test@example.com', role: Role.USER, isActive: true } as User;
+      const removedUser: User = {
+        id,
+        email: 'test@example.com',
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.remove.mockResolvedValue(removedUser);
 
@@ -183,7 +218,12 @@ describe('UsersResolver', () => {
   describe('archiveUser', () => {
     it('should archive a user', async () => {
       const id = '1';
-      const archivedUser: User = { id, email: 'test@example.com', role: Role.USER, isActive: false } as User;
+      const archivedUser: User = {
+        id,
+        email: 'test@example.com',
+        role: Role.USER,
+        isActive: false,
+      } as User;
 
       mockUsersService.archiveUser.mockResolvedValue(archivedUser);
 
@@ -197,7 +237,12 @@ describe('UsersResolver', () => {
   describe('deArchiveUser', () => {
     it('should restore an archived user', async () => {
       const id = '1';
-      const restoredUser: User = { id, email: 'test@example.com', role: Role.USER, isActive: true } as User;
+      const restoredUser: User = {
+        id,
+        email: 'test@example.com',
+        role: Role.USER,
+        isActive: true,
+      } as User;
 
       mockUsersService.deArchiveUser.mockResolvedValue(restoredUser);
 

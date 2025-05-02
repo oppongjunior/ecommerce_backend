@@ -62,7 +62,10 @@ describe('VariantService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [VariantService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        VariantService,
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
     }).compile();
 
     service = module.get<VariantService>(VariantService);
@@ -73,11 +76,15 @@ describe('VariantService', () => {
   describe('createVariant', () => {
     it('should create a variant successfully', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrismaService.variant.create.mockResolvedValue(mockVariantWithProduct);
+      mockPrismaService.variant.create.mockResolvedValue(
+        mockVariantWithProduct,
+      );
 
       const result = await service.createVariant(mockCreateVariantInput);
 
-      expect(prismaService.product.findUnique).toHaveBeenCalledWith({ where: { id: mockProductId } });
+      expect(prismaService.product.findUnique).toHaveBeenCalledWith({
+        where: { id: mockProductId },
+      });
       expect(prismaService.variant.create).toHaveBeenCalledWith({
         data: mockCreateVariantInput,
         include: { product: { select: { id: true, name: true } } },
@@ -88,7 +95,9 @@ describe('VariantService', () => {
     it('should throw NotFoundException if product doesn’t exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      await expect(service.createVariant(mockCreateVariantInput)).rejects.toThrow(
+      await expect(
+        service.createVariant(mockCreateVariantInput),
+      ).rejects.toThrow(
         new NotFoundException(`Product "${mockProductId}" not found`),
       );
       expect(prismaService.variant.create).not.toHaveBeenCalled();
@@ -97,7 +106,9 @@ describe('VariantService', () => {
 
   describe('getVariant', () => {
     it('should retrieve a variant with its product', async () => {
-      mockPrismaService.variant.findUnique.mockResolvedValue(mockVariantWithProduct);
+      mockPrismaService.variant.findUnique.mockResolvedValue(
+        mockVariantWithProduct,
+      );
 
       const result = await service.getVariant('var1');
 
@@ -111,18 +122,24 @@ describe('VariantService', () => {
     it('should throw NotFoundException if variant doesn’t exist', async () => {
       mockPrismaService.variant.findUnique.mockResolvedValue(null);
 
-      await expect(service.getVariant('var1')).rejects.toThrow(new NotFoundException(`Variant "var1" not found`));
+      await expect(service.getVariant('var1')).rejects.toThrow(
+        new NotFoundException(`Variant "var1" not found`),
+      );
     });
   });
 
   describe('getProductVariants', () => {
     it('should retrieve all variants for a product', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
-      mockPrismaService.variant.findMany.mockResolvedValue([mockVariantWithProduct]);
+      mockPrismaService.variant.findMany.mockResolvedValue([
+        mockVariantWithProduct,
+      ]);
 
       const result = await service.getProductVariants(mockProductId);
 
-      expect(prismaService.product.findUnique).toHaveBeenCalledWith({ where: { id: mockProductId } });
+      expect(prismaService.product.findUnique).toHaveBeenCalledWith({
+        where: { id: mockProductId },
+      });
       expect(prismaService.variant.findMany).toHaveBeenCalledWith({
         where: { productId: mockProductId },
         include: { product: { select: { id: true, name: true } } },
@@ -165,10 +182,15 @@ describe('VariantService', () => {
   describe('updateVariant', () => {
     it('should update a variant successfully', async () => {
       const updatedVariant = { ...mockVariantWithProduct, size: 'L' };
-      mockPrismaService.variant.findUnique.mockResolvedValue(mockVariantWithProduct);
+      mockPrismaService.variant.findUnique.mockResolvedValue(
+        mockVariantWithProduct,
+      );
       mockPrismaService.variant.update.mockResolvedValue(updatedVariant);
 
-      const result = await service.updateVariant('var1', mockUpdateVariantInput);
+      const result = await service.updateVariant(
+        'var1',
+        mockUpdateVariantInput,
+      );
 
       expect(prismaService.variant.findUnique).toHaveBeenCalledWith({
         where: { id: 'var1' },
@@ -185,16 +207,18 @@ describe('VariantService', () => {
     it('should throw NotFoundException if variant doesn’t exist', async () => {
       mockPrismaService.variant.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateVariant('var1', mockUpdateVariantInput)).rejects.toThrow(
-        new NotFoundException(`Variant "var1" not found`),
-      );
+      await expect(
+        service.updateVariant('var1', mockUpdateVariantInput),
+      ).rejects.toThrow(new NotFoundException(`Variant "var1" not found`));
       expect(prismaService.variant.update).not.toHaveBeenCalled();
     });
   });
 
   describe('deleteVariant', () => {
     it('should delete a variant successfully', async () => {
-      mockPrismaService.variant.findUnique.mockResolvedValue(mockVariantWithProduct);
+      mockPrismaService.variant.findUnique.mockResolvedValue(
+        mockVariantWithProduct,
+      );
       mockPrismaService.variant.delete.mockResolvedValue(mockVariant);
 
       const result = await service.deleteVariant('var1');
@@ -212,7 +236,9 @@ describe('VariantService', () => {
     it('should throw NotFoundException if variant doesn’t exist', async () => {
       mockPrismaService.variant.findUnique.mockResolvedValue(null);
 
-      await expect(service.deleteVariant('var1')).rejects.toThrow(new NotFoundException(`Variant "var1" not found`));
+      await expect(service.deleteVariant('var1')).rejects.toThrow(
+        new NotFoundException(`Variant "var1" not found`),
+      );
       expect(prismaService.variant.delete).not.toHaveBeenCalled();
     });
   });

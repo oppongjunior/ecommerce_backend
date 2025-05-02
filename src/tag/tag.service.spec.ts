@@ -28,7 +28,10 @@ describe('TagService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [TagService, { provide: PrismaService, useValue: mockPrismaService }],
+      providers: [
+        TagService,
+        { provide: PrismaService, useValue: mockPrismaService },
+      ],
     }).compile();
 
     service = module.get<TagService>(TagService);
@@ -43,7 +46,9 @@ describe('TagService', () => {
 
       const result = await service.createTag('Summer');
 
-      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({ where: { name: 'Summer' } });
+      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({
+        where: { name: 'Summer' },
+      });
       expect(prismaService.tag.create).toHaveBeenCalledWith({
         data: { name: 'Summer' },
       });
@@ -75,7 +80,9 @@ describe('TagService', () => {
     it('should throw NotFoundException if tag doesn’t exist', async () => {
       mockPrismaService.tag.findUnique.mockResolvedValue(null);
 
-      await expect(service.getTag('tag1')).rejects.toThrow(new NotFoundException(`Tag "tag1" not found`));
+      await expect(service.getTag('tag1')).rejects.toThrow(
+        new NotFoundException(`Tag "tag1" not found`),
+      );
     });
   });
 
@@ -110,8 +117,12 @@ describe('TagService', () => {
 
       const result = await service.updateTag('tag1', 'Winter');
 
-      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({ where: { id: 'tag1' } });
-      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({ where: { name: 'Winter' } });
+      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({
+        where: { id: 'tag1' },
+      });
+      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({
+        where: { name: 'Winter' },
+      });
       expect(prismaService.tag.update).toHaveBeenCalledWith({
         where: { id: 'tag1' },
         data: { name: 'Winter' },
@@ -122,7 +133,9 @@ describe('TagService', () => {
     it('should throw NotFoundException if tag doesn’t exist', async () => {
       mockPrismaService.tag.findUnique.mockResolvedValue(null);
 
-      await expect(service.updateTag('tag1', 'Winter')).rejects.toThrow(new NotFoundException(`Tag "tag1" not found`));
+      await expect(service.updateTag('tag1', 'Winter')).rejects.toThrow(
+        new NotFoundException(`Tag "tag1" not found`),
+      );
       expect(prismaService.tag.update).not.toHaveBeenCalled();
     });
 
@@ -161,7 +174,9 @@ describe('TagService', () => {
 
       const result = await service.deleteTag('tag1');
 
-      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({ where: { id: 'tag1' } });
+      expect(prismaService.tag.findUnique).toHaveBeenCalledWith({
+        where: { id: 'tag1' },
+      });
       expect(prismaService.tag.delete).toHaveBeenCalledWith({
         where: { id: 'tag1' },
       });
@@ -171,7 +186,9 @@ describe('TagService', () => {
     it('should throw NotFoundException if tag doesn’t exist', async () => {
       mockPrismaService.tag.findUnique.mockResolvedValue(null);
 
-      await expect(service.deleteTag('tag1')).rejects.toThrow(new NotFoundException(`Tag "tag1" not found`));
+      await expect(service.deleteTag('tag1')).rejects.toThrow(
+        new NotFoundException(`Tag "tag1" not found`),
+      );
       expect(prismaService.tag.delete).not.toHaveBeenCalled();
     });
   });
