@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  OnModuleInit,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, OnModuleInit, UnauthorizedException } from '@nestjs/common';
 import { OAuth2Client } from 'google-auth-library';
 import { ConfigService } from '@nestjs/config';
 import { AuthenticationService } from '../authentication.service';
@@ -31,11 +27,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
     if (user) {
       return this.authService.generateTokens(user);
     } else {
-      const newUser = await this.userService.createUserByAuthProvider(
-        googleId,
-        PROVIDERS.google,
-        email,
-      );
+      const newUser = await this.userService.createUserByAuthProvider(googleId, PROVIDERS.google, email);
       return this.authService.generateTokens(newUser);
     }
   }

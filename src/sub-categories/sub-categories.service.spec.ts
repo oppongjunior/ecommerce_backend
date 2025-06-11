@@ -25,10 +25,7 @@ describe('SubCategoriesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        SubCategoriesService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [SubCategoriesService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<SubCategoriesService>(SubCategoriesService);
@@ -76,9 +73,7 @@ describe('SubCategoriesService', () => {
       mockPrismaService.subcategory.findFirst.mockResolvedValue(existing);
 
       await expect(service.create(input)).rejects.toThrow(
-        new ConflictException(
-          'A subcategory with the name "Shirts" already exists in category ID "cat1"',
-        ),
+        new ConflictException('A subcategory with the name "Shirts" already exists in category ID "cat1"'),
       );
     });
   });
@@ -180,17 +175,15 @@ describe('SubCategoriesService', () => {
       mockPrismaService.subcategory.findFirst.mockResolvedValue(conflicting);
 
       await expect(service.update(id, input)).rejects.toThrow(
-        new ConflictException(
-          'A subcategory with the name "Trousers" already exists in category ID "cat1"',
-        ),
+        new ConflictException('A subcategory with the name "Trousers" already exists in category ID "cat1"'),
       );
     });
 
     it('should throw NotFoundException if subcategory does not exist', async () => {
       mockPrismaService.subcategory.findUnique.mockResolvedValue(null);
-      await expect(
-        service.update('999', {} as UpdateSubCategoryInput),
-      ).rejects.toThrow(new NotFoundException('Subcategory not found'));
+      await expect(service.update('999', {} as UpdateSubCategoryInput)).rejects.toThrow(
+        new NotFoundException('Subcategory not found'),
+      );
     });
   });
 
@@ -226,18 +219,14 @@ describe('SubCategoriesService', () => {
       mockPrismaService.product.count.mockResolvedValue(1);
 
       await expect(service.remove(id)).rejects.toThrow(
-        new ConflictException(
-          'Cannot delete subcategory with associated products',
-        ),
+        new ConflictException('Cannot delete subcategory with associated products'),
       );
     });
 
     it('should throw NotFoundException if subcategory does not exist', async () => {
       mockPrismaService.subcategory.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove('999')).rejects.toThrow(
-        new NotFoundException('Subcategory not found'),
-      );
+      await expect(service.remove('999')).rejects.toThrow(new NotFoundException('Subcategory not found'));
     });
   });
 });

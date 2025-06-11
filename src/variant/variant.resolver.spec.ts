@@ -43,10 +43,7 @@ describe('VariantResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        VariantResolver,
-        { provide: VariantService, useValue: mockVariantService },
-      ],
+      providers: [VariantResolver, { provide: VariantService, useValue: mockVariantService }],
     }).compile();
 
     resolver = module.get<VariantResolver>(VariantResolver);
@@ -93,9 +90,7 @@ describe('VariantResolver', () => {
 
       const result = await resolver.createVariant(mockCreateVariantInput);
 
-      expect(variantService.createVariant).toHaveBeenCalledWith(
-        mockCreateVariantInput,
-      );
+      expect(variantService.createVariant).toHaveBeenCalledWith(mockCreateVariantInput);
       expect(result).toEqual(mockVariant);
     });
   });
@@ -107,10 +102,7 @@ describe('VariantResolver', () => {
 
       const result = await resolver.updateVariant(mockUpdateVariantInput);
 
-      expect(variantService.updateVariant).toHaveBeenCalledWith(
-        'var1',
-        mockUpdateVariantInput,
-      );
+      expect(variantService.updateVariant).toHaveBeenCalledWith('var1', mockUpdateVariantInput);
       expect(result).toEqual(updatedVariant);
     });
   });

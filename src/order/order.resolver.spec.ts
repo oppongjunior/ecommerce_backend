@@ -66,10 +66,7 @@ describe('OrdersResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OrdersResolver,
-        { provide: OrdersService, useValue: mockOrdersService },
-      ],
+      providers: [OrdersResolver, { provide: OrdersService, useValue: mockOrdersService }],
     })
       .overrideProvider(ActiveUser)
       .useValue(mockActiveUser)
@@ -117,15 +114,9 @@ describe('OrdersResolver', () => {
     it('should create an order from the user’s cart', async () => {
       mockOrdersService.createOrderFromCart.mockResolvedValue(mockOrder);
 
-      const result = await resolver.createOrder(
-        mockUserId,
-        mockCreateOrderInput,
-      );
+      const result = await resolver.createOrder(mockUserId, mockCreateOrderInput);
 
-      expect(ordersService.createOrderFromCart).toHaveBeenCalledWith(
-        mockUserId,
-        'addr1',
-      );
+      expect(ordersService.createOrderFromCart).toHaveBeenCalledWith(mockUserId, 'addr1');
       expect(result).toEqual(mockOrder);
     });
   });
@@ -135,16 +126,9 @@ describe('OrdersResolver', () => {
       const updatedOrder = { ...mockOrder, status: OrderStatusEnum.SHIPPED };
       mockOrdersService.updateOrderStatus.mockResolvedValue(updatedOrder);
 
-      const result = await resolver.updateOrderStatus(
-        mockUserId,
-        mockUpdateOrderStatusInput,
-      );
+      const result = await resolver.updateOrderStatus(mockUserId, mockUpdateOrderStatusInput);
 
-      expect(ordersService.updateOrderStatus).toHaveBeenCalledWith(
-        mockUserId,
-        'order1',
-        OrderStatusEnum.SHIPPED,
-      );
+      expect(ordersService.updateOrderStatus).toHaveBeenCalledWith(mockUserId, 'order1', OrderStatusEnum.SHIPPED);
       expect(result).toEqual(updatedOrder);
     });
   });
@@ -159,10 +143,7 @@ describe('OrdersResolver', () => {
 
       const result = await resolver.cancelOrder(mockUserId, 'order1');
 
-      expect(ordersService.cancelOrder).toHaveBeenCalledWith(
-        mockUserId,
-        'order1',
-      );
+      expect(ordersService.cancelOrder).toHaveBeenCalledWith(mockUserId, 'order1');
       expect(result).toEqual(cancelledOrder);
     });
   });
@@ -174,10 +155,7 @@ describe('OrdersResolver', () => {
 
       const result = await resolver.markOrderAsPaid(mockUserId, 'order1');
 
-      expect(ordersService.markOrderAsPaid).toHaveBeenCalledWith(
-        mockUserId,
-        'order1',
-      );
+      expect(ordersService.markOrderAsPaid).toHaveBeenCalledWith(mockUserId, 'order1');
       expect(result).toEqual(paidOrder);
     });
   });

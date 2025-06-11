@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { WishList } from '@prisma/client';
 
@@ -62,9 +58,7 @@ export class WishlistService {
     });
   }
 
-  private async createWishlist(
-    userId: string,
-  ): Promise<WishList & { products: { id: string; name: string }[] }> {
+  private async createWishlist(userId: string): Promise<WishList & { products: { id: string; name: string }[] }> {
     return this.prismaService.wishList.create({
       data: { userId },
       include: { products: { select: { id: true, name: true } } },
@@ -85,34 +79,21 @@ export class WishlistService {
     productId: string,
   ): Promise<void> {
     if (this.isProductInWishlist(wishList, productId)) {
-      throw new BadRequestException(
-        `Product "${productId}" is already in your wishlist`,
-      );
+      throw new BadRequestException(`Product "${productId}" is already in your wishlist`);
     }
   }
 
-  private async ensureProductInWishlist(
-    wishlist: WishList & { products: { id: string }[] },
-    productId: string,
-  ) {
+  private async ensureProductInWishlist(wishlist: WishList & { products: { id: string }[] }, productId: string) {
     if (!this.isProductInWishlist(wishlist, productId)) {
-      throw new NotFoundException(
-        `Product "${productId}" not found in your wishlist`,
-      );
+      throw new NotFoundException(`Product "${productId}" not found in your wishlist`);
     }
   }
 
-  private isProductInWishlist(
-    wishList: WishList & { products: { id: string }[] },
-    productId: string,
-  ): boolean {
+  private isProductInWishlist(wishList: WishList & { products: { id: string }[] }, productId: string): boolean {
     return wishList.products.some((product) => product.id === productId);
   }
 
-  private async connectProductToWishlist(
-    wishListId: string,
-    productId: string,
-  ) {
+  private async connectProductToWishlist(wishListId: string, productId: string) {
     return this.prismaService.wishList.update({
       where: { id: wishListId },
       data: { products: { connect: { id: productId } } },
@@ -120,10 +101,7 @@ export class WishlistService {
     });
   }
 
-  private async disconnectProductFromWishlist(
-    wishListId: string,
-    productId: string,
-  ) {
+  private async disconnectProductFromWishlist(wishListId: string, productId: string) {
     return this.prismaService.wishList.update({
       where: { id: wishListId },
       data: { products: { disconnect: { id: productId } } },

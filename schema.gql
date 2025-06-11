@@ -344,6 +344,7 @@ type Mutation {
     """The ID of the subcategory to delete"""
     id: String!
   ): SubCategory!
+  removeTagFromProduct(productId: String!, tagId: String!): Product!
 
   """Delete a user permanently"""
   removeUser(id: String!): User!
@@ -510,6 +511,7 @@ type Product {
   """sku of product"""
   sku: String
   subcategoryId: String
+  tags: [Tag!]!
 }
 
 type ProductConnection {
@@ -697,6 +699,9 @@ type SubCategory {
   """Id of parent category"""
   categoryId: ID!
 
+  """Timestamp when the sub category was created"""
+  createdAt: DateTime!
+
   """Description of the category"""
   description: String
 
@@ -709,6 +714,9 @@ type SubCategory {
   """Name of the category"""
   name: String!
   products: [Product!]
+
+  """Timestamp when the sub category was last updated"""
+  updatedAt: DateTime!
 }
 
 type Tag {
@@ -747,7 +755,6 @@ input UpdateCartItemInput {
 input UpdateCategoryInput {
   """A brief description of the category (max 500 characters)"""
   description: String
-  id: String!
 
   """A URL to an image representing the category (must be HTTPS)"""
   image: String
@@ -773,7 +780,6 @@ input UpdateProductInput {
 
   """Optional description of the product (max 1000 characters)"""
   description: String
-  id: String!
 
   """Array of HTTPS URLs to product images (max 10)"""
   images: [String!]
@@ -812,7 +818,6 @@ input UpdateSubCategoryInput {
 
   """Optional description (max 500 characters)"""
   description: String
-  id: ID!
 
   """Optional HTTPS URL to an image"""
   image: String

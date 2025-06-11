@@ -25,10 +25,7 @@ describe('CategoriesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CategoriesService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [CategoriesService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<CategoriesService>(CategoriesService);
@@ -69,9 +66,7 @@ describe('CategoriesService', () => {
       mockPrismaService.category.findFirst.mockResolvedValue(existing);
 
       await expect(service.create(input)).rejects.toThrow(
-        new ConflictException(
-          'A category with the name "Clothing" already exists',
-        ),
+        new ConflictException('A category with the name "Clothing" already exists'),
       );
     });
   });
@@ -174,9 +169,7 @@ describe('CategoriesService', () => {
       const id = '999';
       const input: UpdateCategoryInput = { id, name: 'Updated' };
       mockPrismaService.category.findUnique.mockResolvedValue(null);
-      await expect(service.update(id, input)).rejects.toThrow(
-        new NotFoundException('Category not found'),
-      );
+      await expect(service.update(id, input)).rejects.toThrow(new NotFoundException('Category not found'));
     });
     it('should throw ConflictException if updating to an existing name', async () => {
       const id = '1';
@@ -190,14 +183,10 @@ describe('CategoriesService', () => {
       const conflictingCategory = { id: '2', name: 'electronics' };
 
       mockPrismaService.category.findUnique.mockResolvedValue(existingCategory);
-      mockPrismaService.category.findFirst.mockResolvedValue(
-        conflictingCategory,
-      );
+      mockPrismaService.category.findFirst.mockResolvedValue(conflictingCategory);
 
       await expect(service.update(id, input)).rejects.toThrow(
-        new ConflictException(
-          'A category with the name "Electronics" already exists',
-        ),
+        new ConflictException('A category with the name "Electronics" already exists'),
       );
     });
   });
@@ -224,9 +213,7 @@ describe('CategoriesService', () => {
     it('should throw NotFoundException if category does not exist', async () => {
       const id = '999';
       mockPrismaService.category.findUnique.mockResolvedValue(null);
-      await expect(service.remove(id)).rejects.toThrow(
-        new NotFoundException('Category not found'),
-      );
+      await expect(service.remove(id)).rejects.toThrow(new NotFoundException('Category not found'));
     });
     it('should throw ConflictException if category has products', async () => {
       const id = '1';
@@ -235,9 +222,7 @@ describe('CategoriesService', () => {
       mockPrismaService.product.count.mockResolvedValue(1);
 
       await expect(service.remove(id)).rejects.toThrow(
-        new ConflictException(
-          'Cannot delete category with associated products',
-        ),
+        new ConflictException('Cannot delete category with associated products'),
       );
     });
   });

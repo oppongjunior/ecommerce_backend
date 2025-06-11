@@ -16,10 +16,7 @@ export class OrdersResolver {
     name: 'order',
     description: 'Retrieves a specific order by ID for the current user',
   })
-  async getOrder(
-    @ActiveUser('id') userId: string,
-    @Args('orderId', { type: () => String }) orderId: string,
-  ) {
+  async getOrder(@ActiveUser('id') userId: string, @Args('orderId', { type: () => String }) orderId: string) {
     return this.ordersService.getOrder(userId, orderId);
   }
 
@@ -46,14 +43,8 @@ export class OrdersResolver {
     name: 'createOrder',
     description: 'Creates an order from the user’s cart',
   })
-  async createOrder(
-    @ActiveUser('id') userId: string,
-    @Args('input') input: CreateOrderInput,
-  ) {
-    return this.ordersService.createOrderFromCart(
-      userId,
-      input.shippingAddressId,
-    );
+  async createOrder(@ActiveUser('id') userId: string, @Args('input') input: CreateOrderInput) {
+    return this.ordersService.createOrderFromCart(userId, input.shippingAddressId);
   }
 
   @Roles(Role.USER)
@@ -61,15 +52,8 @@ export class OrdersResolver {
     name: 'updateOrderStatus',
     description: 'Updates the status of an order',
   })
-  async updateOrderStatus(
-    @ActiveUser('id') userId: string,
-    @Args('input') input: UpdateOrderStatusInput,
-  ) {
-    return this.ordersService.updateOrderStatus(
-      userId,
-      input.orderId,
-      input.status,
-    );
+  async updateOrderStatus(@ActiveUser('id') userId: string, @Args('input') input: UpdateOrderStatusInput) {
+    return this.ordersService.updateOrderStatus(userId, input.orderId, input.status);
   }
 
   @Roles(Role.USER)
@@ -77,10 +61,7 @@ export class OrdersResolver {
     name: 'cancelOrder',
     description: 'Cancels an order and restores stock',
   })
-  async cancelOrder(
-    @ActiveUser('id') userId: string,
-    @Args('orderId', { type: () => String }) orderId: string,
-  ) {
+  async cancelOrder(@ActiveUser('id') userId: string, @Args('orderId', { type: () => String }) orderId: string) {
     return this.ordersService.cancelOrder(userId, orderId);
   }
 
@@ -89,10 +70,7 @@ export class OrdersResolver {
     name: 'markOrderAsPaid',
     description: 'Marks an order as paid',
   })
-  async markOrderAsPaid(
-    @ActiveUser('id') userId: string,
-    @Args('orderId', { type: () => String }) orderId: string,
-  ) {
+  async markOrderAsPaid(@ActiveUser('id') userId: string, @Args('orderId', { type: () => String }) orderId: string) {
     return this.ordersService.markOrderAsPaid(userId, orderId);
   }
 

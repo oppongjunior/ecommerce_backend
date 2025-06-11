@@ -12,9 +12,7 @@ export class TagResolver {
     name: 'tag',
     description: 'Retrieves a specific tag by ID',
   })
-  async getTag(
-    @Args('tagId', { type: () => String }) tagId: string,
-  ): Promise<Tag> {
+  async getTag(@Args('tagId', { type: () => String }) tagId: string): Promise<Tag> {
     return this.tagService.getTag(tagId);
   }
 
@@ -26,9 +24,7 @@ export class TagResolver {
 
   @Roles(Role.ADMIN)
   @Mutation(() => Tag, { name: 'createTag', description: 'Creates a new tag' })
-  async createTag(
-    @Args('name', { type: () => String }) name: string,
-  ): Promise<Tag> {
+  async createTag(@Args('name', { type: () => String }) name: string): Promise<Tag> {
     return this.tagService.createTag(name);
   }
 
@@ -46,9 +42,7 @@ export class TagResolver {
 
   @Roles(Role.ADMIN)
   @Mutation(() => Tag, { name: 'deleteTag', description: 'Deletes a tag' })
-  async deleteTag(
-    @Args('tagId', { type: () => String }) tagId: string,
-  ): Promise<Tag> {
+  async deleteTag(@Args('tagId', { type: () => String }) tagId: string): Promise<Tag> {
     return this.tagService.deleteTag(tagId);
   }
 }

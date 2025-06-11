@@ -30,6 +30,7 @@ export async function createTestApp(): Promise<{
 }
 
 export async function clearDatabase(prisma: PrismaService) {
+  await prisma.user.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -44,14 +45,11 @@ export async function clearDatabase(prisma: PrismaService) {
   await prisma.discount.deleteMany();
   await prisma.address.deleteMany();
   await prisma.authProvider.deleteMany();
-  await prisma.user.deleteMany();
   await prisma.auditLog.deleteMany();
+  await prisma.tag.deleteMany();
 }
 
-export async function insertUserIntoDatabase(
-  userData: User,
-  prisma: PrismaService,
-) {
+export async function insertUserIntoDatabase(userData: User, prisma: PrismaService) {
   const salt = await genSalt();
   const hashPassword = await hash(userData.password, salt);
   return prisma.user.create({
@@ -102,13 +100,89 @@ export async function deleteUser(id: string, prisma: PrismaService) {
   await prisma.user.delete({ where: { id } });
 }
 
-export function graphqlRequest(
-  app: INestApplication,
-  query: string,
-  variables?: any,
-) {
-  return request(app.getHttpServer())
-    .post('/graphql')
-    .send({ query, variables })
-    .set('Accept', 'application/json');
+export function graphqlRequest(app: INestApplication, query: string, variables?: any) {
+  return request(app.getHttpServer()).post('/graphql').send({ query, variables }).set('Accept', 'application/json');
+}
+
+export async function getSuperAdminToken(app: INestApplication) {
+  const signInMutation = `
+        mutation {
+          signIn(input: { email: "super_admin@example.com", password: "SuperAdmin@123" }) {
+            accessToken
+          }
+        }
+      `;
+  const response = await graphqlRequest(app, signInMutation).expect(200);
+  return response.body.data?.signIn?.accessToken;
+}
+
+export async function getAdminToken(app: INestApplication) {
+  const signInMutation = `
+        mutation {
+          signIn(input: { email: "admin@example.com", password: "Admin@123" }) {
+            accessToken
+          }
+        }
+      `;
+  const response = await graphqlRequest(app, signInMutation).expect(200);
+  return response.body.data?.signIn?.accessToken;
+}
+
+export async function getUserToken(app: INestApplication) {
+  const signInMutation = `
+        mutation {
+          signIn(input: { email: "user@example.com", password: "User@123" }) {
+            accessToken
+          }
+        }
+      `;
+  const response = await graphqlRequest(app, signInMutation).expect(200);
+  return response.body.data?.signIn?.accessToken;
+}
+
+export async function createCategory(prisma: PrismaService) {
+  return prisma.category.create({
+    data: {
+      id: 'cat1',
+      name: 'Electronics',
+    },
+  });
+}
+
+export async function createTag(prisma: PrismaService) {
+  return prisma.tag.create({
+    data: {
+      id: 'tag1',
+      name: 'Popular',
+    },
+  });
+}
+
+export async function createProducts(prisma: PrismaService, categoryId: string) {
+  await prisma.product.createMany({
+    data: [
+      {
+        id: 'prod1',
+        name: 'Laptop',
+        price: 999.99,
+        sku: 'LAP123',
+        quantity: 50,
+        images: ['laptop.jpg'],
+        isActive: true,
+        categoryId,
+        createdAt: new Date('2025-01-01'),
+      },
+      {
+        id: 'prod2',
+        name: 'Phone',
+        price: 499.99,
+        sku: 'PHN123',
+        quantity: 100,
+        images: ['phone.jpg'],
+        isActive: true,
+        categoryId,
+        createdAt: new Date('2025-01-02'),
+      },
+    ],
+  });
 }

@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
@@ -28,10 +24,7 @@ export class ProductsService {
    * @throws ConflictException if the SKU is already in use.
    */
   async create(createProductInput: CreateProductInput): Promise<Product> {
-    await this.validateCategoryAndSubcategory(
-      createProductInput.categoryId,
-      createProductInput.subcategoryId,
-    );
+    await this.validateCategoryAndSubcategory(createProductInput.categoryId, createProductInput.subcategoryId);
     await this.validateSkuUniqueness(createProductInput.sku);
 
     return this.prismaService.product.create({
@@ -65,11 +58,7 @@ export class ProductsService {
 
     const products = await this.fetchProducts(paginationOptions, whereClause);
     const totalCount = await this.countProducts(whereClause);
-    return this.formatPaginatedResponse(
-      products,
-      totalCount,
-      paginationOptions,
-    );
+    return this.formatPaginatedResponse(products, totalCount, paginationOptions);
   }
 
   /**
@@ -95,10 +84,7 @@ export class ProductsService {
    * @throws NotFoundException if the product does not exist.
    * @throws ConflictException if the SKU is already in use by another product.
    */
-  async update(
-    id: string,
-    updateProductInput: UpdateProductInput,
-  ): Promise<Product> {
+  async update(id: string, updateProductInput: UpdateProductInput): Promise<Product> {
     await this.checkProductExists(id);
     await this.validateUpdateInput(id, updateProductInput);
 
@@ -129,10 +115,7 @@ export class ProductsService {
     return this.updateProductTag(productId, tagId, 'connect');
   }
 
-  async removeTagFromProduct(
-    productId: string,
-    tagId: string,
-  ): Promise<Product> {
+  async removeTagFromProduct(productId: string, tagId: string): Promise<Product> {
     return this.updateProductTag(productId, tagId, 'disconnect');
   }
 
@@ -185,28 +168,19 @@ export class ProductsService {
     };
   }
 
-  private async validateCategoryAndSubcategory(
-    categoryId: string,
-    subcategoryId?: string,
-  ): Promise<void> {
+  private async validateCategoryAndSubcategory(categoryId: string, subcategoryId?: string): Promise<void> {
     const category = await this.prismaService.category.findUnique({
       where: { id: categoryId },
     });
-    if (!category)
-      throw new NotFoundException(`Category ID "${categoryId}" not found`);
+    if (!category) throw new NotFoundException(`Category ID "${categoryId}" not found`);
 
     if (subcategoryId) {
       const subcategory = await this.prismaService.subCategory.findUnique({
         where: { id: subcategoryId },
       });
-      if (!subcategory)
-        throw new NotFoundException(
-          `Subcategory ID "${subcategoryId}" not found`,
-        );
+      if (!subcategory) throw new NotFoundException(`Subcategory ID "${subcategoryId}" not found`);
       if (subcategory.categoryId !== categoryId) {
-        throw new ConflictException(
-          `Subcategory ID "${subcategoryId}" does not belong to category ID "${categoryId}"`,
-        );
+        throw new ConflictException(`Subcategory ID "${subcategoryId}" does not belong to category ID "${categoryId}"`);
       }
     }
   }
@@ -216,25 +190,18 @@ export class ProductsService {
       const existing = await this.prismaService.product.findFirst({
         where: { sku: { equals: sku, mode: 'insensitive' } },
       });
-      if (existing)
-        throw new ConflictException(`SKU "${sku}" is already in use`);
+      if (existing) throw new ConflictException(`SKU "${sku}" is already in use`);
     }
   }
 
-  private async validateUpdateInput(
-    id: string,
-    updateProductInput: UpdateProductInput,
-  ): Promise<void> {
+  private async validateUpdateInput(id: string, updateProductInput: UpdateProductInput): Promise<void> {
     const { sku, categoryId, subcategoryId } = updateProductInput;
 
     if (sku) {
       const existing = await this.prismaService.product.findFirst({
         where: { sku: { equals: sku, mode: 'insensitive' }, NOT: { id } },
       });
-      if (existing)
-        throw new ConflictException(
-          `SKU "${sku}" is already in use by another product`,
-        );
+      if (existing) throw new ConflictException(`SKU "${sku}" is already in use by another product`);
     }
 
     if (categoryId || subcategoryId) {
@@ -257,25 +224,12 @@ export class ProductsService {
       where: { productId: id },
     });
     if (cartItemCount > 0 || orderItemCount > 0) {
-      throw new ConflictException(
-        'Cannot delete product referenced in active carts or orders',
-      );
+      throw new ConflictException('Cannot delete product referenced in active carts or orders');
     }
   }
 
-  private buildWhereClause(
-    filter: ProductFilterArgs,
-  ): Prisma.ProductWhereInput {
-    const {
-      categoryId,
-      subcategoryId,
-      isActive,
-      search,
-      createdAfter,
-      priceMin,
-      priceMax,
-      brand,
-    } = filter;
+  private buildWhereClause(filter: ProductFilterArgs): Prisma.ProductWhereInput {
+    const { categoryId, subcategoryId, isActive, search, createdAfter, priceMin, priceMax, brand } = filter;
     return {
       ...(categoryId && { categoryId }),
       ...(subcategoryId && { subcategoryId }),
@@ -297,11 +251,7 @@ export class ProductsService {
   }
 
   private async fetchProducts(
-    {
-      take,
-      skip,
-      cursor,
-    }: { take: number; skip: number; cursor?: { id: string } },
+    { take, skip, cursor }: { take: number; skip: number; cursor?: { id: string } },
     where: Prisma.ProductWhereInput,
   ): Promise<Product[]> {
     return this.prismaService.product.findMany({
@@ -314,9 +264,7 @@ export class ProductsService {
     });
   }
 
-  private async countProducts(
-    where: Prisma.ProductWhereInput,
-  ): Promise<number> {
+  private async countProducts(where: Prisma.ProductWhereInput): Promise<number> {
     return this.prismaService.product.count({ where });
   }
 
@@ -346,6 +294,7 @@ export class ProductsService {
       },
     };
   }
+
   private async updateProductTag(
     productId: string,
     tagId: string,

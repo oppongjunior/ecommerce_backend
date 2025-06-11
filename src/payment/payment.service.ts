@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaystackWebhookDto } from './dto/paystack.dto';
@@ -87,10 +82,7 @@ export class PaymentService {
    * @param signature - Paystack signature header.
    * @returns True if processed successfully, false otherwise.
    */
-  async handlePaystackWebhook(
-    dto: PaystackWebhookDto,
-    signature: string,
-  ): Promise<boolean> {
+  async handlePaystackWebhook(dto: PaystackWebhookDto, signature: string): Promise<boolean> {
     if (!this.canProcessWebhook(dto, signature)) {
       return false;
     }
@@ -150,8 +142,7 @@ export class PaymentService {
       include: { user: true },
     });
     if (!order) throw new NotFoundException(`Order "${orderId}" not found`);
-    if (order.userId !== userId)
-      throw new ForbiddenException('Order does not belong to you');
+    if (order.userId !== userId) throw new ForbiddenException('Order does not belong to you');
     return order;
   }
 
@@ -159,8 +150,7 @@ export class PaymentService {
     const existingPayment = await this.prismaService.payment.findUnique({
       where: { orderId },
     });
-    if (existingPayment)
-      throw new BadRequestException('Payment already initiated for this order');
+    if (existingPayment) throw new BadRequestException('Payment already initiated for this order');
   }
 
   private async initializePaystackTransaction({
@@ -211,10 +201,7 @@ export class PaymentService {
     const payment = await this.prismaService.payment.findFirst({
       where: { transactionId: reference },
     });
-    if (!payment)
-      throw new NotFoundException(
-        `Payment with reference "${reference}" not found`,
-      );
+    if (!payment) throw new NotFoundException(`Payment with reference "${reference}" not found`);
     return payment;
   }
 
@@ -228,10 +215,7 @@ export class PaymentService {
     paymentId: string,
     verification: Paystack.Response<Paystack.Transaction.VerifyResponse>,
   ): Promise<Payment> {
-    const status =
-      verification.data.status === 'success'
-        ? PaymentStatus.COMPLETED
-        : PaymentStatus.FAILED;
+    const status = verification.data.status === 'success' ? PaymentStatus.COMPLETED : PaymentStatus.FAILED;
     return this.prismaService.payment.update({
       where: { id: paymentId },
       data: {
@@ -255,14 +239,8 @@ export class PaymentService {
     });
   }
 
-  private canProcessWebhook(
-    dto: PaystackWebhookDto,
-    signature: string,
-  ): boolean {
-    return (
-      this.isValidWebhookSignature(dto, signature) &&
-      this.isRelevantEvent(dto.event)
-    );
+  private canProcessWebhook(dto: PaystackWebhookDto, signature: string): boolean {
+    return this.isValidWebhookSignature(dto, signature) && this.isRelevantEvent(dto.event);
   }
 
   private async processWebhookPayment(reference: string): Promise<boolean> {
@@ -279,10 +257,7 @@ export class PaymentService {
     }
   }
 
-  private isValidWebhookSignature(
-    dto: PaystackWebhookDto,
-    signature: string,
-  ): boolean {
+  private isValidWebhookSignature(dto: PaystackWebhookDto, signature: string): boolean {
     try {
       const hash = this.computeWebhookSignature(dto);
       return hash === signature;
@@ -297,15 +272,10 @@ export class PaymentService {
 
   private computeWebhookSignature(dto: PaystackWebhookDto): string {
     const secret = this.configService.get('PAYSTACK_SECRET_KEY');
-    return createHmac('sha512', secret)
-      .update(JSON.stringify(dto))
-      .digest('hex');
+    return createHmac('sha512', secret).update(JSON.stringify(dto)).digest('hex');
   }
 
   private isRelevantEvent(event: PaystackEvent): boolean {
-    return [
-      this.PAYSTACK_EVENTS.CHARGE_SUCCESS,
-      this.PAYSTACK_EVENTS.CHARGE_FAILED,
-    ].includes(event);
+    return [this.PAYSTACK_EVENTS.CHARGE_SUCCESS, this.PAYSTACK_EVENTS.CHARGE_FAILED].includes(event);
   }
 }

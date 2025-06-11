@@ -24,9 +24,7 @@ export class ReviewResolver {
     name: 'productReviews',
     description: 'Retrieves all reviews for a product',
   })
-  async getProductReviews(
-    @Args('productId', { type: () => String }) productId: string,
-  ) {
+  async getProductReviews(@Args('productId', { type: () => String }) productId: string) {
     return this.reviewService.getProductReviews(productId);
   }
 
@@ -64,10 +62,7 @@ export class ReviewResolver {
     name: 'deleteReview',
     description: 'Deletes a user’s review',
   })
-  async deleteReview(
-    @ActiveUser('id') userId: string,
-    @Args('reviewId', { type: () => String }) reviewId: string,
-  ) {
+  async deleteReview(@ActiveUser('id') userId: string, @Args('reviewId', { type: () => String }) reviewId: string) {
     return this.reviewService.deleteReview(userId, reviewId);
   }
 }

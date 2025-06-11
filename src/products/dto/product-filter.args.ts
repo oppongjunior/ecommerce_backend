@@ -1,12 +1,5 @@
 import { Field, Float, InputType } from '@nestjs/graphql';
-import {
-  IsBoolean,
-  IsDateString,
-  IsNumber,
-  IsOptional,
-  IsString,
-  Min,
-} from 'class-validator';
+import { IsBoolean, IsDateString, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
 @InputType()
 export class ProductFilterArgs {

@@ -16,14 +16,8 @@ export function sanitizeVariables(
   return result;
 }
 
-export function sanitizeQuery(
-  query: string,
-  fieldsToMask = ['password', 'confirmPassword', 'newPassword'],
-): string {
-  const pattern = new RegExp(
-    `(${fieldsToMask.join('|')})\\s*:\\s*"(.*?)"`,
-    'gi',
-  );
+export function sanitizeQuery(query: string, fieldsToMask = ['password', 'confirmPassword', 'newPassword']): string {
+  const pattern = new RegExp(`(${fieldsToMask.join('|')})\\s*:\\s*"(.*?)"`, 'gi');
   return query.replace(pattern, (_, key) => `${key}: "****"`);
 }
 

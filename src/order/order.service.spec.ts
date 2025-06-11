@@ -132,10 +132,7 @@ describe('OrdersService', () => {
       mockPrismaService.product.update.mockResolvedValue(mockProduct);
       mockPrismaService.cartItem.deleteMany.mockResolvedValue({ count: 1 });
 
-      const result = await ordersService.createOrderFromCart(
-        mockUserId,
-        mockAddressId,
-      );
+      const result = await ordersService.createOrderFromCart(mockUserId, mockAddressId);
 
       expect(cartService.getCartOrThrow).toHaveBeenCalledWith(mockUserId);
       expect(prismaService.address.findFirst).toHaveBeenCalledWith({
@@ -164,9 +161,7 @@ describe('OrdersService', () => {
         items: [],
       });
 
-      await expect(
-        ordersService.createOrderFromCart(mockUserId, mockAddressId),
-      ).rejects.toThrow(
+      await expect(ordersService.createOrderFromCart(mockUserId, mockAddressId)).rejects.toThrow(
         new NotFoundException(`Cart for user "${mockUserId}" is empty`),
       );
     });
@@ -175,12 +170,8 @@ describe('OrdersService', () => {
       mockCartService.getCartOrThrow.mockResolvedValue(mockCart);
       mockPrismaService.address.findFirst.mockResolvedValue(null);
 
-      await expect(
-        ordersService.createOrderFromCart(mockUserId, mockAddressId),
-      ).rejects.toThrow(
-        new NotFoundException(
-          `Shipping address "${mockAddressId}" not found for user "${mockUserId}"`,
-        ),
+      await expect(ordersService.createOrderFromCart(mockUserId, mockAddressId)).rejects.toThrow(
+        new NotFoundException(`Shipping address "${mockAddressId}" not found for user "${mockUserId}"`),
       );
     });
 
@@ -195,12 +186,8 @@ describe('OrdersService', () => {
         isActive: false,
       });
 
-      await expect(
-        ordersService.createOrderFromCart(mockUserId, mockAddressId),
-      ).rejects.toThrow(
-        new BadRequestException(
-          `User "${mockUserId}" is not eligible to place an order`,
-        ),
+      await expect(ordersService.createOrderFromCart(mockUserId, mockAddressId)).rejects.toThrow(
+        new BadRequestException(`User "${mockUserId}" is not eligible to place an order`),
       );
     });
 
@@ -216,12 +203,8 @@ describe('OrdersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
 
-      await expect(
-        ordersService.createOrderFromCart(mockUserId, mockAddressId),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Insufficient stock for "T-Shirt": 100 available, 101 requested',
-        ),
+      await expect(ordersService.createOrderFromCart(mockUserId, mockAddressId)).rejects.toThrow(
+        new BadRequestException('Insufficient stock for "T-Shirt": 100 available, 101 requested'),
       );
     });
   });
@@ -242,9 +225,9 @@ describe('OrdersService', () => {
     it('should throw NotFoundException if order doesn’t exist', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(
-        ordersService.getOrder(mockUserId, 'order1'),
-      ).rejects.toThrow(new NotFoundException(`Order "order1" not found`));
+      await expect(ordersService.getOrder(mockUserId, 'order1')).rejects.toThrow(
+        new NotFoundException(`Order "order1" not found`),
+      );
     });
   });
 
@@ -282,11 +265,7 @@ describe('OrdersService', () => {
         status: 'SHIPPED',
       });
 
-      const result = await ordersService.updateOrderStatus(
-        mockUserId,
-        'order1',
-        'SHIPPED',
-      );
+      const result = await ordersService.updateOrderStatus(mockUserId, 'order1', 'SHIPPED');
 
       expect(prismaService.order.update).toHaveBeenCalledWith({
         where: { id: 'order1' },
@@ -299,9 +278,9 @@ describe('OrdersService', () => {
     it('should throw NotFoundException if order doesn’t exist', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(
-        ordersService.updateOrderStatus(mockUserId, 'order1', 'SHIPPED'),
-      ).rejects.toThrow(new NotFoundException(`Order "order1" not found`));
+      await expect(ordersService.updateOrderStatus(mockUserId, 'order1', 'SHIPPED')).rejects.toThrow(
+        new NotFoundException(`Order "order1" not found`),
+      );
     });
   });
 
@@ -334,12 +313,8 @@ describe('OrdersService', () => {
         status: 'SHIPPED',
       });
 
-      await expect(
-        ordersService.cancelOrder(mockUserId, 'order1'),
-      ).rejects.toThrow(
-        new BadRequestException(
-          `Order "order1" cannot be cancelled; current status: SHIPPED`,
-        ),
+      await expect(ordersService.cancelOrder(mockUserId, 'order1')).rejects.toThrow(
+        new BadRequestException(`Order "order1" cannot be cancelled; current status: SHIPPED`),
       );
     });
   });
@@ -368,12 +343,8 @@ describe('OrdersService', () => {
         status: 'SHIPPED',
       });
 
-      await expect(
-        ordersService.markOrderAsPaid(mockUserId, 'order1'),
-      ).rejects.toThrow(
-        new BadRequestException(
-          `Order "order1" cannot be paid; current status: SHIPPED`,
-        ),
+      await expect(ordersService.markOrderAsPaid(mockUserId, 'order1')).rejects.toThrow(
+        new BadRequestException(`Order "order1" cannot be paid; current status: SHIPPED`),
       );
     });
   });

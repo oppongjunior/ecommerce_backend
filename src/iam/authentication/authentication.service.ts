@@ -1,11 +1,5 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { ConflictException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../../users/users.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { Role } from '../../users/enums/role.enum';
 import { HashingService } from '../hashing/hashing.service';
 import { User } from '@prisma/client';
@@ -56,12 +50,8 @@ export class AuthenticationService {
   async signIn(signInDto: SignInInput) {
     const user = await this.userService.findUserByEmail(signInDto.email);
     if (!user) throw new UnauthorizedException('Invalid email or password');
-    const isPasswordEqual = await this.passwordService.compare(
-      signInDto.password,
-      user.password,
-    );
-    if (!isPasswordEqual)
-      throw new UnauthorizedException('Invalid email or password');
+    const isPasswordEqual = await this.passwordService.compare(signInDto.password, user.password);
+    if (!isPasswordEqual) throw new UnauthorizedException('Invalid email or password');
     return await this.generateTokens(user);
   }
 

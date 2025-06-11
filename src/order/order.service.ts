@@ -1,19 +1,7 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CartService } from '../cart/cart.service';
-import {
-  Cart,
-  CartItem,
-  Order,
-  OrderItem,
-  OrderStatus,
-  Prisma,
-  Product,
-} from '@prisma/client';
+import { Cart, CartItem, Order, OrderItem, OrderStatus, Prisma, Product } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -28,20 +16,12 @@ export class OrdersService {
    * @param shippingAddressId - The ID of the shipping address.
    * @returns The created order with its items.
    */
-  async createOrderFromCart(
-    userId: string,
-    shippingAddressId: string,
-  ): Promise<Order & { items: OrderItem[] }> {
+  async createOrderFromCart(userId: string, shippingAddressId: string): Promise<Order & { items: OrderItem[] }> {
     const cart = await this.ensureValidCart(userId);
     await this.ensureValidShippingAddress(userId, shippingAddressId);
     await this.ensureUserCanOrder(userId, cart);
     const orderDetails = await this.buildOrderDetails(cart.items);
-    return this.saveOrderAndUpdateInventory(
-      userId,
-      shippingAddressId,
-      orderDetails,
-      cart.id,
-    );
+    return this.saveOrderAndUpdateInventory(userId, shippingAddressId, orderDetails, cart.id);
   }
 
   /**
@@ -50,10 +30,7 @@ export class OrdersService {
    * @param orderId - The ID of the order.
    * @returns The order with its items.
    */
-  async getOrder(
-    userId: string,
-    orderId: string,
-  ): Promise<Order & { items: OrderItem[] }> {
+  async getOrder(userId: string, orderId: string): Promise<Order & { items: OrderItem[] }> {
     return this.retrieveUserOrder(userId, orderId);
   }
 
@@ -62,9 +39,7 @@ export class OrdersService {
    * @param userId - The ID of the user.
    * @returns List of orders with their items.
    */
-  async getUserOrders(
-    userId: string,
-  ): Promise<(Order & { items: OrderItem[] })[]> {
+  async getUserOrders(userId: string): Promise<(Order & { items: OrderItem[] })[]> {
     return this.fetchUserOrders(userId);
   }
 
@@ -98,10 +73,7 @@ export class OrdersService {
    * @param orderId - The ID of the order.
    * @returns The cancelled order with its items.
    */
-  async cancelOrder(
-    userId: string,
-    orderId: string,
-  ): Promise<Order & { items: OrderItem[] }> {
+  async cancelOrder(userId: string, orderId: string): Promise<Order & { items: OrderItem[] }> {
     const order = await this.retrieveUserOrder(userId, orderId);
     this.ensureOrderCanBeCancelled(order);
     return this.cancelOrderAndRestoreStock(order);
@@ -113,10 +85,7 @@ export class OrdersService {
    * @param orderId - The ID of the order.
    * @returns The updated order with its items.
    */
-  async markOrderAsPaid(
-    userId: string,
-    orderId: string,
-  ): Promise<Order & { items: OrderItem[] }> {
+  async markOrderAsPaid(userId: string, orderId: string): Promise<Order & { items: OrderItem[] }> {
     const order = await this.retrieveUserOrder(userId, orderId);
     this.ensureOrderCanBePaid(order);
     return this.applyOrderStatus(orderId, 'PROCESSING');
@@ -132,47 +101,30 @@ export class OrdersService {
     return this.removeOrderAndRestoreStock(order);
   }
 
-  private async ensureValidCart(
-    userId: string,
-  ): Promise<Cart & { items: CartItem[] }> {
+  private async ensureValidCart(userId: string): Promise<Cart & { items: CartItem[] }> {
     const cart = await this.cartService.getCartOrThrow(userId);
-    if (cart.items.length === 0)
-      throw new NotFoundException(`Cart for user "${userId}" is empty`);
+    if (cart.items.length === 0) throw new NotFoundException(`Cart for user "${userId}" is empty`);
     return cart;
   }
 
-  private async ensureValidShippingAddress(
-    userId: string,
-    shippingAddressId: string,
-  ): Promise<void> {
+  private async ensureValidShippingAddress(userId: string, shippingAddressId: string): Promise<void> {
     const address = await this.prismaService.address.findFirst({
       where: { id: shippingAddressId, userId },
     });
     if (!address) {
-      throw new NotFoundException(
-        `Shipping address "${shippingAddressId}" not found for user "${userId}"`,
-      );
+      throw new NotFoundException(`Shipping address "${shippingAddressId}" not found for user "${userId}"`);
     }
   }
 
-  private async ensureUserCanOrder(
-    userId: string,
-    cart: Cart & { items: CartItem[] },
-  ): Promise<void> {
+  private async ensureUserCanOrder(userId: string, cart: Cart & { items: CartItem[] }): Promise<void> {
     const user = await this.prismaService.user.findUnique({
       where: { id: userId },
     });
-    if (!user || !user.isActive)
-      throw new BadRequestException(
-        `User "${userId}" is not eligible to place an order`,
-      );
-    if (cart.items.length > 50)
-      throw new BadRequestException('Order exceeds maximum item limit of 50');
+    if (!user || !user.isActive) throw new BadRequestException(`User "${userId}" is not eligible to place an order`);
+    if (cart.items.length > 50) throw new BadRequestException('Order exceeds maximum item limit of 50');
   }
 
-  private async buildOrderDetails(
-    cartItems: CartItem[],
-  ): Promise<{ orderItems: OrderItem[]; totalAmount: number }> {
+  private async buildOrderDetails(cartItems: CartItem[]): Promise<{ orderItems: OrderItem[]; totalAmount: number }> {
     const orderItems = await this.createOrderItems(cartItems);
     const totalAmount = this.computeTotalAmount(orderItems);
     return { orderItems, totalAmount };
@@ -195,8 +147,7 @@ export class OrdersService {
     const product = await this.prismaService.product.findUnique({
       where: { id: item.productId },
     });
-    if (!product)
-      throw new NotFoundException(`Product "${item.productId}" not found`);
+    if (!product) throw new NotFoundException(`Product "${item.productId}" not found`);
 
     if (product.quantity < item.quantity) {
       throw new BadRequestException(
@@ -207,10 +158,7 @@ export class OrdersService {
   }
 
   private computeTotalAmount(orderItems: OrderItem[]): number {
-    const subtotal = orderItems.reduce(
-      (sum, item) => sum + item.priceAtOrder * item.quantity,
-      0,
-    );
+    const subtotal = orderItems.reduce((sum, item) => sum + item.priceAtOrder * item.quantity, 0);
     const tax = subtotal * 0.1; // 10% tax, configurable later
     const shippingFee = 5.0; // Flat fee, configurable later
     return subtotal + tax + shippingFee;
@@ -223,12 +171,7 @@ export class OrdersService {
     cartId: string,
   ): Promise<Order & { items: OrderItem[] }> {
     return this.prismaService.$transaction(async (prisma) => {
-      const newOrder = await this.createOrderInDb(
-        prisma,
-        userId,
-        shippingAddressId,
-        orderDetails,
-      );
+      const newOrder = await this.createOrderInDb(prisma, userId, shippingAddressId, orderDetails);
       await this.reduceProductStock(prisma, orderDetails.orderItems);
       await this.emptyCart(prisma, cartId);
       return newOrder;
@@ -252,10 +195,7 @@ export class OrdersService {
     });
   }
 
-  private async reduceProductStock(
-    prisma: Prisma.TransactionClient,
-    orderItems: OrderItem[],
-  ): Promise<void> {
+  private async reduceProductStock(prisma: Prisma.TransactionClient, orderItems: OrderItem[]): Promise<void> {
     for (const item of orderItems) {
       await prisma.product.update({
         where: { id: item.productId },
@@ -264,17 +204,11 @@ export class OrdersService {
     }
   }
 
-  private async emptyCart(
-    prisma: Prisma.TransactionClient,
-    cartId: string,
-  ): Promise<void> {
+  private async emptyCart(prisma: Prisma.TransactionClient, cartId: string): Promise<void> {
     await prisma.cartItem.deleteMany({ where: { cartId } });
   }
 
-  private async retrieveUserOrder(
-    userId: string,
-    orderId: string,
-  ): Promise<Order & { items: OrderItem[] }> {
+  private async retrieveUserOrder(userId: string, orderId: string): Promise<Order & { items: OrderItem[] }> {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
       include: { items: { include: { product: true } } },
@@ -285,9 +219,7 @@ export class OrdersService {
     return order;
   }
 
-  private async fetchUserOrders(
-    userId: string,
-  ): Promise<(Order & { items: OrderItem[] })[]> {
+  private async fetchUserOrders(userId: string): Promise<(Order & { items: OrderItem[] })[]> {
     return this.prismaService.order.findMany({
       where: { userId },
       include: { items: { include: { product: true } } },
@@ -299,10 +231,7 @@ export class OrdersService {
     return this.prismaService.order.findMany();
   }
 
-  private async applyOrderStatus(
-    orderId: string,
-    status: OrderStatus,
-  ): Promise<Order & { items: OrderItem[] }> {
+  private async applyOrderStatus(orderId: string, status: OrderStatus): Promise<Order & { items: OrderItem[] }> {
     return this.prismaService.order.update({
       where: { id: orderId },
       data: { status },
@@ -310,19 +239,13 @@ export class OrdersService {
     });
   }
 
-  private ensureOrderCanBeCancelled(
-    order: Order & { items: OrderItem[] },
-  ): void {
+  private ensureOrderCanBeCancelled(order: Order & { items: OrderItem[] }): void {
     if (order.status === 'SHIPPED' || order.status === 'DELIVERED') {
-      throw new BadRequestException(
-        `Order "${order.id}" cannot be cancelled; current status: ${order.status}`,
-      );
+      throw new BadRequestException(`Order "${order.id}" cannot be cancelled; current status: ${order.status}`);
     }
   }
 
-  private async cancelOrderAndRestoreStock(
-    order: Order & { items: OrderItem[] },
-  ): Promise<
+  private async cancelOrderAndRestoreStock(order: Order & { items: OrderItem[] }): Promise<
     Order & {
       items: OrderItem[];
     }
@@ -335,15 +258,11 @@ export class OrdersService {
 
   private ensureOrderCanBePaid(order: Order & { items: OrderItem[] }): void {
     if (order.status !== 'PENDING') {
-      throw new BadRequestException(
-        `Order "${order.id}" cannot be paid; current status: ${order.status}`,
-      );
+      throw new BadRequestException(`Order "${order.id}" cannot be paid; current status: ${order.status}`);
     }
   }
 
-  private async retrieveOrder(
-    orderId: string,
-  ): Promise<Order & { items: OrderItem[] }> {
+  private async retrieveOrder(orderId: string): Promise<Order & { items: OrderItem[] }> {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
       include: { items: true },
@@ -364,10 +283,7 @@ export class OrdersService {
     });
   }
 
-  private async restoreProductStock(
-    prisma: Prisma.TransactionClient,
-    orderItems: OrderItem[],
-  ): Promise<void> {
+  private async restoreProductStock(prisma: Prisma.TransactionClient, orderItems: OrderItem[]): Promise<void> {
     for (const item of orderItems) {
       await prisma.product.update({
         where: { id: item.productId },

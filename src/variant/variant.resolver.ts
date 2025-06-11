@@ -16,9 +16,7 @@ export class VariantResolver {
     name: 'variant',
     description: 'Retrieves a specific variant by ID',
   })
-  async getVariant(
-    @Args('variantId', { type: () => String }) variantId: string,
-  ) {
+  async getVariant(@Args('variantId', { type: () => String }) variantId: string) {
     return this.variantService.getVariant(variantId);
   }
 
@@ -26,9 +24,7 @@ export class VariantResolver {
     name: 'productVariants',
     description: 'Retrieves all variants for a product',
   })
-  async getProductVariants(
-    @Args('productId', { type: () => String }) productId: string,
-  ) {
+  async getProductVariants(@Args('productId', { type: () => String }) productId: string) {
     return this.variantService.getProductVariants(productId);
   }
 
@@ -65,9 +61,7 @@ export class VariantResolver {
     name: 'deleteVariant',
     description: 'Deletes a variant',
   })
-  async deleteVariant(
-    @Args('variantId', { type: () => String }) variantId: string,
-  ) {
+  async deleteVariant(@Args('variantId', { type: () => String }) variantId: string) {
     return this.variantService.deleteVariant(variantId);
   }
 }

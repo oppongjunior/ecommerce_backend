@@ -1,11 +1,5 @@
 import { Field, InputType } from '@nestjs/graphql';
-import {
-  IsNotEmpty,
-  IsOptional,
-  IsUrl,
-  Length,
-  Matches,
-} from 'class-validator';
+import { IsNotEmpty, IsOptional, IsUrl, Length, Matches } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 @InputType()
@@ -19,8 +13,7 @@ export class CreateSubCategoryInput {
     message: 'Subcategory name must be between 2 and 50 characters',
   })
   @Matches(/^[a-zA-Z0-9\s-]+$/, {
-    message:
-      'Subcategory name can only contain letters, numbers, spaces, and hyphens',
+    message: 'Subcategory name can only contain letters, numbers, spaces, and hyphens',
   })
   name: string;
 
@@ -33,10 +26,7 @@ export class CreateSubCategoryInput {
     description: 'Optional HTTPS URL to an image',
   })
   @IsOptional()
-  @IsUrl(
-    { protocols: ['https'], require_protocol: true },
-    { message: 'Image must be a valid HTTPS URL' },
-  )
+  @IsUrl({ protocols: ['https'], require_protocol: true }, { message: 'Image must be a valid HTTPS URL' })
   image?: string;
 
   @Field(() => String, {

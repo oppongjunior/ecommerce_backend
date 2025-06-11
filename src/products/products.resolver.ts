@@ -27,11 +27,10 @@ export class ProductsResolver {
     return this.productsService.create(input);
   }
 
-  @Roles(Role.USER, Role.ADMIN)
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => ProductConnection, {
     name: 'products',
-    description:
-      'Retrieves a paginated list of products with optional filtering (e.g., by category, price range)',
+    description: 'Retrieves a paginated list of products with optional filtering (e.g., by category, price range)',
   })
   findAll(
     @Args('paginate', {
@@ -50,6 +49,7 @@ export class ProductsResolver {
     return this.productsService.findAll(paginate, filter);
   }
 
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => Product, {
     name: 'product',
     nullable: true,
@@ -110,8 +110,7 @@ export class ProductsResolver {
   }
 
   @Mutation(() => Product, {
-    description:
-      'Restores an archived product by setting isActive to true (admin only)',
+    description: 'Restores an archived product by setting isActive to true (admin only)',
   })
   restoreProduct(
     @Args('id', {
@@ -131,7 +130,7 @@ export class ProductsResolver {
     return this.productsService.addTagToProduct(productId, tagId);
   }
 
-  @Mutation(() => Product, { name: 'addTagToProduct' })
+  @Mutation(() => Product, { name: 'removeTagFromProduct' })
   async removeTagFromProduct(
     @Args('productId', { type: () => String }) productId: string,
     @Args('tagId', { type: () => String }) tagId: string,

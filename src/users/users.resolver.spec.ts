@@ -169,9 +169,7 @@ describe('UsersResolver', () => {
 
       const result = await resolver.findUserByProviderId(providerId);
 
-      expect(usersService.findUserByProviderId).toHaveBeenCalledWith(
-        providerId,
-      );
+      expect(usersService.findUserByProviderId).toHaveBeenCalledWith(providerId);
       expect(result).toEqual(user);
     });
   });

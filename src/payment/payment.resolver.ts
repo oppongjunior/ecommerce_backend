@@ -11,9 +11,7 @@ export class PaymentResolver {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Mutation(() => Payment)
-  verifyPayment(
-    @Args('verifyPaymentInput') verifyPaymentInput: VerifyPaymentInput,
-  ) {
+  verifyPayment(@Args('verifyPaymentInput') verifyPaymentInput: VerifyPaymentInput) {
     return this.paymentService.verifyPayment(verifyPaymentInput.reference);
   }
 

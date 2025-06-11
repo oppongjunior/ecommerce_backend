@@ -14,10 +14,7 @@ export class AddressesService {
    * @param data - The address data to create.
    * @returns The created address.
    */
-  async createAddress(
-    userId: string,
-    data: CreateAddressInput,
-  ): Promise<Address> {
+  async createAddress(userId: string, data: CreateAddressInput): Promise<Address> {
     return this.saveAddress({ ...data, userId });
   }
 
@@ -55,11 +52,7 @@ export class AddressesService {
    * @param data - The address data to update.
    * @returns The updated address.
    */
-  async updateAddress(
-    userId: string,
-    addressId: string,
-    data: UpdateAddressInput,
-  ): Promise<Address> {
+  async updateAddress(userId: string, addressId: string, data: UpdateAddressInput): Promise<Address> {
     await this.retrieveUserAddress(userId, addressId);
     return this.modifyAddress(addressId, data);
   }
@@ -75,23 +68,16 @@ export class AddressesService {
     return this.removeAddress(addressId);
   }
 
-  private async saveAddress(
-    data: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>,
-  ): Promise<Address> {
+  private async saveAddress(data: Omit<Address, 'id' | 'createdAt' | 'updatedAt'>): Promise<Address> {
     return this.prismaService.address.create({ data });
   }
 
-  private async retrieveUserAddress(
-    userId: string,
-    addressId: string,
-  ): Promise<Address> {
+  private async retrieveUserAddress(userId: string, addressId: string): Promise<Address> {
     const address = await this.prismaService.address.findUnique({
       where: { id: addressId },
     });
     if (!address || address.userId !== userId) {
-      throw new NotFoundException(
-        `Address "${addressId}" not found for user "${userId}"`,
-      );
+      throw new NotFoundException(`Address "${addressId}" not found for user "${userId}"`);
     }
     return address;
   }

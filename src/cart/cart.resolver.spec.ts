@@ -48,10 +48,7 @@ describe('CartResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CartResolver,
-        { provide: CartService, useValue: mockCartService },
-      ],
+      providers: [CartResolver, { provide: CartService, useValue: mockCartService }],
     }).compile();
 
     resolver = module.get<CartResolver>(CartResolver);
@@ -95,9 +92,7 @@ describe('CartResolver', () => {
     });
 
     it('should throw NotFoundException when product does not exist', async () => {
-      mockCartService.addToCart.mockRejectedValueOnce(
-        new NotFoundException('Product "prod1" not found'),
-      );
+      mockCartService.addToCart.mockRejectedValueOnce(new NotFoundException('Product "prod1" not found'));
 
       await expect(resolver.addToCart(mockUserId, input)).rejects.toThrow(
         new NotFoundException('Product "prod1" not found'),
@@ -112,29 +107,18 @@ describe('CartResolver', () => {
         quantity: 101,
       };
       mockCartService.addToCart.mockRejectedValueOnce(
-        new BadRequestException(
-          'Cannot add 101 of "T-Shirt" to cart; only 100 in stock',
-        ),
+        new BadRequestException('Cannot add 101 of "T-Shirt" to cart; only 100 in stock'),
       );
 
-      await expect(
-        resolver.addToCart(mockUserId, highQuantityInput),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Cannot add 101 of "T-Shirt" to cart; only 100 in stock',
-        ),
+      await expect(resolver.addToCart(mockUserId, highQuantityInput)).rejects.toThrow(
+        new BadRequestException('Cannot add 101 of "T-Shirt" to cart; only 100 in stock'),
       );
-      expect(cartService.addToCart).toHaveBeenCalledWith(
-        mockUserId,
-        highQuantityInput,
-      );
+      expect(cartService.addToCart).toHaveBeenCalledWith(mockUserId, highQuantityInput);
       expect(cartService.addToCart).toHaveBeenCalledTimes(1);
     });
 
     it('should throw BadRequestException when product is inactive', async () => {
-      mockCartService.addToCart.mockRejectedValueOnce(
-        new BadRequestException('Product "prod1" is not active'),
-      );
+      mockCartService.addToCart.mockRejectedValueOnce(new BadRequestException('Product "prod1" is not active'));
 
       await expect(resolver.addToCart(mockUserId, input)).rejects.toThrow(
         new BadRequestException('Product "prod1" is not active'),
@@ -152,10 +136,7 @@ describe('CartResolver', () => {
 
       const result = await resolver.updateCartItem(mockUserId, input);
 
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(
-        mockUserId,
-        input,
-      );
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(mockUserId, input);
       expect(cartService.updateCartItem).toHaveBeenCalledTimes(1);
       expect(result).toEqual(mockCart);
     });
@@ -170,10 +151,7 @@ describe('CartResolver', () => {
 
       const result = await resolver.updateCartItem(mockUserId, zeroInput);
 
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(
-        mockUserId,
-        zeroInput,
-      );
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(mockUserId, zeroInput);
       expect(cartService.updateCartItem).toHaveBeenCalledTimes(1);
       expect(result).toEqual(clearedCart);
     });
@@ -186,10 +164,7 @@ describe('CartResolver', () => {
       await expect(resolver.updateCartItem(mockUserId, input)).rejects.toThrow(
         new NotFoundException(`Cart for user "${mockUserId}" not found`),
       );
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(
-        mockUserId,
-        input,
-      );
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(mockUserId, input);
       expect(cartService.updateCartItem).toHaveBeenCalledTimes(1);
     });
 
@@ -201,10 +176,7 @@ describe('CartResolver', () => {
       await expect(resolver.updateCartItem(mockUserId, input)).rejects.toThrow(
         new NotFoundException(`Cart item "item1" not found in user's cart`),
       );
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(
-        mockUserId,
-        input,
-      );
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(mockUserId, input);
       expect(cartService.updateCartItem).toHaveBeenCalledTimes(1);
     });
 
@@ -214,22 +186,13 @@ describe('CartResolver', () => {
         quantity: 101,
       };
       mockCartService.updateCartItem.mockRejectedValueOnce(
-        new BadRequestException(
-          'Cannot add 101 of "T-Shirt" to cart; only 100 in stock',
-        ),
+        new BadRequestException('Cannot add 101 of "T-Shirt" to cart; only 100 in stock'),
       );
 
-      await expect(
-        resolver.updateCartItem(mockUserId, highQuantityInput),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Cannot add 101 of "T-Shirt" to cart; only 100 in stock',
-        ),
+      await expect(resolver.updateCartItem(mockUserId, highQuantityInput)).rejects.toThrow(
+        new BadRequestException('Cannot add 101 of "T-Shirt" to cart; only 100 in stock'),
       );
-      expect(cartService.updateCartItem).toHaveBeenCalledWith(
-        mockUserId,
-        highQuantityInput,
-      );
+      expect(cartService.updateCartItem).toHaveBeenCalledWith(mockUserId, highQuantityInput);
       expect(cartService.updateCartItem).toHaveBeenCalledTimes(1);
     });
   });
@@ -241,10 +204,7 @@ describe('CartResolver', () => {
 
       const result = await resolver.removeFromCart(mockUserId, 'item1');
 
-      expect(cartService.removeFromCart).toHaveBeenCalledWith(
-        mockUserId,
-        'item1',
-      );
+      expect(cartService.removeFromCart).toHaveBeenCalledWith(mockUserId, 'item1');
       expect(cartService.removeFromCart).toHaveBeenCalledTimes(1);
       expect(result).toEqual(clearedCart);
     });
@@ -254,15 +214,10 @@ describe('CartResolver', () => {
         new NotFoundException(`Cart for user "${mockUserId}" not found`),
       );
 
-      await expect(
-        resolver.removeFromCart(mockUserId, 'item1'),
-      ).rejects.toThrow(
+      await expect(resolver.removeFromCart(mockUserId, 'item1')).rejects.toThrow(
         new NotFoundException(`Cart for user "${mockUserId}" not found`),
       );
-      expect(cartService.removeFromCart).toHaveBeenCalledWith(
-        mockUserId,
-        'item1',
-      );
+      expect(cartService.removeFromCart).toHaveBeenCalledWith(mockUserId, 'item1');
       expect(cartService.removeFromCart).toHaveBeenCalledTimes(1);
     });
 
@@ -271,15 +226,10 @@ describe('CartResolver', () => {
         new NotFoundException(`Cart item "item999" not found in user's cart`),
       );
 
-      await expect(
-        resolver.removeFromCart(mockUserId, 'item999'),
-      ).rejects.toThrow(
+      await expect(resolver.removeFromCart(mockUserId, 'item999')).rejects.toThrow(
         new NotFoundException(`Cart item "item999" not found in user's cart`),
       );
-      expect(cartService.removeFromCart).toHaveBeenCalledWith(
-        mockUserId,
-        'item999',
-      );
+      expect(cartService.removeFromCart).toHaveBeenCalledWith(mockUserId, 'item999');
       expect(cartService.removeFromCart).toHaveBeenCalledTimes(1);
     });
   });
@@ -297,9 +247,7 @@ describe('CartResolver', () => {
     });
 
     it('should throw NotFoundException when cart does not exist', async () => {
-      mockCartService.clearCart.mockRejectedValueOnce(
-        new NotFoundException(`Cart for user "${mockUserId}" not found`),
-      );
+      mockCartService.clearCart.mockRejectedValueOnce(new NotFoundException(`Cart for user "${mockUserId}" not found`));
 
       await expect(resolver.clearCart(mockUserId)).rejects.toThrow(
         new NotFoundException(`Cart for user "${mockUserId}" not found`),

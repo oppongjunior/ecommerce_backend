@@ -27,4 +27,12 @@ export class SubCategory {
 
   @Field(() => SubCategory, { nullable: true })
   category: Category;
+
+  @Field(() => Date, { description: 'Timestamp when the sub category was created' })
+  createdAt: Date;
+
+  @Field(() => Date, {
+    description: 'Timestamp when the sub category was last updated',
+  })
+  updatedAt: Date;
 }

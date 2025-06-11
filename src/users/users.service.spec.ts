@@ -92,11 +92,7 @@ describe('UsersService', () => {
 
       mockPrismaService.user.create.mockResolvedValue(createdUser);
 
-      const result = await service.createUserByAuthProvider(
-        providerId,
-        provider,
-        email,
-      );
+      const result = await service.createUserByAuthProvider(providerId, provider, email);
 
       expect(prismaService.user.create).toHaveBeenCalledWith({
         data: {
@@ -353,10 +349,7 @@ describe('UsersService', () => {
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id },
       });
-      expect(hashingService.compare).toHaveBeenCalledWith(
-        'newPassword',
-        'oldHash',
-      );
+      expect(hashingService.compare).toHaveBeenCalledWith('newPassword', 'oldHash');
       expect(hashingService.hash).toHaveBeenCalledWith('newPassword');
       expect(prismaService.user.update).toHaveBeenCalledWith({
         where: { id },
@@ -377,9 +370,7 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
       mockHashingService.compare.mockResolvedValue(true);
 
-      await expect(service.update(id, input)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(service.update(id, input)).rejects.toThrow(ForbiddenException);
     });
   });
 
@@ -397,9 +388,7 @@ describe('UsersService', () => {
       const updatedUser = { ...existingUser, password: 'hashedNewPass' };
 
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
-      mockHashingService.compare
-        .mockResolvedValueOnce(true)
-        .mockResolvedValueOnce(false);
+      mockHashingService.compare.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
       mockHashingService.hash.mockResolvedValue('hashedNewPass');
       mockPrismaService.user.update.mockResolvedValue(updatedUser);
 
@@ -408,14 +397,8 @@ describe('UsersService', () => {
       expect(prismaService.user.findUnique).toHaveBeenCalledWith({
         where: { id: '1' },
       });
-      expect(hashingService.compare).toHaveBeenCalledWith(
-        'oldPass123',
-        'hashedOldPass',
-      );
-      expect(hashingService.compare).toHaveBeenCalledWith(
-        'NewPass123',
-        'hashedOldPass',
-      );
+      expect(hashingService.compare).toHaveBeenCalledWith('oldPass123', 'hashedOldPass');
+      expect(hashingService.compare).toHaveBeenCalledWith('NewPass123', 'hashedOldPass');
       expect(hashingService.hash).toHaveBeenCalledWith('NewPass123');
       expect(prismaService.user.update).toHaveBeenCalledWith({
         where: { id: '1' },
@@ -438,9 +421,7 @@ describe('UsersService', () => {
       mockPrismaService.user.findUnique.mockResolvedValue(existingUser);
       mockHashingService.compare.mockResolvedValue(false);
 
-      await expect(service.changePassword('1', input)).rejects.toThrow(
-        'Old password is incorrect',
-      );
+      await expect(service.changePassword('1', input)).rejects.toThrow('Old password is incorrect');
     });
 
     it('should throw if new password matches old', async () => {

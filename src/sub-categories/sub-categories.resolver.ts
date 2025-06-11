@@ -7,7 +7,7 @@ import { Role } from '@prisma/client';
 import { Roles } from '../iam/authentication/decorators/roles.decorator';
 import { SubCategory } from './entities/sub-category.entity';
 
-@Roles(Role.ADMIN)
+@Roles(Role.ADMIN, Role.SUPER_ADMIN)
 @Resolver(() => SubCategory)
 export class SubCategoriesResolver {
   constructor(private readonly subCategoriesService: SubCategoriesService) {}
@@ -25,21 +25,20 @@ export class SubCategoriesResolver {
     return this.subCategoriesService.create(input);
   }
 
-  @Roles(Role.USER, Role.ADMIN)
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => [SubCategory], {
     name: 'subCategories',
-    description:
-      'Retrieves a list of all subcategories, sorted alphabetically by name',
+    description: 'Retrieves a list of all subcategories, sorted alphabetically by name',
   })
   findAll() {
     return this.subCategoriesService.findAll();
   }
 
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => SubCategory, {
     name: 'subCategory',
     nullable: true,
-    description:
-      'Retrieves a subcategory by its unique ID, or null if not found',
+    description: 'Retrieves a subcategory by its unique ID, or null if not found',
   })
   findOne(
     @Args('id', {

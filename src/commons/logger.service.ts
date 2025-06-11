@@ -10,10 +10,7 @@ export class LoggerService implements NestLoggerService {
   constructor(private readonly configService: ConfigService) {
     this.logger = createLogger({
       level: this.configService.get('LOG_LEVEL') || 'info',
-      format: format.combine(
-        format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        format.json(),
-      ),
+      format: format.combine(format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), format.json()),
       transports: [
         new transports.DailyRotateFile({
           filename: 'logs/combined-%DATE%.log',

@@ -24,8 +24,7 @@ export class UserPaginateArgs extends PaginateArgs {
 
   @Field(() => Boolean, {
     nullable: true,
-    description:
-      'Filter by active status (true for active, false for inactive)',
+    description: 'Filter by active status (true for active, false for inactive)',
   })
   isActive?: boolean;
 
@@ -37,8 +36,7 @@ export class UserPaginateArgs extends PaginateArgs {
 
   @Field(() => Date, {
     nullable: true,
-    description:
-      'Filter by creation date (users created on or after this date)',
+    description: 'Filter by creation date (users created on or after this date)',
   })
   createdAfter?: Date;
 }

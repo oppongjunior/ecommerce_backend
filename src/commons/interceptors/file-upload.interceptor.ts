@@ -5,11 +5,7 @@ import e from 'express';
 import { extname } from 'path';
 
 export class FileUploadInterceptor {
-  static create(
-    destination: string,
-    numberOfFiles: number = 1,
-    maxSizeMB: number = 2,
-  ) {
+  static create(destination: string, numberOfFiles: number = 1, maxSizeMB: number = 2) {
     const options: MulterOptions = {
       storage: this.createStorage(destination),
       fileFilter: this.imageFilter(),
@@ -32,11 +28,7 @@ export class FileUploadInterceptor {
   }
 
   static imageFilter() {
-    return (
-      req: any,
-      file: { mimetype: string },
-      callback: (arg0: Error, arg1: boolean) => void,
-    ) => {
+    return (req: any, file: { mimetype: string }, callback: (arg0: Error, arg1: boolean) => void) => {
       if (!file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
         return callback(new Error('Only image files are allowed!'), false);
       }

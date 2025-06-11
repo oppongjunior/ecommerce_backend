@@ -23,9 +23,7 @@ export class VariantService {
    * @param variantId - The ID of the variant.
    * @returns The variant with its product.
    */
-  async getVariant(
-    variantId: string,
-  ): Promise<Variant & { product: { id: string; name: string } }> {
+  async getVariant(variantId: string): Promise<Variant & { product: { id: string; name: string } }> {
     return this.retrieveVariant(variantId);
   }
 
@@ -34,9 +32,7 @@ export class VariantService {
    * @param productId - The ID of the product.
    * @returns List of variants with their products.
    */
-  async getProductVariants(
-    productId: string,
-  ): Promise<(Variant & { product: { id: string; name: string } })[]> {
+  async getProductVariants(productId: string): Promise<(Variant & { product: { id: string; name: string } })[]> {
     await this.ensureProductExists(productId);
     return this.fetchProductVariants(productId);
   }
@@ -55,10 +51,7 @@ export class VariantService {
    * @param data - The variant data to update.
    * @returns The updated variant.
    */
-  async updateVariant(
-    variantId: string,
-    data: UpdateVariantInput,
-  ): Promise<Variant> {
+  async updateVariant(variantId: string, data: UpdateVariantInput): Promise<Variant> {
     await this.retrieveVariant(variantId);
     return this.modifyVariant(variantId, data);
   }
@@ -89,9 +82,7 @@ export class VariantService {
     });
   }
 
-  private async retrieveVariant(
-    variantId: string,
-  ): Promise<Variant & { product: { id: string; name: string } }> {
+  private async retrieveVariant(variantId: string): Promise<Variant & { product: { id: string; name: string } }> {
     const variant = await this.prismaService.variant.findUnique({
       where: { id: variantId },
       include: { product: { select: { id: true, name: true } } },
@@ -118,10 +109,7 @@ export class VariantService {
     });
   }
 
-  private async modifyVariant(
-    variantId: string,
-    data: UpdateVariantInput,
-  ): Promise<Variant> {
+  private async modifyVariant(variantId: string, data: UpdateVariantInput): Promise<Variant> {
     return this.prismaService.variant.update({
       where: { id: variantId },
       data,

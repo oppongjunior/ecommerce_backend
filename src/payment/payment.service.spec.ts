@@ -2,11 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PaymentService } from './payment.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
-import {
-  BadRequestException,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { PaystackWebhookDto } from './dto/paystack.dto';
 import { PaystackEvent } from './enums/paystack-event.enum';
@@ -145,9 +141,9 @@ describe('PaymentService', () => {
     it('should throw NotFoundException if order not found', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.initiatePayment(userId, createPaymentDto),
-      ).rejects.toThrow(new NotFoundException('Order "order1" not found'));
+      await expect(service.initiatePayment(userId, createPaymentDto)).rejects.toThrow(
+        new NotFoundException('Order "order1" not found'),
+      );
     });
 
     it('should throw ForbiddenException if order does not belong to user', async () => {
@@ -156,18 +152,16 @@ describe('PaymentService', () => {
         userId: 'otherUser',
       });
 
-      await expect(
-        service.initiatePayment(userId, createPaymentDto),
-      ).rejects.toThrow(new ForbiddenException('Order does not belong to you'));
+      await expect(service.initiatePayment(userId, createPaymentDto)).rejects.toThrow(
+        new ForbiddenException('Order does not belong to you'),
+      );
     });
 
     it('should throw BadRequestException if payment already initiated', async () => {
       mockPrismaService.order.findUnique.mockResolvedValue(order);
       mockPrismaService.payment.findUnique.mockResolvedValue(payment);
 
-      await expect(
-        service.initiatePayment(userId, createPaymentDto),
-      ).rejects.toThrow(
+      await expect(service.initiatePayment(userId, createPaymentDto)).rejects.toThrow(
         new BadRequestException('Payment already initiated for this order'),
       );
     });
@@ -312,33 +306,22 @@ describe('PaymentService', () => {
     } as PaystackWebhookDto;
     beforeEach(() => {
       const secret = 'test_secret';
-      const hash = createHmac('sha512', secret)
-        .update(JSON.stringify(webhookDto))
-        .digest('hex');
+      const hash = createHmac('sha512', secret).update(JSON.stringify(webhookDto)).digest('hex');
       mockConfigService.get.mockReturnValue(secret);
-      jest
-        .spyOn(service as any, 'computeWebhookSignature')
-        .mockReturnValue(hash);
+      jest.spyOn(service as any, 'computeWebhookSignature').mockReturnValue(hash);
     });
 
     it('should return false for invalid signature', async () => {
-      jest
-        .spyOn(service as any, 'isValidWebhookSignature')
-        .mockReturnValue(false);
+      jest.spyOn(service as any, 'isValidWebhookSignature').mockReturnValue(false);
 
-      const result = await service.handlePaystackWebhook(
-        webhookDto,
-        'invalid_signature',
-      );
+      const result = await service.handlePaystackWebhook(webhookDto, 'invalid_signature');
 
       expect(result).toBe(false);
       expect(prisma.payment.findFirst).not.toHaveBeenCalled();
     });
 
     it('should return false for irrelevant event', async () => {
-      jest
-        .spyOn(service as any, 'isValidWebhookSignature')
-        .mockReturnValue(true);
+      jest.spyOn(service as any, 'isValidWebhookSignature').mockReturnValue(true);
       jest.spyOn(service as any, 'isRelevantEvent').mockReturnValue(false);
 
       const result = await service.handlePaystackWebhook(
@@ -351,16 +334,11 @@ describe('PaymentService', () => {
     });
 
     it('should return false if payment not found', async () => {
-      jest
-        .spyOn(service as any, 'isValidWebhookSignature')
-        .mockReturnValue(true);
+      jest.spyOn(service as any, 'isValidWebhookSignature').mockReturnValue(true);
       jest.spyOn(service as any, 'isRelevantEvent').mockReturnValue(true);
       mockPrismaService.payment.findFirst.mockResolvedValue(null);
 
-      const result = await service.handlePaystackWebhook(
-        webhookDto,
-        'valid_signature',
-      );
+      const result = await service.handlePaystackWebhook(webhookDto, 'valid_signature');
 
       expect(result).toBe(false);
     });
@@ -392,9 +370,7 @@ describe('PaymentService', () => {
 
     it('should throw NotFoundException if payment not found', async () => {
       mockPrismaService.payment.findUnique.mockResolvedValue(null);
-      await expect(service.softDelete(paymentId)).rejects.toThrow(
-        new NotFoundException('Payment Not found'),
-      );
+      await expect(service.softDelete(paymentId)).rejects.toThrow(new NotFoundException('Payment Not found'));
     });
   });
 
@@ -428,9 +404,7 @@ describe('PaymentService', () => {
     it('should throw NotFoundException if payment not found', async () => {
       mockPrismaService.payment.findUnique.mockResolvedValue(null);
 
-      await expect(service.restore(paymentId)).rejects.toThrow(
-        new NotFoundException('Payment Not found'),
-      );
+      await expect(service.restore(paymentId)).rejects.toThrow(new NotFoundException('Payment Not found'));
     });
   });
 
@@ -459,9 +433,7 @@ describe('PaymentService', () => {
     it('should throw NotFoundException if payment not found', async () => {
       mockPrismaService.payment.findUnique.mockResolvedValue(null);
 
-      await expect(service.remove(paymentId)).rejects.toThrow(
-        new NotFoundException('Payment Not found'),
-      );
+      await expect(service.remove(paymentId)).rejects.toThrow(new NotFoundException('Payment Not found'));
     });
   });
 });

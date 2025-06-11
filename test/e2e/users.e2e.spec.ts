@@ -1,12 +1,5 @@
 import { INestApplication } from '@nestjs/common';
-import {
-  clearDatabase,
-  createAdmin,
-  createSuperAdmin,
-  createTestApp,
-  createUser,
-  graphqlRequest,
-} from '../e2e.utils';
+import { clearDatabase, createAdmin, createSuperAdmin, createTestApp, createUser, graphqlRequest } from '../e2e.utils';
 import { PrismaService } from '../../src/prisma/prisma.service';
 
 describe('User Management', () => {
@@ -27,7 +20,7 @@ describe('User Management', () => {
   describe('Super Admin', () => {
     let superAdminToken: string;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       await clearDatabase(prisma);
       await createSuperAdmin(prisma);
       await prisma.user.createMany({
@@ -113,10 +106,7 @@ describe('User Management', () => {
         }
       `;
 
-      const response = await graphqlRequest(app, query)
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(200);
-
+      const response = await graphqlRequest(app, query).set('Authorization', `Bearer ${superAdminToken}`).expect(200);
       expect(response.body.data.users.edges.length).toBeGreaterThanOrEqual(3);
     });
 
@@ -132,9 +122,7 @@ describe('User Management', () => {
         }
       `;
 
-      const response = await graphqlRequest(app, query)
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, query).set('Authorization', `Bearer ${superAdminToken}`).expect(200);
 
       expect(response.body.data.userById).toMatchObject({
         id: 'user2',
@@ -157,9 +145,7 @@ describe('User Management', () => {
         }
       `;
 
-      await graphqlRequest(app, changePasswordMutation)
-        .set('Authorization', `Bearer ${superAdminToken}`)
-        .expect(200);
+      await graphqlRequest(app, changePasswordMutation).set('Authorization', `Bearer ${superAdminToken}`).expect(200);
 
       // Attempt login with new password
       const signInMutation = `
@@ -169,9 +155,7 @@ describe('User Management', () => {
           }
         }
       `;
-      const loginResponse = await graphqlRequest(app, signInMutation).expect(
-        200,
-      );
+      const loginResponse = await graphqlRequest(app, signInMutation).expect(200);
       expect(loginResponse.body.data.signIn.accessToken).toBeDefined();
     });
 
@@ -267,7 +251,7 @@ describe('User Management', () => {
   describe('Admin', () => {
     let adminToken: string;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       await clearDatabase(prisma);
       await createAdmin(prisma);
       await createSuperAdmin(prisma);
@@ -308,9 +292,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, query)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, query).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
       expect(response.body.data.users.edges.length).toBeGreaterThanOrEqual(1);
     });
@@ -326,9 +308,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, query)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, query).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
       expect(response.body.data.userById).toMatchObject({
         id: 'user1',
@@ -386,9 +366,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
       expect(response.body.data.updateUser).toMatchObject({
         name: 'Updated User',
@@ -409,13 +387,9 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
-      expect(response.body.data.changeUserPassword.email).toBe(
-        'admin@example.com',
-      );
+      expect(response.body.data.changeUserPassword.email).toBe('admin@example.com');
 
       // Try signing in with new password
       const signInMutation = `
@@ -425,9 +399,7 @@ describe('User Management', () => {
         }
       }
     `;
-      const loginResponse = await graphqlRequest(app, signInMutation).expect(
-        200,
-      );
+      const loginResponse = await graphqlRequest(app, signInMutation).expect(200);
       expect(loginResponse.body.data.signIn.accessToken).toBeDefined();
     });
 
@@ -445,9 +417,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${adminToken}`).expect(200);
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');
     });
@@ -461,19 +431,16 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${adminToken}`).expect(200);
 
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');
     });
   });
-
   describe('User', () => {
     let userToken: string;
 
-    beforeEach(async () => {
+    beforeAll(async () => {
       await clearDatabase(prisma);
       await createUser(prisma);
 
@@ -500,9 +467,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, query)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, query).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.data.userProfile).toMatchObject({
         email: 'user@example.com',
@@ -525,9 +490,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.data.updateMyProfile).toMatchObject({
         name: 'Updated User',
@@ -548,13 +511,9 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${userToken}`).expect(200);
 
-      expect(response.body.data.changeUserPassword.email).toBe(
-        'user@example.com',
-      );
+      expect(response.body.data.changeUserPassword.email).toBe('user@example.com');
 
       // Confirm new password works
       const loginTest = `
@@ -583,9 +542,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, query)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, query).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');
@@ -601,9 +558,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');
@@ -618,9 +573,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');
@@ -635,9 +588,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');
@@ -656,9 +607,7 @@ describe('User Management', () => {
       }
     `;
 
-      const response = await graphqlRequest(app, mutation)
-        .set('Authorization', `Bearer ${userToken}`)
-        .expect(200);
+      const response = await graphqlRequest(app, mutation).set('Authorization', `Bearer ${userToken}`).expect(200);
 
       expect(response.body.errors).toBeDefined();
       expect(response.body.errors[0].message).toContain('Forbidden');

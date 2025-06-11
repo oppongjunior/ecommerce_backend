@@ -9,8 +9,7 @@ export class ChangeUserPasswordInput {
     message: 'New password must be between 8 and 16 characters',
   })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).+$/, {
-    message:
-      'New password must contain at least one uppercase letter, one lowercase letter, and one number',
+    message: 'New password must contain at least one uppercase letter, one lowercase letter, and one number',
   })
   newPassword: string;
 

@@ -42,10 +42,7 @@ describe('AddressesService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AddressesService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [AddressesService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<AddressesService>(AddressesService);
@@ -82,9 +79,7 @@ describe('AddressesService', () => {
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
       await expect(service.getAddress(mockUserId, 'addr1')).rejects.toThrow(
-        new NotFoundException(
-          `Address "addr1" not found for user "${mockUserId}"`,
-        ),
+        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
       );
     });
 
@@ -95,9 +90,7 @@ describe('AddressesService', () => {
       });
 
       await expect(service.getAddress(mockUserId, 'addr1')).rejects.toThrow(
-        new NotFoundException(
-          `Address "addr1" not found for user "${mockUserId}"`,
-        ),
+        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
       );
     });
   });
@@ -164,11 +157,7 @@ describe('AddressesService', () => {
         service.updateAddress(mockUserId, 'addr1', {
           street: '456 Elm St',
         } as UpdateAddressInput),
-      ).rejects.toThrow(
-        new NotFoundException(
-          `Address "addr1" not found for user "${mockUserId}"`,
-        ),
-      );
+      ).rejects.toThrow(new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`));
     });
   });
 
@@ -192,9 +181,7 @@ describe('AddressesService', () => {
       mockPrismaService.address.findUnique.mockResolvedValue(null);
 
       await expect(service.deleteAddress(mockUserId, 'addr1')).rejects.toThrow(
-        new NotFoundException(
-          `Address "addr1" not found for user "${mockUserId}"`,
-        ),
+        new NotFoundException(`Address "addr1" not found for user "${mockUserId}"`),
       );
     });
   });

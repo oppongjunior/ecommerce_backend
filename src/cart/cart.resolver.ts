@@ -25,30 +25,21 @@ export class CartResolver {
   }
 
   @Mutation(() => Cart, { description: 'Adds a product to the user’s cart' })
-  async addToCart(
-    @ActiveUser('id') userId: string,
-    @Args('input') input: AddToCartInput,
-  ) {
+  async addToCart(@ActiveUser('id') userId: string, @Args('input') input: AddToCartInput) {
     return this.cartService.addToCart(userId, input);
   }
 
   @Mutation(() => Cart, {
     description: 'Updates the quantity of an item in the user’s cart',
   })
-  async updateCartItem(
-    @ActiveUser('id') userId: string,
-    @Args('input') input: UpdateCartItemInput,
-  ) {
+  async updateCartItem(@ActiveUser('id') userId: string, @Args('input') input: UpdateCartItemInput) {
     return this.cartService.updateCartItem(userId, input);
   }
 
   @Mutation(() => Cart, {
     description: 'Removes a specific item from the user’s cart',
   })
-  async removeFromCart(
-    @ActiveUser('id') userId: string,
-    @Args('cartItemId') cartItemId: string,
-  ) {
+  async removeFromCart(@ActiveUser('id') userId: string, @Args('cartItemId') cartItemId: string) {
     return this.cartService.removeFromCart(userId, cartItemId);
   }
 

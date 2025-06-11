@@ -18,10 +18,7 @@ describe('CategoriesResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CategoriesResolver,
-        { provide: CategoriesService, useValue: mockCategoriesService },
-      ],
+      providers: [CategoriesResolver, { provide: CategoriesService, useValue: mockCategoriesService }],
     }).compile();
 
     resolver = module.get<CategoriesResolver>(CategoriesResolver);

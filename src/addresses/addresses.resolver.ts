@@ -16,10 +16,7 @@ export class AddressesResolver {
     name: 'address',
     description: 'Retrieves a specific address by ID for the current user',
   })
-  async getAddress(
-    @ActiveUser('id') userId: string,
-    @Args('addressId', { type: () => String }) addressId: string,
-  ) {
+  async getAddress(@ActiveUser('id') userId: string, @Args('addressId', { type: () => String }) addressId: string) {
     return this.addressService.getAddress(userId, addressId);
   }
 
@@ -46,10 +43,7 @@ export class AddressesResolver {
     name: 'createAddress',
     description: 'Creates a new address for the user',
   })
-  async createAddress(
-    @ActiveUser('id') userId: string,
-    @Args('input') input: CreateAddressInput,
-  ) {
+  async createAddress(@ActiveUser('id') userId: string, @Args('input') input: CreateAddressInput) {
     return this.addressService.createAddress(userId, input);
   }
 
@@ -71,10 +65,7 @@ export class AddressesResolver {
     name: 'deleteAddress',
     description: 'Deletes an address for the user',
   })
-  async deleteAddress(
-    @ActiveUser('id') userId: string,
-    @Args('addressId', { type: () => String }) addressId: string,
-  ) {
+  async deleteAddress(@ActiveUser('id') userId: string, @Args('addressId', { type: () => String }) addressId: string) {
     return this.addressService.deleteAddress(userId, addressId);
   }
 }

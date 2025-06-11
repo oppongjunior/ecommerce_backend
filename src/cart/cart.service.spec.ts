@@ -29,10 +29,7 @@ describe('CartService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        CartService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [CartService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<CartService>(CartService);
@@ -155,12 +152,8 @@ describe('CartService', () => {
       mockPrismaService.product.findUnique.mockResolvedValueOnce(mockProduct);
       mockPrismaService.cart.findUnique.mockResolvedValueOnce(mockCart); // findOrCreateCart
 
-      await expect(
-        service.addToCart(mockUserId, { productId: 'prod1', quantity: 101 }),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Cannot add 101 of "T-Shirt" to cart; only 100 in stock',
-        ),
+      await expect(service.addToCart(mockUserId, { productId: 'prod1', quantity: 101 })).rejects.toThrow(
+        new BadRequestException('Cannot add 101 of "T-Shirt" to cart; only 100 in stock'),
       );
     });
 
@@ -247,11 +240,7 @@ describe('CartService', () => {
           cartItemId: 'item1',
           quantity: 101,
         }),
-      ).rejects.toThrow(
-        new BadRequestException(
-          'Cannot add 101 of "T-Shirt" to cart; only 100 in stock',
-        ),
-      );
+      ).rejects.toThrow(new BadRequestException('Cannot add 101 of "T-Shirt" to cart; only 100 in stock'));
     });
   });
 
@@ -287,9 +276,7 @@ describe('CartService', () => {
         items: [],
       }); // getCartOrThrow
 
-      await expect(
-        service.removeFromCart(mockUserId, 'item999'),
-      ).rejects.toThrow(
+      await expect(service.removeFromCart(mockUserId, 'item999')).rejects.toThrow(
         new NotFoundException(`Cart item "item999" not found in user's cart`),
       );
     });

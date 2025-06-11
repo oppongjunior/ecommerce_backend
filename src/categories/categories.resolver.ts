@@ -6,7 +6,7 @@ import { UpdateCategoryInput } from './dto/update-category.input';
 import { Role } from '@prisma/client';
 import { Roles } from '../iam/authentication/decorators/roles.decorator';
 
-@Roles(Role.ADMIN)
+@Roles(Role.SUPER_ADMIN, Role.ADMIN)
 @Resolver(() => Category)
 export class CategoriesResolver {
   constructor(private readonly categoriesService: CategoriesService) {}
@@ -21,16 +21,16 @@ export class CategoriesResolver {
     return this.categoriesService.create(input);
   }
 
-  @Roles(Role.USER, Role.ADMIN)
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Query(() => [Category], {
     name: 'categories',
-    description:
-      'Retrieves a list of all categories, sorted alphabetically by name',
+    description: 'Retrieves a list of all categories, sorted alphabetically by name',
   })
   findAll() {
     return this.categoriesService.findAll();
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.USER, Role.ADMIN)
   @Query(() => Category, {
     name: 'category',
     nullable: true,

@@ -22,10 +22,7 @@ export class WishlistResolver {
     name: 'addToWishlist',
     description: 'Adds a product to the user’s wishlist',
   })
-  async addToWishlist(
-    @ActiveUser('id') userId: string,
-    @Args('productId', { type: () => String }) productId: string,
-  ) {
+  async addToWishlist(@ActiveUser('id') userId: string, @Args('productId', { type: () => String }) productId: string) {
     return this.wishlistService.addToWishlist(userId, productId);
   }
 

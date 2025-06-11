@@ -1,4 +1,5 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Tag } from '../../tag/entities/tag.entity';
 
 @ObjectType()
 export class Product {
@@ -40,4 +41,7 @@ export class Product {
 
   @Field(() => String, { nullable: true })
   brand?: string;
+
+  @Field(() => [Tag])
+  tags: Tag[];
 }

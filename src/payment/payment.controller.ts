@@ -1,14 +1,4 @@
-import {
-  BadRequestException,
-  Body,
-  Controller,
-  Get,
-  Headers,
-  HttpCode,
-  HttpStatus,
-  Post,
-  Query,
-} from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Headers, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 import { PaystackCallbackDto, PaystackWebhookDto } from './dto/paystack.dto';
 import { PaymentService } from './payment.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
@@ -22,10 +12,7 @@ export class PaymentController {
   constructor(private readonly paymentService: PaymentService) {}
 
   @Post('/initialize')
-  async initializeTransaction(
-    @Body() createPaymentDto: CreatePaymentDto,
-    @ActiveUser('id') userId: string,
-  ) {
+  async initializeTransaction(@Body() createPaymentDto: CreatePaymentDto, @ActiveUser('id') userId: string) {
     return this.paymentService.initiatePayment(userId, createPaymentDto);
   }
 
@@ -38,14 +25,8 @@ export class PaymentController {
   @Auth(AuthType.None)
   @Post('/webhook')
   @HttpCode(HttpStatus.OK)
-  async paymentWebhookHandler(
-    @Body() dto: PaystackWebhookDto,
-    @Headers() headers = {},
-  ) {
-    const result = await this.paymentService.handlePaystackWebhook(
-      dto,
-      `${headers[PAYSTACK_WEBHOOK_SIGNATURE_KEY]}`,
-    );
+  async paymentWebhookHandler(@Body() dto: PaystackWebhookDto, @Headers() headers = {}) {
+    const result = await this.paymentService.handlePaystackWebhook(dto, `${headers[PAYSTACK_WEBHOOK_SIGNATURE_KEY]}`);
     if (!result) throw new BadRequestException();
   }
 }

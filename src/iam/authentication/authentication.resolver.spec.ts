@@ -16,10 +16,7 @@ describe('AuthenticationResolver', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthenticationResolver,
-        { provide: AuthenticationService, useValue: mockAuthService },
-      ],
+      providers: [AuthenticationResolver, { provide: AuthenticationService, useValue: mockAuthService }],
     }).compile();
 
     resolver = module.get<AuthenticationResolver>(AuthenticationResolver);

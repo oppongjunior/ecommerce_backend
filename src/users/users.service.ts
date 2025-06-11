@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -24,18 +20,11 @@ export class UsersService {
     return this.prismaService.user.create({ data: createUserInput });
   }
 
-  async changePassword(
-    id: string,
-    input: ChangeUserPasswordInput,
-  ): Promise<User> {
+  async changePassword(id: string, input: ChangeUserPasswordInput): Promise<User> {
     const { oldPassword, newPassword } = input;
     const user = await this.findUserByIdOrThrow(id);
-    const isOldPasswordValid = await this.passwordService.compare(
-      oldPassword,
-      user.password,
-    );
-    if (!isOldPasswordValid)
-      throw new ForbiddenException('Old password is incorrect');
+    const isOldPasswordValid = await this.passwordService.compare(oldPassword, user.password);
+    if (!isOldPasswordValid) throw new ForbiddenException('Old password is incorrect');
     await this.compareNewPasswordToOld(newPassword, user.password);
     const hashedNewPassword = await this.passwordService.hash(newPassword);
     return this.prismaService.user.update({
@@ -44,11 +33,7 @@ export class UsersService {
     });
   }
 
-  async createUserByAuthProvider(
-    providerId: string,
-    provider: string,
-    email: string,
-  ) {
+  async createUserByAuthProvider(providerId: string, provider: string, email: string) {
     return this.prismaService.user.create({
       data: { email, authProvider: { create: { providerId, provider } } },
     });
@@ -63,12 +48,7 @@ export class UsersService {
     return this.formatPaginatedResponse(users, totalCount, paginationOptions);
   }
 
-  private buildPaginationOptions({
-    first,
-    after,
-    orderBy,
-    orderInAsc,
-  }: UserPaginateArgs) {
+  private buildPaginationOptions({ first, after, orderBy, orderInAsc }: UserPaginateArgs) {
     this.validatePaginationOrderingCriteria(orderBy);
     const pageSize = first;
     const hasCursor = !!after;
@@ -97,9 +77,7 @@ export class UsersService {
     ];
     if (orderBy) {
       if (!validOrderByFields.includes(orderBy)) {
-        throw new Error(
-          `Invalid orderBy field: ${orderBy}. Must be one of: ${validOrderByFields.join(', ')}`,
-        );
+        throw new Error(`Invalid orderBy field: ${orderBy}. Must be one of: ${validOrderByFields.join(', ')}`);
       }
     }
   }
@@ -139,9 +117,7 @@ export class UsersService {
       skip,
       cursor,
       where,
-      orderBy: orderBy
-        ? { [orderBy]: orderInAsc ? 'asc' : 'desc' }
-        : { name: 'asc' },
+      orderBy: orderBy ? { [orderBy]: orderInAsc ? 'asc' : 'desc' } : { name: 'asc' },
     });
   }
 
@@ -149,11 +125,7 @@ export class UsersService {
     return this.prismaService.user.count({ where });
   }
 
-  private formatPaginatedResponse(
-    users: User[],
-    totalCount: number,
-    { skip, take }: { take: number; skip: number },
-  ) {
+  private formatPaginatedResponse(users: User[], totalCount: number, { skip, take }: { take: number; skip: number }) {
     const lastUser = users[users.length - 1];
     const itemsFetched = skip + users.length;
     return {
@@ -191,18 +163,10 @@ export class UsersService {
     });
   }
 
-  private async compareNewPasswordToOld(
-    newPassword: string,
-    oldEncryptedPassword: string,
-  ) {
-    const result = await this.passwordService.compare(
-      newPassword,
-      oldEncryptedPassword,
-    );
+  private async compareNewPasswordToOld(newPassword: string, oldEncryptedPassword: string) {
+    const result = await this.passwordService.compare(newPassword, oldEncryptedPassword);
     if (result) {
-      throw new ForbiddenException(
-        'New password must be different from old password',
-      );
+      throw new ForbiddenException('New password must be different from old password');
     }
   }
 

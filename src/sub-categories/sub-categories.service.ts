@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSubCategoryInput } from './dto/create-sub-category.input';
 import { UpdateSubCategoryInput } from './dto/update-sub-category.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -18,16 +14,11 @@ export class SubCategoriesService {
    * @returns A promise resolving to the created SubCategory.
    * @throws {ConflictException} If a SubCategory with the same name (case-insensitive) already exists within the same category.
    */
-  async create(
-    createSubCategoryInput: CreateSubCategoryInput,
-  ): Promise<SubCategory> {
+  async create(createSubCategoryInput: CreateSubCategoryInput): Promise<SubCategory> {
     const { name, categoryId } = createSubCategoryInput;
 
     // Check for existing SubCategory with the same name in the same category
-    const existing = await this.findSubCategoryByNameAndCategory(
-      name,
-      categoryId,
-    );
+    const existing = await this.findSubCategoryByNameAndCategory(name, categoryId);
     if (existing) {
       throw new ConflictException(
         `A SubCategory with the name "${name}" already exists in category ID "${categoryId}"`,
@@ -66,20 +57,13 @@ export class SubCategoriesService {
    * @throws {NotFoundException} If the SubCategory does not exist.
    * @throws {ConflictException} If the new name conflicts with an existing SubCategory in the same category.
    */
-  async update(
-    id: string,
-    updateSubCategoryInput: UpdateSubCategoryInput,
-  ): Promise<SubCategory> {
+  async update(id: string, updateSubCategoryInput: UpdateSubCategoryInput): Promise<SubCategory> {
     await this.checkSubCategory(id);
 
     if (updateSubCategoryInput.name) {
       const current = await this.findOne(id);
-      const categoryId =
-        updateSubCategoryInput.categoryId || current.categoryId;
-      const existing = await this.findSubCategoryByNameAndCategory(
-        updateSubCategoryInput.name,
-        categoryId,
-      );
+      const categoryId = updateSubCategoryInput.categoryId || current.categoryId;
+      const existing = await this.findSubCategoryByNameAndCategory(updateSubCategoryInput.name, categoryId);
       if (existing && existing.id !== id) {
         throw new ConflictException(
           `A SubCategory with the name "${updateSubCategoryInput.name}" already exists in category ID "${categoryId}"`,
@@ -107,9 +91,7 @@ export class SubCategoriesService {
       where: { subcategoryId: id },
     });
     if (productCount > 0) {
-      throw new ConflictException(
-        'Cannot delete SubCategory with associated products',
-      );
+      throw new ConflictException('Cannot delete SubCategory with associated products');
     }
 
     return this.prismaService.subCategory.delete({ where: { id } });
@@ -121,10 +103,7 @@ export class SubCategoriesService {
    * @param categoryId - The ID of the category to scope the search.
    * @returns A promise resolving to the SubCategory or null if not found.
    */
-  async findSubCategoryByNameAndCategory(
-    name: string,
-    categoryId: string,
-  ): Promise<SubCategory | null> {
+  async findSubCategoryByNameAndCategory(name: string, categoryId: string): Promise<SubCategory | null> {
     return this.prismaService.subCategory.findFirst({
       where: {
         name: { mode: 'insensitive', equals: name },

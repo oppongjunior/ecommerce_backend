@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from '../prisma/prisma.service';
@@ -21,10 +17,7 @@ export class CategoriesService {
   async create(createCategoryInput: CreateCategoryInput): Promise<Category> {
     const { name } = createCategoryInput;
     const existing = await this.findCategoryByName(name);
-    if (existing)
-      throw new ConflictException(
-        `A category with the name "${name}" already exists`,
-      );
+    if (existing) throw new ConflictException(`A category with the name "${name}" already exists`);
     return this.prismaService.category.create({ data: createCategoryInput });
   }
 
@@ -53,25 +46,18 @@ export class CategoriesService {
    * @throws {NotFoundException} If the category does not exist.
    * @throws {ConflictException} If the new name conflicts with an existing category.
    */
-  async update(
-    id: string,
-    updateCategoryInput: UpdateCategoryInput,
-  ): Promise<Category> {
+  async update(id: string, updateCategoryInput: UpdateCategoryInput): Promise<Category> {
+    const { name } = updateCategoryInput;
     await this.checkCategory(id);
-    if (updateCategoryInput.name) {
-      const existing = await this.findCategoryByName(updateCategoryInput.name);
+    if (name) {
+      const existing = await this.findCategoryByName(name);
       if (existing && existing.id !== id) {
-        throw new ConflictException(
-          `A category with the name "${updateCategoryInput.name}" already exists`,
-        );
+        throw new ConflictException(`A category with the name "${name}" already exists`);
       }
     }
     return this.prismaService.category.update({
       where: { id },
-      data: {
-        name: updateCategoryInput.name,
-        description: updateCategoryInput.description,
-      },
+      data: updateCategoryInput,
     });
   }
 
@@ -87,10 +73,7 @@ export class CategoriesService {
     const productCount = await this.prismaService.product.count({
       where: { categoryId: id },
     });
-    if (productCount > 0)
-      throw new ConflictException(
-        'Cannot delete category with associated products',
-      );
+    if (productCount > 0) throw new ConflictException('Cannot delete category with associated products');
     return this.prismaService.category.delete({ where: { id } });
   }
 

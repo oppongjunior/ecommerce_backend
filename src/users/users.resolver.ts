@@ -30,9 +30,7 @@ export class UsersResolver {
     name: 'users',
     description: 'Fetch a paginated list of users',
   })
-  async usersConnection(
-    @Args('filter', { type: () => UserPaginateArgs }) filter: UserPaginateArgs,
-  ) {
+  async usersConnection(@Args('filter', { type: () => UserPaginateArgs }) filter: UserPaginateArgs) {
     return this.usersService.findAll(filter);
   }
 
@@ -55,9 +53,7 @@ export class UsersResolver {
     name: 'userByProviderId',
     description: 'Fetch a user by OAuth provider ID',
   })
-  findUserByProviderId(
-    @Args('providerId', { type: () => String }) providerId: string,
-  ) {
+  findUserByProviderId(@Args('providerId', { type: () => String }) providerId: string) {
     return this.usersService.findUserByProviderId(providerId);
   }
 
@@ -72,10 +68,7 @@ export class UsersResolver {
 
   @Roles(Role.USER)
   @Mutation(() => User, { description: 'Update user profile' })
-  updateMyProfile(
-    @ActiveUser('id') id: string,
-    @Args('updateMyProfileInput') updateMyProfileInput: UpdateUserInput,
-  ) {
+  updateMyProfile(@ActiveUser('id') id: string, @Args('updateMyProfileInput') updateMyProfileInput: UpdateUserInput) {
     return this.usersService.update(id, updateMyProfileInput);
   }
 

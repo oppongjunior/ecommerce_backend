@@ -53,10 +53,7 @@ describe('ReviewService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        ReviewService,
-        { provide: PrismaService, useValue: mockPrismaService },
-      ],
+      providers: [ReviewService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
     service = module.get<ReviewService>(ReviewService);
@@ -96,9 +93,7 @@ describe('ReviewService', () => {
     it('should throw NotFoundException if product doesn’t exist', async () => {
       mockPrismaService.product.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.createReview(mockUserId, createReviewInput),
-      ).rejects.toThrow(
+      await expect(service.createReview(mockUserId, createReviewInput)).rejects.toThrow(
         new NotFoundException(`Product "${mockProductId}" not found`),
       );
       expect(prismaService.review.findFirst).not.toHaveBeenCalled();
@@ -108,12 +103,8 @@ describe('ReviewService', () => {
       mockPrismaService.product.findUnique.mockResolvedValue(mockProduct);
       mockPrismaService.review.findFirst.mockResolvedValue(mockReview);
 
-      await expect(
-        service.createReview(mockUserId, createReviewInput),
-      ).rejects.toThrow(
-        new BadRequestException(
-          `You have already reviewed product "${mockProductId}"`,
-        ),
+      await expect(service.createReview(mockUserId, createReviewInput)).rejects.toThrow(
+        new BadRequestException(`You have already reviewed product "${mockProductId}"`),
       );
       expect(prismaService.review.create).not.toHaveBeenCalled();
     });
@@ -231,9 +222,7 @@ describe('ReviewService', () => {
     it('should throw NotFoundException if review doesn’t exist', async () => {
       mockPrismaService.review.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.updateReview(mockUserId, updateReviewInput),
-      ).rejects.toThrow(
+      await expect(service.updateReview(mockUserId, updateReviewInput)).rejects.toThrow(
         new NotFoundException(`Review "${mockReviewId}" not found`),
       );
       expect(prismaService.review.update).not.toHaveBeenCalled();
@@ -243,9 +232,7 @@ describe('ReviewService', () => {
       const reviewByOtherUser = { ...mockReview, userId: 'user2' };
       mockPrismaService.review.findUnique.mockResolvedValue(reviewByOtherUser);
 
-      await expect(
-        service.updateReview(mockUserId, updateReviewInput),
-      ).rejects.toThrow(
+      await expect(service.updateReview(mockUserId, updateReviewInput)).rejects.toThrow(
         new BadRequestException(`You can only modify your own reviews`),
       );
       expect(prismaService.review.update).not.toHaveBeenCalled();
@@ -275,9 +262,7 @@ describe('ReviewService', () => {
     it('should throw NotFoundException if review doesn’t exist', async () => {
       mockPrismaService.review.findUnique.mockResolvedValue(null);
 
-      await expect(
-        service.deleteReview(mockUserId, mockReviewId),
-      ).rejects.toThrow(
+      await expect(service.deleteReview(mockUserId, mockReviewId)).rejects.toThrow(
         new NotFoundException(`Review "${mockReviewId}" not found`),
       );
       expect(prismaService.review.delete).not.toHaveBeenCalled();
@@ -287,9 +272,7 @@ describe('ReviewService', () => {
       const reviewByOtherUser = { ...mockReview, userId: 'user2' };
       mockPrismaService.review.findUnique.mockResolvedValue(reviewByOtherUser);
 
-      await expect(
-        service.deleteReview(mockUserId, mockReviewId),
-      ).rejects.toThrow(
+      await expect(service.deleteReview(mockUserId, mockReviewId)).rejects.toThrow(
         new BadRequestException(`You can only modify your own reviews`),
       );
       expect(prismaService.review.delete).not.toHaveBeenCalled();
