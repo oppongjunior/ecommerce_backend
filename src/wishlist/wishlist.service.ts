@@ -54,14 +54,14 @@ export class WishlistService {
   private async fetchWishlist(userId: string) {
     return this.prismaService.wishList.findUnique({
       where: { userId },
-      include: { products: { select: { id: true, name: true } } },
+      include: { products: true },
     });
   }
 
   private async createWishlist(userId: string): Promise<WishList & { products: { id: string; name: string }[] }> {
     return this.prismaService.wishList.create({
       data: { userId },
-      include: { products: { select: { id: true, name: true } } },
+      include: { products: true },
     });
   }
 
@@ -97,7 +97,7 @@ export class WishlistService {
     return this.prismaService.wishList.update({
       where: { id: wishListId },
       data: { products: { connect: { id: productId } } },
-      include: { products: { select: { id: true, name: true } } },
+      include: { products: true },
     });
   }
 
@@ -105,7 +105,7 @@ export class WishlistService {
     return this.prismaService.wishList.update({
       where: { id: wishListId },
       data: { products: { disconnect: { id: productId } } },
-      include: { products: { select: { id: true, name: true } } },
+      include: { products: true },
     });
   }
 
@@ -113,7 +113,7 @@ export class WishlistService {
     return this.prismaService.wishList.update({
       where: { id: wishListId },
       data: { products: { set: [] } },
-      include: { products: { select: { id: true, name: true } } },
+      include: { products: true },
     });
   }
 }

@@ -30,7 +30,6 @@ export async function createTestApp(): Promise<{
 }
 
 export async function clearDatabase(prisma: PrismaService) {
-  await prisma.user.deleteMany();
   await prisma.payment.deleteMany();
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -47,6 +46,7 @@ export async function clearDatabase(prisma: PrismaService) {
   await prisma.authProvider.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.tag.deleteMany();
+  await prisma.user.deleteMany();
 }
 
 export async function insertUserIntoDatabase(userData: User, prisma: PrismaService) {
@@ -158,6 +158,13 @@ export async function createTag(prisma: PrismaService) {
   });
 }
 
+/**
+ * Creates multiple product records in the database for the specified category.
+ * the ids of the product created are prod1 and prod2
+ * @param prisma - An instance of PrismaService used to interact with the database.
+ * @param categoryId - The ID of the category to associate with the new products.
+ * @returns A promise that resolves when the products have been created.
+ */
 export async function createProducts(prisma: PrismaService, categoryId: string) {
   await prisma.product.createMany({
     data: [

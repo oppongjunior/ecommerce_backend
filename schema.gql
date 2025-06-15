@@ -732,7 +732,6 @@ input UpdateAddressInput {
 
   """Country"""
   country: String
-  id: String!
 
   """State or province"""
   state: String

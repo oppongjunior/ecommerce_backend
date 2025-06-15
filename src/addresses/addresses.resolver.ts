@@ -29,7 +29,7 @@ export class AddressesResolver {
     return this.addressService.getUserAddresses(userId);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => [Address], {
     name: 'addresses',
     description: 'Retrieves all addresses (admin only)',
