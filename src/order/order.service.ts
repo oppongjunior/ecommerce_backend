@@ -35,6 +35,18 @@ export class OrdersService {
   }
 
   /**
+   * Retrieves a specific order by ID for administrator view purpose.
+   * @param orderId - The ID of the order.
+   * @returns The order with its items.
+   */
+  async viewOrder(orderId: string) {
+    return this.prismaService.order.findUnique({
+      where: { id: orderId },
+      include: { items: true },
+    });
+  }
+
+  /**
    * Retrieves all orders for the user.
    * @param userId - The ID of the user.
    * @returns List of orders with their items.
@@ -53,17 +65,12 @@ export class OrdersService {
 
   /**
    * Updates the status of an order.
-   * @param userId - The ID of the user.
    * @param orderId - The ID of the order.
    * @param status - The new status.
    * @returns The updated order with its items.
    */
-  async updateOrderStatus(
-    userId: string,
-    orderId: string,
-    status: OrderStatus,
-  ): Promise<Order & { items: OrderItem[] }> {
-    await this.retrieveUserOrder(userId, orderId);
+  async updateOrderStatus(orderId: string, status: OrderStatus): Promise<Order & { items: OrderItem[] }> {
+    await this.retrieveOrder(orderId);
     return this.applyOrderStatus(orderId, status);
   }
 
@@ -228,7 +235,7 @@ export class OrdersService {
   }
 
   private async fetchAllOrders(): Promise<Order[]> {
-    return this.prismaService.order.findMany();
+    return this.prismaService.order.findMany({ include: { items: true } });
   }
 
   private async applyOrderStatus(orderId: string, status: OrderStatus): Promise<Order & { items: OrderItem[] }> {

@@ -67,8 +67,7 @@ export class ReviewService {
    * @returns The deleted review.
    */
   async deleteReview(userId: string, reviewId: string): Promise<Review> {
-    const review = await this.fetchReview(reviewId);
-    await this.ensureUserOwnsReview(userId, review);
+    await this.fetchReview(reviewId);
     return this.removeReview(reviewId);
   }
 

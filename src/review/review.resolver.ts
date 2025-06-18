@@ -7,7 +7,7 @@ import { Role } from '../users/enums/role.enum';
 import { CreateReviewInput } from './dto/create-review.input';
 import { UpdateReviewInput } from './dto/update-review.input';
 
-@Roles(Role.USER)
+@Roles(Role.USER, Role.SUPER_ADMIN, Role.ADMIN)
 @Resolver(() => Review)
 export class ReviewResolver {
   constructor(private readonly reviewService: ReviewService) {}
@@ -40,6 +40,7 @@ export class ReviewResolver {
     name: 'createReview',
     description: 'Creates a review for a product',
   })
+  @Roles(Role.USER)
   async createReview(
     @ActiveUser('id') userId: string,
     @Args('input', { type: () => CreateReviewInput }) input: CreateReviewInput,
@@ -51,6 +52,7 @@ export class ReviewResolver {
     name: 'updateReview',
     description: 'Updates a user’s review',
   })
+  @Roles(Role.USER)
   async updateReview(
     @ActiveUser('id') userId: string,
     @Args('input', { type: () => UpdateReviewInput }) input: UpdateReviewInput,

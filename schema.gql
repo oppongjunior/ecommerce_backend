@@ -317,9 +317,6 @@ type Mutation {
   """Deletes a variant"""
   deleteVariant(variantId: String!): Variant!
 
-  """Marks an order as paid"""
-  markOrderAsPaid(orderId: String!): Order!
-
   """Deletes a category by ID (admin only)"""
   removeCategory(
     """The ID of the category to delete"""
@@ -653,6 +650,9 @@ type Query {
 
   """Retrieves all variants (admin only)"""
   variants: [Variant!]!
+
+  """Retrieves all orders (admin only)"""
+  viewOrder(id: String!): Order!
 
   """Retrieves the user’s wishlist"""
   wishlist: Wishlist!

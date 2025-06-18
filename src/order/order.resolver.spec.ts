@@ -17,7 +17,6 @@ describe('OrdersResolver', () => {
     createOrderFromCart: jest.fn(),
     updateOrderStatus: jest.fn(),
     cancelOrder: jest.fn(),
-    markOrderAsPaid: jest.fn(),
     deleteOrder: jest.fn(),
   };
 
@@ -126,9 +125,9 @@ describe('OrdersResolver', () => {
       const updatedOrder = { ...mockOrder, status: OrderStatusEnum.SHIPPED };
       mockOrdersService.updateOrderStatus.mockResolvedValue(updatedOrder);
 
-      const result = await resolver.updateOrderStatus(mockUserId, mockUpdateOrderStatusInput);
+      const result = await resolver.updateOrderStatus(mockUpdateOrderStatusInput);
 
-      expect(ordersService.updateOrderStatus).toHaveBeenCalledWith(mockUserId, 'order1', OrderStatusEnum.SHIPPED);
+      expect(ordersService.updateOrderStatus).toHaveBeenCalledWith('order1', OrderStatusEnum.SHIPPED);
       expect(result).toEqual(updatedOrder);
     });
   });
@@ -145,18 +144,6 @@ describe('OrdersResolver', () => {
 
       expect(ordersService.cancelOrder).toHaveBeenCalledWith(mockUserId, 'order1');
       expect(result).toEqual(cancelledOrder);
-    });
-  });
-
-  describe('markOrderAsPaid', () => {
-    it('should mark an order as paid', async () => {
-      const paidOrder = { ...mockOrder, status: OrderStatusEnum.PROCESSING };
-      mockOrdersService.markOrderAsPaid.mockResolvedValue(paidOrder);
-
-      const result = await resolver.markOrderAsPaid(mockUserId, 'order1');
-
-      expect(ordersService.markOrderAsPaid).toHaveBeenCalledWith(mockUserId, 'order1');
-      expect(result).toEqual(paidOrder);
     });
   });
 

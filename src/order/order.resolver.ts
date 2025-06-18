@@ -29,13 +29,22 @@ export class OrdersResolver {
     return this.ordersService.getUserOrders(userId);
   }
 
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Query(() => [Order], {
     name: 'orders',
     description: 'Retrieves all orders (admin only)',
   })
   async getOrders() {
     return this.ordersService.getOrders();
+  }
+
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => Order, {
+    name: 'viewOrder',
+    description: 'Retrieves all orders (admin only)',
+  })
+  async viewOrder(@Args('id', { type: () => String }) orderId: string) {
+    return this.ordersService.viewOrder(orderId);
   }
 
   @Roles(Role.USER)
@@ -47,13 +56,13 @@ export class OrdersResolver {
     return this.ordersService.createOrderFromCart(userId, input.shippingAddressId);
   }
 
-  @Roles(Role.USER)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Mutation(() => Order, {
     name: 'updateOrderStatus',
     description: 'Updates the status of an order',
   })
-  async updateOrderStatus(@ActiveUser('id') userId: string, @Args('input') input: UpdateOrderStatusInput) {
-    return this.ordersService.updateOrderStatus(userId, input.orderId, input.status);
+  async updateOrderStatus(@Args('input') input: UpdateOrderStatusInput) {
+    return this.ordersService.updateOrderStatus(input.orderId, input.status);
   }
 
   @Roles(Role.USER)
@@ -65,16 +74,7 @@ export class OrdersResolver {
     return this.ordersService.cancelOrder(userId, orderId);
   }
 
-  @Roles(Role.USER)
-  @Mutation(() => Order, {
-    name: 'markOrderAsPaid',
-    description: 'Marks an order as paid',
-  })
-  async markOrderAsPaid(@ActiveUser('id') userId: string, @Args('orderId', { type: () => String }) orderId: string) {
-    return this.ordersService.markOrderAsPaid(userId, orderId);
-  }
-
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.SUPER_ADMIN)
   @Mutation(() => Order, {
     name: 'deleteOrder',
     description: 'Deletes an order and restores stock (admin only)',
