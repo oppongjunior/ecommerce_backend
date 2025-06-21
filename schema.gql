@@ -34,11 +34,20 @@ type Cart {
   """Timestamp when the cart was created"""
   createdAt: DateTime!
 
+  """Total discount amount applied"""
+  discountTotal: Float!
+
+  """Final total after discounts"""
+  finalTotal: Float
+
   """Unique identifier of the cart"""
   id: ID!
 
   """Items in the cart"""
   items: [CartItem!]!
+
+  """Total original price of all items"""
+  total: Float!
 
   """Timestamp when the cart was last updated"""
   updatedAt: DateTime!
@@ -48,11 +57,20 @@ type Cart {
 }
 
 type CartItem {
+  """Discount applied to the cart item, if any"""
+  appliedDiscount: Discount
+
   """Timestamp when the item was added"""
   createdAt: DateTime!
 
+  """Discounted price per unit, if applicable"""
+  discountedPrice: Float
+
   """Unique identifier of the cart item"""
   id: ID!
+
+  """Original price per unit of the product or variant"""
+  originalPrice: Float
 
   """The product in the cart"""
   product: Product!
@@ -65,6 +83,9 @@ type CartItem {
 
   """Timestamp when the item was last updated"""
   updatedAt: DateTime!
+
+  """Variant of the product, if applicable"""
+  variant: Variant
 }
 
 type Category {
@@ -127,6 +148,41 @@ input CreateCategoryInput {
 
   """The name of the category (e.g., "Electronics")"""
   name: String!
+}
+
+input CreateDiscountInput {
+  """List of category IDs to which the discount applies"""
+  categories: [ID!]
+
+  """A detailed description of the discount"""
+  description: String
+
+  """The end date and time of the discount"""
+  endDate: DateTime!
+
+  """Whether the discount is active"""
+  isActive: Boolean! = false
+
+  """Minimum purchase amount to qualify for the discount"""
+  minimumPurchase: Float
+
+  """The name of the discount (e.g., "Summer Sale 2025")"""
+  name: String!
+
+  """List of product IDs to which the discount applies"""
+  products: [ID!]
+
+  """The start date and time of the discount"""
+  startDate: DateTime!
+
+  """The type of discount (e.g., PERCENTAGE or FIXED_AMOUNT)"""
+  type: DiscountType!
+
+  """The discount value (e.g., 20 for 20% or 10.00 for $10 off)"""
+  value: Float!
+
+  """List of variant IDs to which the discount applies"""
+  variants: [ID!]
 }
 
 input CreateOrderInput {
@@ -236,6 +292,49 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+type Discount {
+  """Categories to which the discount applies"""
+  categories: [Category!]
+
+  """Detailed description of the discount"""
+  description: String
+
+  """End date and time of the discount"""
+  endDate: DateTime!
+
+  """Unique identifier for the discount"""
+  id: ID!
+
+  """Whether the discount is currently active"""
+  isActive: Boolean!
+
+  """Minimum purchase amount to qualify for the discount"""
+  minimumPurchase: Float
+
+  """Name of the discount (e.g., "Summer Sale 2025")"""
+  name: String!
+
+  """Products to which the discount applies"""
+  products: [Product!]
+
+  """Start date and time of the discount"""
+  startDate: DateTime!
+
+  """Type of discount (e.g., PERCENTAGE or FIXED_AMOUNT)"""
+  type: DiscountType!
+
+  """Discount value (e.g., 20 for 20% or 10.00 for $10 off)"""
+  value: Float!
+
+  """Variants to which the discount applies"""
+  variants: [Variant!]
+}
+
+enum DiscountType {
+  FLAT
+  PERCENTAGE
+}
+
 type Mutation {
   addTagToProduct(productId: String!, tagId: String!): Product!
 
@@ -271,6 +370,7 @@ type Mutation {
 
   """Creates a new category (admin only)"""
   createCategory(input: CreateCategoryInput!): Category!
+  createDiscount(createDiscountInput: CreateDiscountInput!): Discount!
 
   """Creates an order from the user’s cart"""
   createOrder(input: CreateOrderInput!): Order!
@@ -316,12 +416,14 @@ type Mutation {
 
   """Deletes a variant"""
   deleteVariant(variantId: String!): Variant!
+  finalizeOrder(id: String!): Order!
 
   """Deletes a category by ID (admin only)"""
   removeCategory(
     """The ID of the category to delete"""
     id: String!
   ): Category!
+  removeDiscount(id: Int!): Discount!
 
   """Removes a specific item from the user’s cart"""
   removeFromCart(cartItemId: String!): Cart!
@@ -372,6 +474,7 @@ type Mutation {
     id: String!
     input: UpdateCategoryInput!
   ): Category!
+  updateDiscount(updateDiscountInput: UpdateDiscountInput!): Discount!
 
   """Update user profile"""
   updateMyProfile(updateMyProfileInput: UpdateUserInput!): User!
@@ -413,6 +516,12 @@ type Mutation {
 
 type Order {
   createdAt: DateTime!
+
+  """Total discount amount applied"""
+  discountTotal: Float
+
+  """Final total after discounts"""
+  finalTotal: Float
   id: ID!
   items: [OrderItem!]!
   shippingAddressId: ID!
@@ -423,9 +532,17 @@ type Order {
 }
 
 type OrderItem {
+  """Discount applied to the order item, if any"""
+  appliedDiscount: Discount
   createdAt: DateTime!
+
+  """Discount amount applied to the item"""
+  discountAmount: Float
   id: ID!
   orderId: ID!
+
+  """Original price per unit of the product or variant"""
+  originalPrice: Float
   priceAtOrder: Float!
   product: Product!
   productId: ID!
@@ -483,11 +600,16 @@ enum PaymentStatus {
 }
 
 type Product {
+  """Discount applied to the product, if any"""
+  appliedDiscount: Discount
   brand: String
   categoryId: String!
 
   """description of the product"""
   description: String
+
+  """Discounted price of the product, if applicable"""
+  discountedPrice: Float
 
   """Id of product"""
   id: String!
@@ -561,6 +683,7 @@ type Query {
 
   """Retrieves the current user’s cart"""
   cart: Cart
+  cartWithDiscount(id: String!): Cart!
 
   """Retrieves a list of all categories, sorted alphabetically by name"""
   categories: [Category!]!
@@ -570,6 +693,7 @@ type Query {
     """The ID of the category"""
     id: String!
   ): Category
+  discount(id: Int!): Discount!
   getMyPayments: [Payment!]!
   getUserPayment(userId: String!): [Payment!]!
 
@@ -760,6 +884,44 @@ input UpdateCategoryInput {
 
   """The name of the category (e.g., "Electronics")"""
   name: String
+}
+
+input UpdateDiscountInput {
+  """List of category IDs to which the discount applies"""
+  categories: [ID!]
+
+  """A detailed description of the discount"""
+  description: String
+
+  """The end date and time of the discount"""
+  endDate: DateTime
+
+  """The ID of the discount to update"""
+  id: ID!
+
+  """Whether the discount is active"""
+  isActive: Boolean = false
+
+  """Minimum purchase amount to qualify for the discount"""
+  minimumPurchase: Float
+
+  """The name of the discount (e.g., "Summer Sale 2025")"""
+  name: String
+
+  """List of product IDs to which the discount applies"""
+  products: [ID!]
+
+  """The start date and time of the discount"""
+  startDate: DateTime
+
+  """The type of discount (e.g., PERCENTAGE or FIXED_AMOUNT)"""
+  type: DiscountType
+
+  """The discount value (e.g., 20 for 20% or 10.00 for $10 off)"""
+  value: Float
+
+  """List of variant IDs to which the discount applies"""
+  variants: [ID!]
 }
 
 input UpdateOrderStatusInput {

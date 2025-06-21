@@ -151,7 +151,7 @@ model Review {
 model Discount {
   id              String       @id @default(cuid())
   name            String
-  description     String
+  description     String?
   type            DiscountType
   value           Decimal
   startDate       DateTime
@@ -161,6 +161,8 @@ model Discount {
   variants        Variant[]
   categories      Category[]
   minimumPurchase Decimal?     @db.Decimal(10, 2)
+  orderItems      OrderItem[]
+  cartItems       CartItem[]
 
   @@index([startDate, endDate, isActive])
 }
@@ -175,49 +177,59 @@ model Cart {
 }
 
 model CartItem {
-  id        String   @id @default(cuid())
-  cartId    String
-  productId String
-  variantId String?
-  quantity  Int      @default(1)
-  cart      Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  variant   Variant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String    @id @default(cuid())
+  cartId          String
+  productId       String
+  variantId       String?
+  quantity        Int       @default(1)
+  cart            Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product         Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant         Variant?  @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  originalPrice   Decimal?  @db.Decimal(10, 2)
+  discountedPrice Decimal?  @db.Decimal(10, 2)
+  discount        Discount? @relation(fields: [discountId], references: [id])
+  discountId      String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  @@index([productId])
+  @@index([cartId, productId])
 }
 
 model Order {
-  id                String      @id @default(cuid())
-  userId            String
-  user              User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  totalAmount       Float
-  status            OrderStatus @default(PENDING)
-  shippingAddressId String
-  shippingAddress   Address     @relation(fields: [shippingAddressId], references: [id])
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  items             OrderItem[]
-  payment           Payment?
+  id                   String      @id @default(cuid())
+  userId               String
+  user                 User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  discountTotal        Decimal?
+  totalWithOutDiscount Decimal?
+  totalAmount          Float
+  status               OrderStatus @default(PENDING)
+  shippingAddressId    String
+  shippingAddress      Address     @relation(fields: [shippingAddressId], references: [id])
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
+  items                OrderItem[]
+  payment              Payment?
 
   @@index([userId])
 }
 
 model OrderItem {
-  id           String   @id @default(cuid())
-  orderId      String
-  productId    String
-  variantId    String?
-  quantity     Int      @default(1)
-  priceAtOrder Float
-  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product      Product  @relation(fields: [productId], references: [id], onDelete: Restrict)
-  variant      Variant? @relation(fields: [variantId], references: [id], onDelete: Restrict)
-  createdAt    DateTime @default(now())
+  id             String    @id @default(cuid())
+  orderId        String
+  productId      String
+  variantId      String?
+  quantity       Int       @default(1)
+  priceAtOrder   Float
+  order          Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product        Product   @relation(fields: [productId], references: [id], onDelete: Restrict)
+  variant        Variant?  @relation(fields: [variantId], references: [id], onDelete: Restrict)
+  createdAt      DateTime  @default(now())
+  originalPrice  Decimal   @db.Decimal(10, 2)
+  discountAmount Decimal?  @db.Decimal(10, 2)
+  discount       Discount? @relation(fields: [discountId], references: [id])
+  discountId     String?
 
-  @@index([productId])
+  @@index([productId, orderId])
 }
 
 model Payment {

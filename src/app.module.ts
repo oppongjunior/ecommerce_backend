@@ -26,6 +26,7 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { GraphqlLoggingInterceptor } from './commons/interceptors/graphql-logging.interceptor';
 import { formatError } from './commons/error-formatters/grapqhl-error.formatter';
 import { LoggerService } from './commons/logger.service';
+import { DiscountModule } from './discount/discount.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { LoggerService } from './commons/logger.service';
     WishlistModule,
     ReviewModule,
     PaymentModule,
+    DiscountModule,
   ],
   controllers: [AppController],
   providers: [

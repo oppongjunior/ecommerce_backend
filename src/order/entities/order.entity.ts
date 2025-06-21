@@ -14,6 +14,12 @@ export class Order {
   @Field(() => Float)
   totalAmount: number;
 
+  @Field(() => Float, { description: 'Total discount amount applied', nullable: true })
+  discountTotal?: number;
+
+  @Field(() => Float, { description: 'Final total after discounts', nullable: true })
+  finalTotal?: number;
+
   @Field(() => OrderStatusEnum)
   status: OrderStatus;
 

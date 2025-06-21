@@ -9,12 +9,16 @@ import { Roles } from '../iam/authentication/decorators/roles.decorator';
 import { ActiveUser } from '../iam/authentication/decorators/active-user.decorator';
 import { Role } from '../users/enums/role.enum';
 import { Cart } from './entities/cart.entity';
+import { DiscountService } from '../discount/discount.service';
 
 @Auth(AuthType.Bearer)
 @Roles(Role.USER)
 @Resolver('Cart')
 export class CartResolver {
-  constructor(private readonly cartService: CartService) {}
+  constructor(
+    private readonly cartService: CartService,
+    private readonly discountService: DiscountService,
+  ) {}
 
   @Query(() => Cart, {
     nullable: true,
@@ -48,5 +52,10 @@ export class CartResolver {
   })
   async clearCart(@ActiveUser('id') userId: string) {
     return this.cartService.clearCart(userId);
+  }
+
+  @Query(() => Cart)
+  async cartWithDiscount(@Args('id', { type: () => String }) id: string) {
+    return this.discountService.applyDiscountsToCart(id);
   }
 }

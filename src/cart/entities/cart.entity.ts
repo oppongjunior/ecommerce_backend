@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from '@nestjs/graphql';
+import { Field, Float, ID, ObjectType } from '@nestjs/graphql';
 import { CartItem } from './cart-item.entity';
 
 @ObjectType()
@@ -11,6 +11,15 @@ export class Cart {
 
   @Field(() => [CartItem], { description: 'Items in the cart' })
   items: CartItem[];
+
+  @Field(() => Float, { description: 'Total original price of all items' })
+  total: number;
+
+  @Field(() => Float, { description: 'Total discount amount applied' })
+  discountTotal: number;
+
+  @Field(() => Float, { description: 'Final total after discounts', nullable: true })
+  finalTotal?: number;
 
   @Field(() => Date, { description: 'Timestamp when the cart was created' })
   createdAt: Date;

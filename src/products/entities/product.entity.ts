@@ -1,5 +1,6 @@
 import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
 import { Tag } from '../../tag/entities/tag.entity';
+import { Discount } from '../../discount/entities/discount.entity';
 
 @ObjectType()
 export class Product {
@@ -23,6 +24,12 @@ export class Product {
 
   @Field(() => Float, { description: 'price of the product' })
   price: number;
+
+  @Field(() => Float, { description: 'Discounted price of the product, if applicable', nullable: true })
+  discountedPrice?: number;
+
+  @Field(() => Discount, { description: 'Discount applied to the product, if any', nullable: true })
+  appliedDiscount?: Discount;
 
   @Field(() => String, { description: 'sku of product', nullable: true })
   sku?: string;

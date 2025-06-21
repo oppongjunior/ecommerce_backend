@@ -6,10 +6,14 @@ import { ActiveUser } from '../iam/authentication/decorators/active-user.decorat
 import { CreateOrderInput } from './dto/create-order.input';
 import { UpdateOrderStatusInput } from './dto/update-order-status.input';
 import { OrdersService } from './order.service';
+import { DiscountService } from '../discount/discount.service';
 
 @Resolver(() => Order)
 export class OrdersResolver {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly discountService: DiscountService,
+  ) {}
 
   @Roles(Role.USER)
   @Query(() => Order, {
@@ -81,5 +85,10 @@ export class OrdersResolver {
   })
   async deleteOrder(@Args('orderId', { type: () => String }) orderId: string) {
     return this.ordersService.deleteOrder(orderId);
+  }
+
+  @Mutation(() => Order)
+  async finalizeOrder(@Args('id', { type: () => String }) id: string) {
+    return this.discountService.finalizeDiscountsForOrder(id);
   }
 }

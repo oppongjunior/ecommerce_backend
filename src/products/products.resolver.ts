@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Float, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
@@ -8,11 +8,16 @@ import { ProductFilterArgs } from './dto/product-filter.args';
 import { ProductConnection } from './entities/product-connection.entity';
 import { Role } from '@prisma/client';
 import { Roles } from '../iam/authentication/decorators/roles.decorator';
+import { DiscountService } from '../discount/discount.service';
+import { Discount } from '../discount/entities/discount.entity';
 
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
 @Resolver(() => Product)
 export class ProductsResolver {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly discountService: DiscountService,
+  ) {}
 
   @Mutation(() => Product, {
     description: 'Creates a new product (admin only)',
@@ -136,5 +141,17 @@ export class ProductsResolver {
     @Args('tagId', { type: () => String }) tagId: string,
   ) {
     return this.productsService.removeTagFromProduct(productId, tagId);
+  }
+
+  @ResolveField(() => Float, { nullable: true })
+  async discountedPrice(@Parent() product: Product) {
+    const { discountedPrice } = await this.discountService.getDiscountedPriceForProduct(product.id);
+    return discountedPrice !== product.price ? discountedPrice : null;
+  }
+
+  @ResolveField(() => Discount, { nullable: true })
+  async appliedDiscount(@Parent() product: Product) {
+    const { discountId } = await this.discountService.getDiscountedPriceForProduct(product.id);
+    return discountId ? this.discountService.findOneDiscount(discountId) : null;
   }
 }
