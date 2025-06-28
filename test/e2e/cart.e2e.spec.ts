@@ -184,7 +184,6 @@ describe('Cart E2E Test', () => {
     });
     it('should retrieve user cart with one item', async () => {
       const response = await graphqlRequest(app, GET_CART).set('Authorization', `Bearer ${userToken}`).expect(200);
-      console.log(response.body.data.cart);
       expect(response.body.data.cart).toBeDefined();
       expect(response.body.data.cart.items).toHaveLength(1);
       expect(response.body.data.cart.id).toBeDefined();

@@ -2,44 +2,18 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateDiscountInput } from './dto/create-discount.input';
 import { UpdateDiscountInput } from './dto/update-discount.input';
-import { Cart, CartItem, Discount, Order, OrderItem, Product, Variant } from '@prisma/client';
-
-interface DiscountConnectInput {
-  products: { connect?: { id: string }[] };
-  variants: { connect?: { id: string }[] };
-  categories: { connect?: { id: string }[] };
-}
-
-interface DiscountCalculation {
-  discountedPrice: number;
-  discountAmount: number;
-  discountId?: string;
-}
-
-interface DiscountSetInput {
-  products: { set?: { id: string }[] };
-  variants: { set?: { id: string }[] };
-  categories: { set?: { id: string }[] };
-}
-
-interface CartItemWithProduct extends CartItem {
-  product: Product;
-}
-
-export interface CartWithDiscount extends Cart {
-  items: CartItem[];
-  total: number;
-  discountTotal: number;
-  finalTotal: number;
-}
-
-interface OrderItemWithProduct extends OrderItem {
-  product: Product;
-}
-
-type CreateOrUpdateDiscountInput = CreateDiscountInput | UpdateDiscountInput;
-type DiscountConnectOrSetInput = DiscountConnectInput | DiscountSetInput;
-type DiscountConnectionOperation = 'connect' | 'set';
+import { CartItem, Discount, Order, OrderItem, Product, Variant } from '@prisma/client';
+import {
+  CartItemWithProduct,
+  CartWithDiscount,
+  CreateOrUpdateDiscountInput,
+  DiscountCalculation,
+  DiscountConnectInput,
+  DiscountConnectionOperation,
+  DiscountConnectOrSetInput,
+  DiscountSetInput,
+  OrderItemWithProduct,
+} from './types';
 
 @Injectable()
 export class DiscountService {
@@ -183,7 +157,7 @@ export class DiscountService {
     this.ensureEndDateComeAfter(input);
     this.ensureDiscountInputIsValid(input);
 
-    if (input.products.length) await this.ensureProductsExist(input);
+    if (input.products?.length) await this.ensureProductsExist(input);
     if (input.variants?.length) await this.ensureVariantsExist(input);
     if (input.categories?.length) await this.ensureCategoriesExist(input);
 
@@ -234,13 +208,12 @@ export class DiscountService {
   private async getApplicableDiscounts(productId: string, variantId?: string): Promise<Discount[]> {
     const product = await this.getProductWithDiscounts(productId);
     const discounts: Discount[] = product ? product.discounts : [];
-
     const categoryDiscounts = await this.getCategoryDiscounts(product.categoryId);
-    discounts.push(...categoryDiscounts);
+    discounts?.push(...categoryDiscounts);
 
     if (variantId) {
       const variantDiscounts = await this.getVariantDiscounts(variantId);
-      discounts.push(...variantDiscounts);
+      discounts?.push(...variantDiscounts);
     }
 
     return discounts;
@@ -279,7 +252,7 @@ export class DiscountService {
   }
 
   private selectBestDiscount(discounts: Discount[]): Discount | null {
-    if (!discounts.length) return null;
+    if (!discounts?.length) return null;
 
     return discounts.reduce((best, current) => {
       const bestValue = Number(best.value);
@@ -456,7 +429,7 @@ export class DiscountService {
   }
 
   private ensureEndDateComeAfter(input: CreateOrUpdateDiscountInput) {
-    if (input.startDate && input.endDate && input.endDate <= input.startDate) {
+    if (input.startDate && input.endDate && input.endDate < input.startDate) {
       throw new BadRequestException('End date must be after start date');
     }
   }

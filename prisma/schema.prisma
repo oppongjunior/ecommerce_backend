@@ -124,7 +124,7 @@ model Product {
   category      Category     @relation(fields: [categoryId], references: [id])
   subcategoryId String?
   subcategory   SubCategory? @relation(fields: [subcategoryId], references: [id])
-  brand         String?      @db.VarChar(100)
+  brand         String?      @db.VarChar(255)
   tags          Tag[]
   reviews       Review[]
   variants      Variant[]

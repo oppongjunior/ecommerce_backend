@@ -1,15 +1,17 @@
-import { Args, Float, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
+import { Args, Float, Info, Mutation, Parent, Query, ResolveField, Resolver } from '@nestjs/graphql';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
-import { PaginateArgs } from '../commons/entities/paginate.args';
 import { ProductFilterArgs } from './dto/product-filter.args';
 import { ProductConnection } from './entities/product-connection.entity';
-import { Role } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 import { Roles } from '../iam/authentication/decorators/roles.decorator';
 import { DiscountService } from '../discount/discount.service';
 import { Discount } from '../discount/entities/discount.entity';
+import { PaginationArgs } from '../commons/dto/paginate.args';
+import { GraphQLResolveInfo } from 'graphql/type';
+import { extractRequestedFieldsFromQuery } from '../commons/useful-functions';
 
 @Roles(Role.SUPER_ADMIN, Role.ADMIN)
 @Resolver(() => Product)
@@ -19,112 +21,36 @@ export class ProductsResolver {
     private readonly discountService: DiscountService,
   ) {}
 
-  @Mutation(() => Product, {
-    description: 'Creates a new product (admin only)',
-  })
+  @Mutation(() => Product)
   createProduct(
-    @Args('input', {
-      type: () => CreateProductInput,
-      description: 'Input data for the new product',
-    })
-    input: CreateProductInput,
+    @Args('createProductInput', { type: () => CreateProductInput })
+    createProductInput: CreateProductInput,
   ) {
-    return this.productsService.create(input);
+    return this.productsService.create(createProductInput);
   }
 
-  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
-  @Query(() => ProductConnection, {
-    name: 'products',
-    description: 'Retrieves a paginated list of products with optional filtering (e.g., by category, price range)',
-  })
-  findAll(
-    @Args('paginate', {
-      type: () => PaginateArgs,
-      nullable: true,
-      description: 'Pagination options (first, after)',
-    })
-    paginate: PaginateArgs = { first: 10 },
-    @Args('filter', {
-      type: () => ProductFilterArgs,
-      nullable: true,
-      description: 'Filter options (categoryId, search, etc.)',
-    })
-    filter: ProductFilterArgs = {},
-  ) {
-    return this.productsService.findAll(paginate, filter);
-  }
-
-  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
-  @Query(() => Product, {
-    name: 'product',
-    nullable: true,
-    description: 'Retrieves a single product by its ID, or null if not found',
-  })
-  findOne(
-    @Args('id', {
-      type: () => String,
-      description: 'The unique ID of the product',
-    })
-    id: string,
-  ) {
-    return this.productsService.findOne(id);
-  }
-
-  @Mutation(() => Product, {
-    description: 'Updates an existing product (admin only)',
-  })
+  @Mutation(() => Product)
   updateProduct(
-    @Args('id', {
-      type: () => String,
-      description: 'The ID of the product to update',
-    })
-    id: string,
-    @Args('input', {
-      type: () => UpdateProductInput,
-      description: 'Updated data for the product',
-    })
-    input: UpdateProductInput,
+    @Args('productId', { type: () => String }) productId: string,
+    @Args('updateProductInput', { type: () => UpdateProductInput })
+    updateProductInput: UpdateProductInput,
   ) {
-    return this.productsService.update(id, input);
+    return this.productsService.update(productId, updateProductInput);
   }
 
-  @Mutation(() => Product, {
-    description: 'Deletes a product by ID (admin only)',
-  })
-  removeProduct(
-    @Args('id', {
-      type: () => String,
-      description: 'The ID of the product to delete',
-    })
-    id: string,
-  ) {
-    return this.productsService.remove(id);
+  @Mutation(() => Product)
+  permanentlyDeleteProduct(@Args('productId', { type: () => String }) productId: string) {
+    return this.productsService.remove(productId);
   }
 
-  @Mutation(() => Product, {
-    description: 'Archives a product by setting isActive to false (admin only)',
-  })
-  archiveProduct(
-    @Args('id', {
-      type: () => String,
-      description: 'The ID of the product to archive',
-    })
-    id: string,
-  ) {
-    return this.productsService.archiveProduct(id);
+  @Mutation(() => Product)
+  archiveProduct(@Args('productId', { type: () => String }) productId: string) {
+    return this.productsService.archiveProduct(productId);
   }
 
-  @Mutation(() => Product, {
-    description: 'Restores an archived product by setting isActive to true (admin only)',
-  })
-  restoreProduct(
-    @Args('id', {
-      type: () => String,
-      description: 'The ID of the product to restore',
-    })
-    id: string,
-  ) {
-    return this.productsService.restoreProduct(id);
+  @Mutation(() => Product)
+  restoreProduct(@Args('productId', { type: () => String }) productId: string) {
+    return this.productsService.restoreProduct(productId);
   }
 
   @Mutation(() => Product, { name: 'addTagToProduct' })
@@ -143,10 +69,35 @@ export class ProductsResolver {
     return this.productsService.removeTagFromProduct(productId, tagId);
   }
 
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => ProductConnection, { name: 'products' })
+  findAll(
+    @Args('paginationArgs', { type: () => PaginationArgs, nullable: true })
+    paginationArgs: PaginationArgs = { first: 10 },
+    @Args('filterArgs', { type: () => ProductFilterArgs, nullable: true })
+    filterArgs: ProductFilterArgs = {},
+    @Info() requestInfo?: GraphQLResolveInfo,
+  ) {
+    const requestedFields = extractRequestedFieldsFromQuery(requestInfo, {
+      excludedFields: ['edges', 'cursor', 'node'],
+      level: 3,
+    });
+    return this.productsService.findAll(paginationArgs, filterArgs, requestedFields);
+  }
+
+  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
+  @Query(() => Product, { name: 'product', nullable: true })
+  findOne(@Args('productId', { type: () => String }) productId: string, @Info() requestInfo?: GraphQLResolveInfo) {
+    const requestedFields = extractRequestedFieldsFromQuery(requestInfo, {
+      excludedFields: ['discountedPrice'],
+    });
+    return this.productsService.findOne(productId, requestedFields);
+  }
+
   @ResolveField(() => Float, { nullable: true })
   async discountedPrice(@Parent() product: Product) {
     const { discountedPrice } = await this.discountService.getDiscountedPriceForProduct(product.id);
-    return discountedPrice !== product.price ? discountedPrice : null;
+    return (discountedPrice as unknown as Prisma.Decimal) !== product.price ? discountedPrice : null;
   }
 
   @ResolveField(() => Discount, { nullable: true })

@@ -152,7 +152,7 @@ input CreateCategoryInput {
 
 input CreateDiscountInput {
   """List of category IDs to which the discount applies"""
-  categories: [ID!]
+  categories: [ID!] = []
 
   """A detailed description of the discount"""
   description: String
@@ -170,7 +170,7 @@ input CreateDiscountInput {
   name: String!
 
   """List of product IDs to which the discount applies"""
-  products: [ID!]
+  products: [ID!] = []
 
   """The start date and time of the discount"""
   startDate: DateTime!
@@ -182,7 +182,7 @@ input CreateDiscountInput {
   value: Float!
 
   """List of variant IDs to which the discount applies"""
-  variants: [ID!]
+  variants: [ID!] = []
 }
 
 input CreateOrderInput {
@@ -204,7 +204,7 @@ input CreateProductInput {
   images: [String!]
 
   """Whether the product is active and visible (defaults to false)"""
-  isActive: Boolean!
+  isActive: Boolean! = false
 
   """Name of the product (e.g., "Cotton T-Shirt")"""
   name: String!
@@ -343,12 +343,7 @@ type Mutation {
 
   """Adds a product to the user’s wishlist"""
   addToWishlist(productId: String!): Wishlist!
-
-  """Archives a product by setting isActive to false (admin only)"""
-  archiveProduct(
-    """The ID of the product to archive"""
-    id: String!
-  ): Product!
+  archiveProduct(productId: String!): Product!
 
   """Archive (soft delete) a user"""
   archiveUser(id: String!): User!
@@ -374,12 +369,7 @@ type Mutation {
 
   """Creates an order from the user’s cart"""
   createOrder(input: CreateOrderInput!): Order!
-
-  """Creates a new product (admin only)"""
-  createProduct(
-    """Input data for the new product"""
-    input: CreateProductInput!
-  ): Product!
+  createProduct(createProductInput: CreateProductInput!): Product!
 
   """Creates a review for a product"""
   createReview(input: CreateReviewInput!): Review!
@@ -417,6 +407,7 @@ type Mutation {
   """Deletes a variant"""
   deleteVariant(variantId: String!): Variant!
   finalizeOrder(id: String!): Order!
+  permanentlyDeleteProduct(productId: String!): Product!
 
   """Deletes a category by ID (admin only)"""
   removeCategory(
@@ -432,12 +423,6 @@ type Mutation {
   removeFromWishlist(productId: String!): Wishlist!
   removePayment(id: String!): Payment!
 
-  """Deletes a product by ID (admin only)"""
-  removeProduct(
-    """The ID of the product to delete"""
-    id: String!
-  ): Product!
-
   """Deletes a subcategory by ID (admin only)"""
   removeSubCategory(
     """The ID of the subcategory to delete"""
@@ -448,12 +433,7 @@ type Mutation {
   """Delete a user permanently"""
   removeUser(id: String!): User!
   restorePayment(id: String!): Payment!
-
-  """Restores an archived product by setting isActive to true (admin only)"""
-  restoreProduct(
-    """The ID of the product to restore"""
-    id: String!
-  ): Product!
+  restoreProduct(productId: String!): Product!
 
   """Sign in an existing user with email and password"""
   signIn(input: SignInInput!): AuthEntity!
@@ -481,15 +461,7 @@ type Mutation {
 
   """Updates the status of an order"""
   updateOrderStatus(input: UpdateOrderStatusInput!): Order!
-
-  """Updates an existing product (admin only)"""
-  updateProduct(
-    """The ID of the product to update"""
-    id: String!
-
-    """Updated data for the product"""
-    input: UpdateProductInput!
-  ): Product!
+  updateProduct(productId: String!, updateProductInput: UpdateProductInput!): Product!
 
   """Updates a user’s review"""
   updateReview(input: UpdateReviewInput!): Review!
@@ -565,7 +537,7 @@ type PageInfo {
   pageSize: Int!
 }
 
-input PaginateArgs {
+input PaginationArgs {
   """the id of the cursor"""
   after: String
   first: Int! = 12
@@ -603,6 +575,7 @@ type Product {
   """Discount applied to the product, if any"""
   appliedDiscount: Discount
   brand: String
+  category: Category!
   categoryId: String!
 
   """description of the product"""
@@ -610,6 +583,7 @@ type Product {
 
   """Discounted price of the product, if applicable"""
   discountedPrice: Float
+  discounts: [Discount!]
 
   """Id of product"""
   id: String!
@@ -626,11 +600,14 @@ type Product {
 
   """description of the product"""
   quantity: Int!
+  reviews: [Review!]
 
-  """sku of product"""
+  """unique id for product"""
   sku: String
+  subcategory: SubCategory!
   subcategoryId: String
   tags: [Tag!]!
+  variants: [Variant!]
 }
 
 type ProductConnection {
@@ -703,29 +680,14 @@ type Query {
   """Retrieves all orders (admin only)"""
   orders: [Order!]!
   payment(id: String!): Payment!
-
-  """Retrieves a single product by its ID, or null if not found"""
-  product(
-    """The unique ID of the product"""
-    id: String!
-  ): Product
+  product(productId: String!): Product
 
   """Retrieves all reviews for a product"""
   productReviews(productId: String!): [Review!]!
 
   """Retrieves all variants for a product"""
   productVariants(productId: String!): [Variant!]!
-
-  """
-  Retrieves a paginated list of products with optional filtering (e.g., by category, price range)
-  """
-  products(
-    """Filter options (categoryId, search, etc.)"""
-    filter: ProductFilterArgs
-
-    """Pagination options (first, after)"""
-    paginate: PaginateArgs
-  ): ProductConnection!
+  products(filterArgs: ProductFilterArgs, paginationArgs: PaginationArgs): ProductConnection!
 
   """Retrieves a specific review by ID"""
   review(reviewId: String!): Review!
@@ -888,7 +850,7 @@ input UpdateCategoryInput {
 
 input UpdateDiscountInput {
   """List of category IDs to which the discount applies"""
-  categories: [ID!]
+  categories: [ID!] = []
 
   """A detailed description of the discount"""
   description: String
@@ -909,7 +871,7 @@ input UpdateDiscountInput {
   name: String
 
   """List of product IDs to which the discount applies"""
-  products: [ID!]
+  products: [ID!] = []
 
   """The start date and time of the discount"""
   startDate: DateTime
@@ -921,7 +883,7 @@ input UpdateDiscountInput {
   value: Float
 
   """List of variant IDs to which the discount applies"""
-  variants: [ID!]
+  variants: [ID!] = []
 }
 
 input UpdateOrderStatusInput {
@@ -946,7 +908,7 @@ input UpdateProductInput {
   images: [String!]
 
   """Whether the product is active and visible (defaults to false)"""
-  isActive: Boolean
+  isActive: Boolean = false
 
   """Name of the product (e.g., "Cotton T-Shirt")"""
   name: String

@@ -3,7 +3,7 @@ import { ProductsService } from './products.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateProductInput } from './dto/update-product.input';
 import { ProductFilterArgs } from './dto/product-filter.args';
-import { PaginateArgs } from '../commons/entities/paginate.args';
+import { PaginationArgs } from '../commons/dto/paginate.args';
 import { ConflictException, NotFoundException } from '@nestjs/common';
 
 const mockPrismaService = {
@@ -111,7 +111,7 @@ describe('ProductsService', () => {
   });
 
   describe('findAll', () => {
-    const paginate: PaginateArgs = { first: 2, after: undefined };
+    const paginate: PaginationArgs = { first: 2, after: undefined };
     const filter: ProductFilterArgs = { categoryId: 'cat1', isActive: true };
     const products = [
       {
@@ -150,7 +150,6 @@ describe('ProductsService', () => {
         cursor: undefined,
         where: { categoryId: 'cat1', isActive: true },
         orderBy: { createdAt: 'desc' },
-        include: { category: true, subcategory: true },
       });
       expect(prisma.product.count).toHaveBeenCalledWith({
         where: { categoryId: 'cat1', isActive: true },
@@ -184,9 +183,27 @@ describe('ProductsService', () => {
         }),
       );
     });
+    it('should select only requested fields when requestedField is provided', async () => {
+      mockPrismaService.product.findMany.mockResolvedValue(products);
+      mockPrismaService.product.count.mockResolvedValue(3);
+
+      await service.findAll(paginate, filter, { id: true, name: true });
+
+      expect(prisma.product.findMany).toHaveBeenCalledWith({
+        take: 2,
+        skip: 0,
+        cursor: undefined,
+        where: { categoryId: 'cat1', isActive: true },
+        orderBy: { createdAt: 'desc' },
+        select: { id: true, name: true },
+      });
+      expect(prisma.product.count).toHaveBeenCalledWith({
+        where: { categoryId: 'cat1', isActive: true },
+      });
+    });
 
     it('should respect pagination with after cursor', async () => {
-      const paginateWithCursor: PaginateArgs = { first: 1, after: 'prod1' };
+      const paginateWithCursor: PaginationArgs = { first: 1, after: 'prod1' };
       mockPrismaService.product.findMany.mockResolvedValue([products[1]]);
       mockPrismaService.product.count.mockResolvedValue(2);
 
@@ -221,7 +238,6 @@ describe('ProductsService', () => {
 
       expect(prisma.product.findUnique).toHaveBeenCalledWith({
         where: { id: 'prod1' },
-        include: { category: true, subcategory: true },
       });
       expect(result).toEqual(product);
     });
@@ -276,7 +292,7 @@ describe('ProductsService', () => {
     });
 
     it('should throw ConflictException if SKU conflicts', async () => {
-      const skuInput: UpdateProductInput = { sku: 'TSHIRT002', id: 'prod1' };
+      const skuInput: UpdateProductInput = { sku: 'TSHIRT002' };
       mockPrismaService.product.findUnique.mockResolvedValue({
         id: 'prod1',
         categoryId: 'cat1',

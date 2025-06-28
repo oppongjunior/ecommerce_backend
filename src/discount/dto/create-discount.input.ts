@@ -10,7 +10,7 @@ import {
   IsPositive,
   IsString,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { DiscountType } from '../enums/discount-type.enum';
 
 @InputType()
@@ -53,17 +53,32 @@ export class CreateDiscountInput {
   @IsBoolean({ message: 'isActive must be a boolean' })
   isActive: boolean;
 
-  @Field(() => [ID], { description: 'List of product IDs to which the discount applies', nullable: true })
+  @Transform((value) => value ?? [])
+  @Field(() => [ID], {
+    description: 'List of product IDs to which the discount applies',
+    nullable: true,
+    defaultValue: [],
+  })
   @IsOptional()
   @IsArray({ message: 'Products must be an array of IDs' })
   products: string[];
 
-  @Field(() => [ID], { description: 'List of variant IDs to which the discount applies', nullable: true })
+  @Transform((value) => value ?? [])
+  @Field(() => [ID], {
+    description: 'List of variant IDs to which the discount applies',
+    nullable: true,
+    defaultValue: [],
+  })
   @IsOptional()
   @IsArray({ message: 'Variants must be an array of IDs' })
   variants: string[];
 
-  @Field(() => [ID], { description: 'List of category IDs to which the discount applies', nullable: true })
+  @Transform((value) => value ?? [])
+  @Field(() => [ID], {
+    description: 'List of category IDs to which the discount applies',
+    nullable: true,
+    defaultValue: [],
+  })
   @IsOptional()
   @IsArray({ message: 'Categories must be an array of IDs' })
   categories: string[];

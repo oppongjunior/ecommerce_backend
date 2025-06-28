@@ -70,9 +70,10 @@ export class CreateProductInput {
 
   @Field(() => Boolean, {
     description: 'Whether the product is active and visible (defaults to false)',
+    defaultValue: false,
   })
   @IsBoolean()
-  isActive: boolean;
+  isActive: boolean = false;
 
   @Field(() => String, {
     description: 'ID of the parent category (e.g., "cat_clothing")',

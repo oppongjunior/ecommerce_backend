@@ -1,9 +1,9 @@
 import { Field, InputType } from '@nestjs/graphql';
 import { Role } from '../enums/role.enum';
-import { PaginateArgs } from '../../commons/entities/paginate.args';
+import { PaginationArgs } from '../../commons/dto/paginate.args';
 
 @InputType()
-export class UserPaginateArgs extends PaginateArgs {
+export class UserPaginateArgs extends PaginationArgs {
   @Field(() => String, {
     nullable: true,
     description: 'Filter by email (partial match, case-insensitive)',
