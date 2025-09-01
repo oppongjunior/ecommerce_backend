@@ -30,6 +30,16 @@ type AuthEntity {
   refreshToken: String!
 }
 
+type Brand {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  logo: String
+  name: String!
+  products: [Product!]
+  updatedAt: DateTime!
+}
+
 type Cart {
   """Timestamp when the cart was created"""
   createdAt: DateTime!
@@ -139,6 +149,12 @@ input CreateAddressInput {
   zipCode: String!
 }
 
+input CreateBrandInput {
+  description: String
+  logo: String
+  name: String!
+}
+
 input CreateCategoryInput {
   """A brief description of the category (max 500 characters)"""
   description: String
@@ -192,7 +208,7 @@ input CreateOrderInput {
 
 input CreateProductInput {
   """Optional brand name (e.g., "Nike")"""
-  brand: String
+  brandId: String
 
   """ID of the parent category (e.g., "cat_clothing")"""
   categoryId: String!
@@ -362,6 +378,7 @@ type Mutation {
 
   """Creates a new address for the user"""
   createAddress(input: CreateAddressInput!): Address!
+  createBrand(input: CreateBrandInput!): Brand!
 
   """Creates a new category (admin only)"""
   createCategory(input: CreateCategoryInput!): Category!
@@ -394,6 +411,7 @@ type Mutation {
 
   """Deletes an address for the user"""
   deleteAddress(addressId: String!): Address!
+  deleteBrand(id: String!): Brand!
 
   """Deletes an order and restores stock (admin only)"""
   deleteOrder(orderId: String!): Order!
@@ -444,6 +462,7 @@ type Mutation {
 
   """Updates an existing address for the user"""
   updateAddress(addressId: String!, input: UpdateAddressInput!): Address!
+  updateBrand(id: String!, input: UpdateBrandInput!): Brand!
 
   """Updates the quantity of an item in the user’s cart"""
   updateCartItem(input: UpdateCartItemInput!): Cart!
@@ -574,9 +593,10 @@ enum PaymentStatus {
 type Product {
   """Discount applied to the product, if any"""
   appliedDiscount: Discount
-  brand: String
+  brand: Brand
   category: Category!
   categoryId: String!
+  createdAt: DateTime!
 
   """description of the product"""
   description: String
@@ -607,6 +627,7 @@ type Product {
   subcategory: SubCategory!
   subcategoryId: String
   tags: [Tag!]!
+  updatedAt: DateTime!
   variants: [Variant!]
 }
 
@@ -632,8 +653,14 @@ input ProductFilterArgs {
   """Filter by category ID"""
   categoryId: String
 
+  """Filter by category name"""
+  categoryName: String
+
   """Filter products created after this ISO date"""
   createdAfter: String
+
+  """Filter by instock status"""
+  inStock: Boolean
 
   """Filter by active status"""
   isActive: Boolean = true
@@ -647,6 +674,9 @@ input ProductFilterArgs {
   """Filter by name, description, or tags (partial match)"""
   search: String
 
+  """Filter by subcategory name"""
+  subCategoryName: String
+
   """Filter by subcategory ID"""
   subcategoryId: String
 }
@@ -657,6 +687,8 @@ type Query {
 
   """Retrieves all addresses (admin only)"""
   addresses: [Address!]!
+  brand(id: String!): Brand
+  brands: [Brand]
 
   """Retrieves the current user’s cart"""
   cart: Cart
@@ -829,6 +861,12 @@ input UpdateAddressInput {
   zipCode: String
 }
 
+input UpdateBrandInput {
+  description: String
+  logo: String
+  name: String
+}
+
 input UpdateCartItemInput {
   """ID of the cart item to update"""
   cartItemId: String!
@@ -896,7 +934,7 @@ input UpdateOrderStatusInput {
 
 input UpdateProductInput {
   """Optional brand name (e.g., "Nike")"""
-  brand: String
+  brandId: String
 
   """ID of the parent category (e.g., "cat_clothing")"""
   categoryId: String

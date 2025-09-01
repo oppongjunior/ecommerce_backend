@@ -90,10 +90,11 @@ describe('CategoriesService', () => {
 
       mockPrismaService.category.findMany.mockResolvedValue(categories);
 
-      const result = await service.findAll();
+      const result = await service.findAll({ id: true, name: true });
 
       expect(prisma.category.findMany).toHaveBeenCalledWith({
         orderBy: { name: 'asc' },
+        select: { id: true, name: true },
       });
       expect(result).toEqual(categories);
     });
@@ -101,7 +102,7 @@ describe('CategoriesService', () => {
     it('should return an empty array if no categories exist', async () => {
       mockPrismaService.category.findMany.mockResolvedValue([]);
 
-      const result = await service.findAll();
+      const result = await service.findAll({ id: true, name: true, createdAt: true, updatedAt: true });
 
       expect(result).toEqual([]);
     });
@@ -138,7 +139,6 @@ describe('CategoriesService', () => {
     it('should update an existing category', async () => {
       const id = '1';
       const input: UpdateCategoryInput = {
-        id,
         name: 'Updated Clothing',
         description: 'Updated description',
       };
@@ -167,13 +167,13 @@ describe('CategoriesService', () => {
 
     it('should throw NotFoundException if category does not exist', async () => {
       const id = '999';
-      const input: UpdateCategoryInput = { id, name: 'Updated' };
+      const input: UpdateCategoryInput = { name: 'Updated' };
       mockPrismaService.category.findUnique.mockResolvedValue(null);
       await expect(service.update(id, input)).rejects.toThrow(new NotFoundException('Category not found'));
     });
     it('should throw ConflictException if updating to an existing name', async () => {
       const id = '1';
-      const input: UpdateCategoryInput = { name: 'Electronics', id };
+      const input: UpdateCategoryInput = { name: 'Electronics' };
       const existingCategory = {
         id,
         name: 'Clothing',

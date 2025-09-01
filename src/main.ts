@@ -8,6 +8,7 @@ async function bootstrap() {
     // logger: false,
   });
 
+  app.enableCors();
   //set custom logger
   const logger = app.get(LoggerService);
   app.useLogger(logger);

@@ -1,4 +1,4 @@
-import { Field, Float, Int, ObjectType } from '@nestjs/graphql';
+import { Field, Float, GraphQLISODateTime, Int, ObjectType } from '@nestjs/graphql';
 import { Tag } from '../../tag/entities/tag.entity';
 import { Discount } from '../../discount/entities/discount.entity';
 import { Prisma } from '@prisma/client';
@@ -6,6 +6,7 @@ import { Category } from '../../categories/entities/category.entity';
 import { SubCategory } from '../../sub-categories/entities/sub-category.entity';
 import { Variant } from '../../variant/entities/variant.entity';
 import { Review } from '../../review/entities/review.entity';
+import { Brand } from '../../brand/entities/brand.entity';
 
 @ObjectType()
 export class Product {
@@ -57,8 +58,8 @@ export class Product {
   @Field(() => SubCategory)
   subcategory?: SubCategory;
 
-  @Field(() => String, { nullable: true })
-  brand?: string;
+  @Field(() => Brand, { nullable: true })
+  brand?: Brand;
 
   @Field(() => [Variant], { nullable: true })
   variants?: Variant[];
@@ -71,4 +72,10 @@ export class Product {
 
   @Field(() => [Tag])
   tags?: Tag[];
+
+  @Field(() => GraphQLISODateTime)
+  createdAt: Date;
+
+  @Field(() => GraphQLISODateTime)
+  updatedAt: Date;
 }

@@ -6,7 +6,7 @@ import { sanitizeQuery, sanitizeVariables } from '../useful-functions';
 
 @Injectable()
 export class GraphqlLoggingInterceptor implements NestInterceptor {
-  constructor(private readonly logger: LoggerService) {}
+  constructor(private readonly logger: LoggerService) { }
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const start = Date.now();
@@ -14,8 +14,8 @@ export class GraphqlLoggingInterceptor implements NestInterceptor {
     const { req } = gqlContext.getContext();
     const info = gqlContext.getInfo();
 
-    const operationType = info.operation.operation;
-    const operationName = info.operation.name?.value || 'Unnamed';
+    const operationType = info.operation?.operation;
+    const operationName = info.operation?.name?.value || 'Unnamed';
     const rawQuery = req.body.query?.replace(/\s+/g, ' ').trim() || '';
     const query = sanitizeQuery(rawQuery).substring(0, 100);
     const rawVariables = req.body.variables || {};

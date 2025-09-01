@@ -93,10 +93,5 @@ export class CreateProductInput {
     description: 'Optional brand name (e.g., "Nike")',
   })
   @IsOptional()
-  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
-  @Length(1, 50, { message: 'Brand must be between 1 and 50 characters' })
-  @Matches(/^[a-zA-Z0-9\s\-&]+$/, {
-    message: 'Brand can only contain letters, numbers, spaces, hyphens, and ampersands',
-  })
-  brand?: string;
+  brandId?: string;
 }

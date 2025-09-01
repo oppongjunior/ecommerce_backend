@@ -6,36 +6,34 @@ import {
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileUploadInterceptor } from './interceptors/file-upload.interceptor';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { CloudinaryService } from './cloudinary.service';
 
 @Controller('upload')
 export class UploadController {
-  @Post('/profile-image')
-  @UseInterceptors(FileUploadInterceptor.create('./upload/profile-image'))
-  uploadProfileImage(@UploadedFile() image: Express.Multer.File) {
-    if (!image) {
-      throw new InternalServerErrorException('File upload failed!');
-    }
-  }
-
-  @Post('/products-images')
-  @UseInterceptors(FileUploadInterceptor.create('./upload/products', 3))
-  uploadProductImages(@UploadedFiles() images: Express.Multer.File[]) {
+  constructor(private readonly cloudinaryService: CloudinaryService) {}
+  @Post('/multiple-files')
+  @UseInterceptors(FilesInterceptor('files', 3))
+  async uploadProductImages(@UploadedFiles() images: Express.Multer.File[]) {
     if (!images || images.length === 0) {
       throw new Error('No files were uploaded!');
     }
-    const uploadedFiles = images.map((file) => file.filename);
+    const uploadedFiles = await Promise.all(
+      images.map((file) => this.cloudinaryService.uploadImage(file, 'ecommerce')),
+    );
     return {
       message: 'Product images uploaded successfully',
-      files: uploadedFiles,
+      files: uploadedFiles.map((f) => ({ url: f['secure_url'], public_id: f['public_id'] })),
     };
   }
 
-  @Post('/category-image')
-  @UseInterceptors(FileUploadInterceptor.create('./upload/categories'))
-  uploadCategoryImage(@UploadedFile() image: string) {
+  @Post('/single-file')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadCategoryImage(@UploadedFile() image: Express.Multer.File) {
     if (!image) {
       throw new InternalServerErrorException('File upload failed!');
     }
+    const result = await this.cloudinaryService.uploadImage(image, 'ecommerce');
+    return { url: result['secure_url'], public_id: result['public_id'] };
   }
 }
