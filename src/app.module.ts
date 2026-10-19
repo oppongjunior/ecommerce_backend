@@ -27,6 +27,7 @@ import { GraphqlLoggingInterceptor } from './commons/interceptors/graphql-loggin
 import { formatError } from './commons/error-formatters/grapqhl-error.formatter';
 import { LoggerService } from './commons/logger.service';
 import { DiscountModule } from './discount/discount.module';
+import { BrandModule } from './brand/brand.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { DiscountModule } from './discount/discount.module';
     ReviewModule,
     PaymentModule,
     DiscountModule,
+    BrandModule,
   ],
   controllers: [AppController],
   providers: [

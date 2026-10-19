@@ -12,8 +12,9 @@ import { Discount } from '../discount/entities/discount.entity';
 import { PaginationArgs } from '../commons/dto/paginate.args';
 import { GraphQLResolveInfo } from 'graphql/type';
 import { extractRequestedFieldsFromQuery } from '../commons/useful-functions';
+import { Auth } from '../iam/authentication/decorators/auth.decorator';
+import { AuthType } from '../iam/authentication/enums/auth-type.enum';
 
-@Roles(Role.SUPER_ADMIN, Role.ADMIN)
 @Resolver(() => Product)
 export class ProductsResolver {
   constructor(
@@ -21,6 +22,7 @@ export class ProductsResolver {
     private readonly discountService: DiscountService,
   ) {}
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product)
   createProduct(
     @Args('createProductInput', { type: () => CreateProductInput })
@@ -29,6 +31,7 @@ export class ProductsResolver {
     return this.productsService.create(createProductInput);
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product)
   updateProduct(
     @Args('productId', { type: () => String }) productId: string,
@@ -38,21 +41,25 @@ export class ProductsResolver {
     return this.productsService.update(productId, updateProductInput);
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product)
   permanentlyDeleteProduct(@Args('productId', { type: () => String }) productId: string) {
     return this.productsService.remove(productId);
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product)
   archiveProduct(@Args('productId', { type: () => String }) productId: string) {
     return this.productsService.archiveProduct(productId);
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product)
   restoreProduct(@Args('productId', { type: () => String }) productId: string) {
     return this.productsService.restoreProduct(productId);
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product, { name: 'addTagToProduct' })
   async addTagToProduct(
     @Args('productId', { type: () => String }) productId: string,
@@ -61,6 +68,7 @@ export class ProductsResolver {
     return this.productsService.addTagToProduct(productId, tagId);
   }
 
+  @Roles(Role.SUPER_ADMIN, Role.ADMIN)
   @Mutation(() => Product, { name: 'removeTagFromProduct' })
   async removeTagFromProduct(
     @Args('productId', { type: () => String }) productId: string,
@@ -69,7 +77,7 @@ export class ProductsResolver {
     return this.productsService.removeTagFromProduct(productId, tagId);
   }
 
-  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(AuthType.None)
   @Query(() => ProductConnection, { name: 'products' })
   findAll(
     @Args('paginationArgs', { type: () => PaginationArgs, nullable: true })
@@ -79,13 +87,13 @@ export class ProductsResolver {
     @Info() requestInfo?: GraphQLResolveInfo,
   ) {
     const requestedFields = extractRequestedFieldsFromQuery(requestInfo, {
-      excludedFields: ['edges', 'cursor', 'node'],
+      excludedFields: ['edges', 'cursor', 'node', 'discountedPrice', 'appliedDiscount'],
       level: 3,
     });
     return this.productsService.findAll(paginationArgs, filterArgs, requestedFields);
   }
 
-  @Roles(Role.USER, Role.ADMIN, Role.SUPER_ADMIN)
+  @Auth(AuthType.None)
   @Query(() => Product, { name: 'product', nullable: true })
   findOne(@Args('productId', { type: () => String }) productId: string, @Info() requestInfo?: GraphQLResolveInfo) {
     const requestedFields = extractRequestedFieldsFromQuery(requestInfo, {

@@ -2,7 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
 import { PrismaService } from '../prisma/prisma.service';
-import { Category } from '@prisma/client';
+import { Category, Prisma } from '@prisma/client';
 
 @Injectable()
 export class CategoriesService {
@@ -25,8 +25,10 @@ export class CategoriesService {
    * Retrieves all categories from the database, sorted alphabetically by name.
    * @returns A promise resolving to an array of categories.
    */
-  async findAll(): Promise<Category[]> {
-    return this.prismaService.category.findMany({ orderBy: { name: 'asc' } });
+  async findAll(requestedFields: Prisma.CategorySelect): Promise<Category[]> {
+    const queryOption: Prisma.CategoryFindManyArgs = { orderBy: { name: 'asc' } };
+    if (Object.keys(requestedFields).length) queryOption.select = requestedFields;
+    return this.prismaService.category.findMany(queryOption);
   }
 
   /**

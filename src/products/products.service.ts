@@ -137,6 +137,7 @@ export class ProductsService {
   }
 
   private buildPaginationOptions({ first, after }: PaginationArgs) {
+    if (!first && !after) return {};
     const pageSize = Math.min(first, 100);
     const hasCursor = !!after;
     return {
@@ -202,8 +203,22 @@ export class ProductsService {
   }
 
   private buildWhereClause(filter: ProductFilterArgs): Prisma.ProductWhereInput {
-    const { categoryId, subcategoryId, isActive, search, createdAfter, priceMin, priceMax, brand } = filter;
+    const {
+      categoryId,
+      subcategoryId,
+      isActive,
+      search,
+      createdAfter,
+      priceMin,
+      priceMax,
+      brand,
+      categoryName,
+      subCategoryName,
+      inStock,
+    } = filter;
     return {
+      ...(categoryName && { category: { name: { equals: categoryName, mode: 'insensitive' } } }),
+      ...(subCategoryName && { subcategory: { name: { equals: categoryName, mode: 'insensitive' } } }),
       ...(categoryId && { categoryId }),
       ...(subcategoryId && { subcategoryId }),
       ...(isActive !== undefined && { isActive }),
@@ -219,12 +234,13 @@ export class ProductsService {
       ...(createdAfter && { createdAt: { gte: new Date(createdAfter) } }),
       ...(priceMin !== undefined && { price: { gte: priceMin } }),
       ...(priceMax !== undefined && { price: { lte: priceMax } }),
-      ...(brand && { brand }),
+      ...(brand && { brand: { name: { equals: brand, mode: 'insensitive' } } }),
+      ...(inStock && { quantity: { gte: 0 } }),
     };
   }
 
   private async fetchProducts(
-    { take, skip, cursor }: { take: number; skip: number; cursor?: { id: string } },
+    { take, skip, cursor }: { take?: number; skip?: number; cursor?: { id: string } },
     where: Prisma.ProductWhereInput,
     requestedField: Prisma.ProductSelect = {},
   ): Promise<Product[]> {
@@ -246,7 +262,7 @@ export class ProductsService {
   private formatPaginatedResponse(
     products: Product[],
     totalCount: number,
-    { skip, take }: { take: number; skip: number },
+    { skip, take }: { take?: number; skip?: number },
   ): ProductConnection {
     const lastProduct = products[products.length - 1];
     const itemsFetched = skip + products.length;

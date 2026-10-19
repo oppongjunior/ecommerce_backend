@@ -8,6 +8,16 @@ export class ProductFilterArgs {
   @IsString()
   categoryId?: string;
 
+  @Field(() => String, { nullable: true, description: 'Filter by category name' })
+  @IsOptional()
+  @IsString()
+  categoryName?: string;
+
+  @Field(() => String, { nullable: true, description: 'Filter by subcategory name' })
+  @IsOptional()
+  @IsString()
+  subCategoryName?: string;
+
   @Field(() => String, {
     nullable: true,
     description: 'Filter by subcategory ID',
@@ -66,4 +76,11 @@ export class ProductFilterArgs {
   @IsOptional()
   @IsString()
   brand?: string;
+
+  @Field(() => Boolean, {
+    nullable: true,
+    description: 'Filter by instock status',
+  })
+  @IsOptional()
+  inStock?: boolean;
 }

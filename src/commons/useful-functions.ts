@@ -43,6 +43,7 @@ export const extractRequestedFieldsFromQuery = (
   options: { excludedFields?: string[]; level?: 1 | 2 | 3 } = { excludedFields: [], level: 1 },
 ): object => {
   const prismaSelect = {};
+  options.excludedFields.push('__typename');
   // if (options.level === 2) {
   //   const item = info.fieldNodes[0]?.selectionSet?.selections.find((selection) =>
   //     Array.isArray((selection as FieldNode)?.selectionSet?.selections),
